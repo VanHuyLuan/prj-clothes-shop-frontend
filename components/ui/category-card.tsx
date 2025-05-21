@@ -10,18 +10,27 @@ interface CategoryCardProps {
 }
 
 export function CategoryCard({ category }: CategoryCardProps) {
+  const categoryPath = category.toLowerCase();
+
   return (
-    <Link href="#" className="group block">
+    <Link
+      href={`/client/${categoryPath}`}
+      className="group block"
+      prefetch={true}
+    >
       <motion.div
         whileHover={{ scale: 1.03 }}
-        transition={{ duration: 0.3 }}
-        className="relative h-[200px] w-full overflow-hidden rounded-xl shadow-lg"
+        transition={{ duration: 0.2 }}
+        className="relative h-[200px] w-full overflow-hidden rounded-xl shadow-lg will-change-transform"
       >
         <Image
-          src="/placeholder.svg?height=400&width=300"
+          src={`/images/categories/${categoryPath}.jpg`}
           alt={category}
           fill
-          className="object-cover transition-transform duration-700 group-hover:scale-110"
+          priority
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-4">

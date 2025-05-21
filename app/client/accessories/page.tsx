@@ -1,8 +1,8 @@
 import { CategoryHero } from "@/components/category/category-hero";
+import { Footer } from "@/components/layout/footer";
 import { ProductGrid } from "@/components/category/product-grid";
 import { CategoryFilters } from "@/components/category/category-filters";
 import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 export const metadata = {
   title: "Accessories Collection - STYLISH",
   description:
