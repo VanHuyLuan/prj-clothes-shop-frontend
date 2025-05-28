@@ -1,23 +1,35 @@
 "use client";
 
-import { Toaster as SonnerToaster } from "sonner";
+import {
+  Toast,
+  ToastClose,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+} from "@/components/ui/toast";
+import { useToast } from "@/components/ui/use-toast";
 
 export function Toaster() {
+  const { toasts } = useToast();
+
   return (
-    <SonnerToaster
-      position="bottom-right"
-      toastOptions={{
-        className: "border border-border",
-        classNames: {
-          toast: "group flex w-full items-center bg-background p-4 shadow",
-          title: "text-sm font-medium",
-          description: "text-sm opacity-90",
-          actionButton:
-            "bg-primary text-primary-foreground hover:bg-primary/90",
-          cancelButton: "bg-muted hover:bg-muted/80",
-          closeButton: "text-foreground/50 hover:text-foreground",
-        },
-      }}
-    />
+    <ToastProvider>
+      {toasts.map(function ({ id, title, description, action, ...props }) {
+        return (
+          <Toast key={id} {...props}>
+            <div className="grid gap-1">
+              {title && <ToastTitle>{title}</ToastTitle>}
+              {description && (
+                <ToastDescription>{description}</ToastDescription>
+              )}
+            </div>
+            {action}
+            <ToastClose />
+          </Toast>
+        );
+      })}
+      <ToastViewport />
+    </ToastProvider>
   );
 }

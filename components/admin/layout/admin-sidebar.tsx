@@ -11,6 +11,7 @@ import {
   UserCog,
   Boxes,
   Activity,
+  Settings,
 } from "lucide-react";
 
 const sidebarItems = [
@@ -68,6 +69,11 @@ const sidebarItems = [
     title: "Users",
     href: "/admin/users",
     icon: UserCog,
+  },
+  {
+    title: "Settings",
+    href: "/admin/settings",
+    icon: Settings,
   },
 ];
 
