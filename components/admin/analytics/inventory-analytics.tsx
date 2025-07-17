@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion/dist/framer-motion/dist/framer-motion";
+import { motion } from "framer-motion/dist/framer-motion";
 import { Bar, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,

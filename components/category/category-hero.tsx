@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion/dist/framer-motion";
+import { motion } from "framer-motion";
 
 interface CategoryHeroProps {
   title: string;

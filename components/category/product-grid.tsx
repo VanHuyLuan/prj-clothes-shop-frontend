@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion/dist/framer-motion";
+import { motion } from "framer-motion";
 import { ProductCard } from "@/components/ui/product-card";
 
 interface Product {

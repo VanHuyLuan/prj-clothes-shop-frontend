@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion/dist/framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Clock, Package, AlertTriangle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";

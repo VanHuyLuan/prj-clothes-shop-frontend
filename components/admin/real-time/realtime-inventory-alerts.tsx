@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion/dist/framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, TrendingDown, TrendingUp, Package } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";

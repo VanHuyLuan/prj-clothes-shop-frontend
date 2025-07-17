@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion/dist/framer-motion";
+import { motion } from "framer-motion";
 import { Edit, MoreHorizontal, Plus, Trash } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

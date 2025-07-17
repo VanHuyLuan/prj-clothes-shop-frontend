@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion/dist/framer-motion";
+import { motion } from "framer-motion";
 import { Send } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
