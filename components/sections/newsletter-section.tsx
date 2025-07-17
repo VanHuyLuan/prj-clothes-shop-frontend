@@ -1,29 +1,29 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useState } from "react"
-import Image from "next/image"
-import { motion } from "framer-motion"
-import { Send } from "lucide-react"
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion/dist/framer-motion";
+import { Send } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function NewsletterSection() {
-  const [isLoaded, setIsLoaded] = useState(false)
-  const [email, setEmail] = useState("")
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
-    setIsLoaded(true)
-  }, [])
+    setIsLoaded(true);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // Handle newsletter signup
-    console.log("Newsletter signup:", email)
-    setEmail("")
-  }
+    console.log("Newsletter signup:", email);
+    setEmail("");
+  };
 
   return (
     <section className="relative w-full overflow-hidden py-12 md:py-24 lg:py-32">
@@ -41,14 +41,22 @@ export function NewsletterSection() {
             <div className="space-y-2">
               <div className="inline-flex items-center space-x-2">
                 <span className="h-px w-8 bg-primary"></span>
-                <span className="text-sm font-medium uppercase tracking-wider text-primary">Newsletter</span>
+                <span className="text-sm font-medium uppercase tracking-wider text-primary">
+                  Newsletter
+                </span>
               </div>
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Join Our Newsletter</h2>
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+                Join Our Newsletter
+              </h2>
               <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.
+                Subscribe to get special offers, free giveaways, and
+                once-in-a-lifetime deals.
               </p>
             </div>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-2 min-[400px]:flex-row">
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-2 min-[400px]:flex-row"
+            >
               <Input
                 placeholder="Enter your email"
                 type="email"
@@ -86,5 +94,5 @@ export function NewsletterSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

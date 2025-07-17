@@ -1,17 +1,24 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
-import { BarChart3, ShoppingBag, Users, CreditCard, TrendingUp, TrendingDown } from "lucide-react"
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion/dist/framer-motion";
+import {
+  BarChart3,
+  ShoppingBag,
+  Users,
+  CreditCard,
+  TrendingUp,
+  TrendingDown,
+} from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function DashboardStats() {
-  const [isLoaded, setIsLoaded] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    setIsLoaded(true)
-  }, [])
+    setIsLoaded(true);
+  }, []);
 
   const statCards = [
     {
@@ -42,7 +49,7 @@ export function DashboardStats() {
       trend: "down",
       icon: BarChart3,
     },
-  ]
+  ];
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -55,7 +62,9 @@ export function DashboardStats() {
         >
           <Card className="overflow-hidden border-muted/30 transition-all duration-200 hover:shadow-md">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                {stat.title}
+              </CardTitle>
               <div className="rounded-full bg-muted/50 p-1.5">
                 <stat.icon className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -63,7 +72,11 @@ export function DashboardStats() {
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
               <p className="text-xs text-muted-foreground">
-                <span className={`flex items-center ${stat.trend === "up" ? "text-green-500" : "text-red-500"}`}>
+                <span
+                  className={`flex items-center ${
+                    stat.trend === "up" ? "text-green-500" : "text-red-500"
+                  }`}
+                >
                   {stat.trend === "up" ? (
                     <TrendingUp className="mr-1 h-3 w-3" />
                   ) : (
@@ -77,5 +90,5 @@ export function DashboardStats() {
         </motion.div>
       ))}
     </div>
-  )
+  );
 }

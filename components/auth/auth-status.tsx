@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogOut, User } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion/dist/framer-motion/dist/framer-motion";
 
 import { Button } from "@/components/ui/button";
 import {

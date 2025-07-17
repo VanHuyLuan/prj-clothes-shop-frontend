@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion/dist/framer-motion/dist/framer-motion";
 import Link from "next/link";
 import { ArrowUpRight, AlertTriangle } from "lucide-react";
 

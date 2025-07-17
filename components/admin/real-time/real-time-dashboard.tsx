@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion/dist/framer-motion/dist/framer-motion";
 import {
   Bell,
   TrendingUp,
