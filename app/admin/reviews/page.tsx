@@ -1,5 +1,4 @@
-import { ReviewsTable } from "@/components/admin/reviews/reviews-table";
-import { ReviewsHeader } from "@/components/admin/reviews/reviews-header";
+import { ReviewsClient } from "@/components/admin/reviews/reviews-client";
 
 export const metadata = {
   title: "Reviews Management - STYLISH Admin",
@@ -7,10 +6,5 @@ export const metadata = {
 };
 
 export default function ReviewsPage() {
-  return (
-    <div className="space-y-6">
-      <ReviewsHeader />
-      <ReviewsTable />
-    </div>
-  );
+  return <ReviewsClient />;
 }

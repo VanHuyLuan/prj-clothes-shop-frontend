@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { MotionDiv, MotionTR } from "@/components/providers/motion-provider";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
@@ -69,7 +69,7 @@ export function RecentOrders() {
   }, []);
 
   return (
-    <motion.div
+    <MotionDiv
       initial={{ opacity: 0, y: 20 }}
       animate={isLoaded ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: 0.3 }}
@@ -101,7 +101,7 @@ export function RecentOrders() {
             </TableHeader>
             <TableBody>
               {recentOrders.map((order, index) => (
-                <motion.tr
+                <MotionTR
                   key={order.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={isLoaded ? { opacity: 1, y: 0 } : {}}
@@ -135,12 +135,12 @@ export function RecentOrders() {
                       {order.status}
                     </Badge>
                   </TableCell>
-                </motion.tr>
+                </MotionTR>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
-    </motion.div>
+    </MotionDiv>
   );
 }

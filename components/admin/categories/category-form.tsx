@@ -1,8 +1,8 @@
 "use client";
 
 import type React from "react";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,42 +10,73 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
+// Dữ liệu giả để hiển thị trong chế độ chỉnh sửa
+const mockCategory = {
+  id: "1",
+  name: "Women's Clothing",
+  description: "Fashion for women including dresses, tops, and more",
+  image: "/placeholder.svg?height=40&width=40",
+  isActive: true,
+  parentId: "",
+};
+
+// Sửa lại interface để chấp nhận prop 'id'
 interface CategoryFormProps {
-  category?: {
-    id: string;
-    name: string;
-    description: string;
-    image: string;
-    isActive: boolean;
-    parentId?: string;
-  };
-  onSubmit: (data: Omit<CategoryFormProps["category"], "id">) => void;
-  onCancel: () => void;
+  id?: string;
 }
 
-export function CategoryForm({
-  category,
-  onSubmit,
-  onCancel,
-}: CategoryFormProps) {
+export function CategoryForm({ id }: CategoryFormProps) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const isEditMode = !!id;
+
   const [formData, setFormData] = useState({
-    name: category?.name || "",
-    description: category?.description || "",
-    image: category?.image || "",
-    isActive: category?.isActive ?? true,
-    parentId: category?.parentId || "",
+    name: "",
+    description: "",
+    image: "",
+    isActive: true,
+    parentId: "",
   });
+
+  useEffect(() => {
+    if (isEditMode) {
+      // Trong ứng dụng thật, bạn sẽ fetch dữ liệu từ API dựa trên id
+      // Ở đây chúng ta dùng dữ liệu giả để minh họa
+      console.log("Fetching data for category ID:", id);
+      setFormData({
+        name: mockCategory.name,
+        description: mockCategory.description,
+        image: mockCategory.image,
+        isActive: mockCategory.isActive,
+        parentId: mockCategory.parentId || "",
+      });
+    }
+  }, [isEditMode, id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    console.log("Submitting:", formData);
+    toast({
+      title: `Category ${isEditMode ? "updated" : "created"}`,
+      description: `The category has been ${
+        isEditMode ? "updated" : "created"
+      } successfully.`,
+    });
+    router.push("/admin/categories");
+  };
+
+  const onCancel = () => {
+    router.push("/admin/categories");
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{category ? "Edit Category" : "Add New Category"}</CardTitle>
+        <CardTitle>
+          {isEditMode ? "Edit Category" : "Add New Category"}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -122,7 +153,7 @@ export function CategoryForm({
 
           <div className="flex gap-4">
             <Button type="submit" className="flex-1">
-              {category ? "Update Category" : "Create Category"}
+              {isEditMode ? "Update Category" : "Create Category"}
             </Button>
             <Button
               type="button"

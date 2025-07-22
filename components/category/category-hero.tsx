@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { MotionDiv } from "@/components/providers/motion-provider";
 
 interface CategoryHeroProps {
   title: string;
@@ -41,7 +41,7 @@ export function CategoryHero({
       )}
 
       <div className="mx-auto max-w-screen-xl relative z-20 px-4 md:px-6 w-full">
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -53,7 +53,7 @@ export function CategoryHero({
           <p className="text-white/80 text-lg md:text-xl max-w-xl">
             {description}
           </p>
-        </motion.div>
+        </MotionDiv>
       </div>
     </section>
   );

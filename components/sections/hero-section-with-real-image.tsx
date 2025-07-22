@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import {
+  MotionDiv,
+  MotionH1,
+  MotionP,
+} from "@/components/providers/motion-provider";
 
 import { Button } from "@/components/ui/button";
 
@@ -30,14 +34,14 @@ export function HeroSection() {
 
       <div className="mx-auto max-w-screen-xl relative z-20 px-4 md:px-6">
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0, y: 20 }}
             animate={isLoaded ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="flex flex-col justify-center space-y-4"
           >
             <div className="space-y-2">
-              <motion.div
+              <MotionDiv
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={isLoaded ? { opacity: 1, scale: 1 } : {}}
                 transition={{ duration: 0.5, delay: 0.3 }}
@@ -45,8 +49,8 @@ export function HeroSection() {
                 <span className="inline-block rounded-full bg-primary/20 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm">
                   New Collection 2025
                 </span>
-              </motion.div>
-              <motion.h1
+              </MotionDiv>
+              <MotionH1
                 initial={{ opacity: 0, y: 20 }}
                 animate={isLoaded ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.7, delay: 0.4 }}
@@ -56,8 +60,8 @@ export function HeroSection() {
                 <span className="text-primary-foreground bg-primary px-2 rounded">
                   Style
                 </span>
-              </motion.h1>
-              <motion.p
+              </MotionH1>
+              <MotionP
                 initial={{ opacity: 0, y: 20 }}
                 animate={isLoaded ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.7, delay: 0.5 }}
@@ -65,9 +69,9 @@ export function HeroSection() {
               >
                 Shop the latest trends in fashion with our new collection.
                 Quality materials, stylish designs, and affordable prices.
-              </motion.p>
+              </MotionP>
             </div>
-            <motion.div
+            <MotionDiv
               initial={{ opacity: 0, y: 20 }}
               animate={isLoaded ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, delay: 0.6 }}
@@ -90,9 +94,9 @@ export function HeroSection() {
                   View Collections
                 </Button>
               </Link>
-            </motion.div>
-          </motion.div>
-          <motion.div
+            </MotionDiv>
+          </MotionDiv>
+          <MotionDiv
             initial={{ opacity: 0, scale: 0.95 }}
             animate={isLoaded ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: 1, delay: 0.3 }}
@@ -106,7 +110,7 @@ export function HeroSection() {
               className="object-cover transition-transform duration-10000 hover:scale-110"
               priority
             />
-          </motion.div>
+          </MotionDiv>
         </div>
       </div>
     </section>

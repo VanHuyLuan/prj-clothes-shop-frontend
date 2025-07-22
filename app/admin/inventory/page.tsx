@@ -1,5 +1,4 @@
-import { InventoryTable } from "@/components/admin/inventory/inventory-table";
-import { InventoryHeader } from "@/components/admin/inventory/inventory-header";
+import { InventoryClient } from "@/components/admin/inventory/inventory-client";
 
 export const metadata = {
   title: "Inventory Management - STYLISH Admin",
@@ -7,10 +6,5 @@ export const metadata = {
 };
 
 export default function InventoryPage() {
-  return (
-    <div className="space-y-6">
-      <InventoryHeader />
-      <InventoryTable />
-    </div>
-  );
+  return <InventoryClient />;
 }

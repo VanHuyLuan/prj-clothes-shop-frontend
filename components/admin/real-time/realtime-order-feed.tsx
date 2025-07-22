@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { CheckCircle2, Clock, Package, AlertTriangle } from "lucide-react";
+import { MotionDiv } from "@/components/providers/motion-provider";
 
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -69,7 +70,7 @@ export function RealtimeOrderFeed({
       <div className="space-y-4">
         <AnimatePresence initial={false}>
           {orders.map((order) => (
-            <motion.div
+            <MotionDiv
               key={order.id}
               initial={
                 order.isNew ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }
@@ -144,7 +145,7 @@ export function RealtimeOrderFeed({
                   </Badge>
                 )}
               </div>
-            </motion.div>
+            </MotionDiv>
           ))}
         </AnimatePresence>
 

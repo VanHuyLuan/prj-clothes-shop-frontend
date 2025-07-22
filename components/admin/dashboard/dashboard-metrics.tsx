@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion/dist/framer-motion";
+
 import {
   BarChart3,
   ShoppingBag,
@@ -10,6 +10,7 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
+import { MotionDiv } from "@/components/providers/motion-provider";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -54,7 +55,7 @@ export function DashboardMetrics() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {statCards.map((stat, index) => (
-        <motion.div
+        <MotionDiv
           key={stat.title}
           initial={{ opacity: 0, y: 20 }}
           animate={isLoaded ? { opacity: 1, y: 0 } : {}}
@@ -87,7 +88,7 @@ export function DashboardMetrics() {
               </p>
             </CardContent>
           </Card>
-        </motion.div>
+        </MotionDiv>
       ))}
     </div>
   );

@@ -1,8 +1,8 @@
 "use client";
 
 import type React from "react";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,49 +24,78 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
+// Dữ liệu giả để hiển thị trong chế độ chỉnh sửa
+const mockCoupon = {
+  id: "1",
+  code: "SAVE20",
+  description: "20% off on all items",
+  type: "percentage" as "percentage" | "fixed",
+  value: 20,
+  minOrderValue: 100,
+  maxDiscount: 50,
+  usageLimit: 100,
+  usedCount: 45,
+  startDate: new Date("2024-01-01"),
+  endDate: new Date("2024-12-31"),
+  isActive: true,
+};
+
+// Sửa lại interface để chấp nhận prop 'id'
 interface CouponFormProps {
-  coupon?: {
-    id: string;
-    code: string;
-    description: string;
-    type: "percentage" | "fixed";
-    value: number;
-    minOrderValue: number;
-    maxDiscount?: number;
-    usageLimit: number;
-    usedCount: number;
-    startDate: Date;
-    endDate: Date;
-    isActive: boolean;
-  };
-  onSubmit: (data: Omit<CouponFormProps["coupon"], "id">) => void;
-  onCancel: () => void;
+  id?: string;
 }
 
-export function CouponForm({ coupon, onSubmit, onCancel }: CouponFormProps) {
+export function CouponForm({ id }: CouponFormProps) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const isEditMode = !!id;
+
   const [formData, setFormData] = useState({
-    code: coupon?.code || "",
-    description: coupon?.description || "",
-    type: coupon?.type || "percentage",
-    value: coupon?.value || 0,
-    minOrderValue: coupon?.minOrderValue || 0,
-    maxDiscount: coupon?.maxDiscount || 0,
-    usageLimit: coupon?.usageLimit || 100,
-    startDate: coupon?.startDate || new Date(),
-    endDate: coupon?.endDate || new Date(),
-    isActive: coupon?.isActive ?? true,
+    code: "",
+    description: "",
+    type: "percentage" as "percentage" | "fixed",
+    value: 0,
+    minOrderValue: 0,
+    maxDiscount: 0,
+    usageLimit: 100,
+    startDate: new Date(),
+    endDate: new Date(),
+    isActive: true,
   });
+
+  useEffect(() => {
+    if (isEditMode) {
+      // Trong ứng dụng thật, bạn sẽ fetch dữ liệu từ API dựa trên id
+      // Ở đây chúng ta dùng dữ liệu giả
+      console.log("Fetching data for coupon ID:", id);
+      setFormData(mockCoupon);
+    }
+  }, [isEditMode, id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    console.log("Submitting:", formData);
+    toast({
+      title: `Coupon ${isEditMode ? "updated" : "created"}`,
+      description: `The coupon has been ${
+        isEditMode ? "updated" : "created"
+      } successfully.`,
+    });
+    router.push("/admin/coupons");
+  };
+
+  const onCancel = () => {
+    router.push("/admin/coupons");
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{coupon ? "Edit Coupon" : "Create New Coupon"}</CardTitle>
+        <CardTitle>
+          {isEditMode ? "Edit Coupon" : "Create New Coupon"}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -256,7 +285,7 @@ export function CouponForm({ coupon, onSubmit, onCancel }: CouponFormProps) {
 
           <div className="flex gap-4">
             <Button type="submit" className="flex-1">
-              {coupon ? "Update Coupon" : "Create Coupon"}
+              {isEditMode ? "Update Coupon" : "Create Coupon"}
             </Button>
             <Button
               type="button"

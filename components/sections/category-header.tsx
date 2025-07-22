@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { MotionDiv } from "@/components/providers/motion-provider";
 import Image from "next/image";
 
 interface CategoryHeaderProps {
@@ -24,7 +24,7 @@ export function CategoryHeader({
       <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
       <div className="absolute inset-0 flex items-center">
         <div className="container mx-auto px-4">
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -34,7 +34,7 @@ export function CategoryHeader({
               {title}
             </h1>
             <p className="text-white/80 text-lg md:text-xl">{description}</p>
-          </motion.div>
+          </MotionDiv>
         </div>
       </div>
     </div>

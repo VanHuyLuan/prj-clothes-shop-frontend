@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion/dist/framer-motion";
+import { MotionDiv } from "@/components/providers/motion-provider";
+
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -136,7 +137,7 @@ export function SalesChart() {
   };
 
   return (
-    <motion.div
+    <MotionDiv
       initial={{ opacity: 0, y: 20 }}
       animate={isLoaded ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5 }}
@@ -167,6 +168,6 @@ export function SalesChart() {
           </Tabs>
         </CardContent>
       </Card>
-    </motion.div>
+    </MotionDiv>
   );
 }

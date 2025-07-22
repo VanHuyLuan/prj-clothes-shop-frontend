@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion/dist/framer-motion";
+import { MotionDiv } from "@/components/providers/motion-provider";
+
 import { Bar, Scatter } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -301,7 +302,7 @@ export function ProductPerformance() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={isLoaded ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
@@ -319,9 +320,9 @@ export function ProductPerformance() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </MotionDiv>
 
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={isLoaded ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5, delay: 0.1 }}
@@ -339,10 +340,10 @@ export function ProductPerformance() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </MotionDiv>
       </div>
 
-      <motion.div
+      <MotionDiv
         initial={{ opacity: 0, y: 20 }}
         animate={isLoaded ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5, delay: 0.2 }}
@@ -516,7 +517,7 @@ export function ProductPerformance() {
             </div>
           </CardContent>
         </Card>
-      </motion.div>
+      </MotionDiv>
     </div>
   );
 }

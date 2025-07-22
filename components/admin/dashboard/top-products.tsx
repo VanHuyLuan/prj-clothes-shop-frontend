@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { MotionDiv } from "@/components/providers/motion-provider";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
@@ -67,7 +67,7 @@ export function TopProducts() {
   }, []);
 
   return (
-    <motion.div
+    <MotionDiv
       initial={{ opacity: 0, y: 20 }}
       animate={isLoaded ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: 0.1 }}
@@ -91,7 +91,7 @@ export function TopProducts() {
         <CardContent>
           <div className="space-y-6">
             {topProducts.map((product, index) => (
-              <motion.div
+              <MotionDiv
                 key={product.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={isLoaded ? { opacity: 1, y: 0 } : {}}
@@ -117,11 +117,11 @@ export function TopProducts() {
                   </div>
                   <Progress value={product.progress} className="h-1" />
                 </div>
-              </motion.div>
+              </MotionDiv>
             ))}
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </MotionDiv>
   );
 }

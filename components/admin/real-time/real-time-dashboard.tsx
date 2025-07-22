@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion/dist/framer-motion";
+import { AnimatePresence } from "framer-motion";
+import { MotionDiv } from "@/components/providers/motion-provider";
 import {
   Bell,
   TrendingUp,
@@ -97,7 +98,7 @@ export function RealTimeDashboard() {
 
             <AnimatePresence>
               {showNotifications && (
-                <motion.div
+                <MotionDiv
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
@@ -161,7 +162,7 @@ export function RealTimeDashboard() {
                       </div>
                     )}
                   </div>
-                </motion.div>
+                </MotionDiv>
               )}
             </AnimatePresence>
           </div>

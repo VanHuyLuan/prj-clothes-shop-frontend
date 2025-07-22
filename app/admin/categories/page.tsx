@@ -1,5 +1,4 @@
-import { CategoriesTable } from "@/components/admin/categories/categories-table";
-import { CategoriesHeader } from "@/components/admin/categories/categories-header";
+import { CategoriesClient } from "@/components/admin/categories/categories-client";
 
 export const metadata = {
   title: "Categories Management - STYLISH Admin",
@@ -7,10 +6,5 @@ export const metadata = {
 };
 
 export default function CategoriesPage() {
-  return (
-    <div className="space-y-6">
-      <CategoriesHeader />
-      <CategoriesTable />
-    </div>
-  );
+  return <CategoriesClient />;
 }

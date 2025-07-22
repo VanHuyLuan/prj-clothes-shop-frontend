@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import {
+  MotionDiv,
+  MotionH1,
+  MotionP,
+} from "@/components/providers/motion-provider";
 import { ProductCard } from "@/components/ui/product-card";
 
 interface Product {
@@ -64,14 +68,14 @@ export function ProductGrid({
         </div>
       </div>
 
-      <motion.div
+      <MotionDiv
         variants={container}
         initial="hidden"
         animate="show"
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
       >
         {products.slice(0, visibleProducts).map((product) => (
-          <motion.div key={product.id} variants={item}>
+          <MotionDiv key={product.id} variants={item}>
             <ProductCard
               product={{
                 name: product.name,
@@ -85,9 +89,9 @@ export function ProductGrid({
               image={product.image}
               showDiscount={showDiscount}
             />
-          </motion.div>
+          </MotionDiv>
         ))}
-      </motion.div>
+      </MotionDiv>
 
       {visibleProducts < products.length && (
         <div className="flex justify-center mt-8">

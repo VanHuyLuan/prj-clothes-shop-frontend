@@ -4,13 +4,15 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, Search, ShoppingBag } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
+import { MotionDiv } from "@/components/providers/motion-provider";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { AuthStatus } from "@/components/auth/auth-status";
 import { cn } from "@/lib/utils";
+import { MotionForm } from "@/components/providers/motion-provider";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -117,7 +119,7 @@ export function Header() {
         <div className="flex items-center gap-4">
           <AnimatePresence>
             {searchOpen ? (
-              <motion.form
+              <MotionForm
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: "300px", opacity: 1 }}
                 exit={{ width: 0, opacity: 0 }}
@@ -149,9 +151,9 @@ export function Header() {
                   <Search className="h-5 w-5" />
                   <span className="sr-only">Search</span>
                 </Button>
-              </motion.form>
+              </MotionForm>
             ) : (
-              <motion.div
+              <MotionDiv
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -171,7 +173,7 @@ export function Header() {
                   <Search className="h-5 w-5" />
                   <span className="sr-only">Search</span>
                 </Button>
-              </motion.div>
+              </MotionDiv>
             )}
           </AnimatePresence>
           <Button

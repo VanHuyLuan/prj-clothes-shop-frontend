@@ -1,8 +1,8 @@
 "use client";
 
 import type React from "react";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,33 +17,59 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Upload, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
+// Dữ liệu giả để hiển thị trong chế độ chỉnh sửa
+const mockUser = {
+  id: "1",
+  name: "John Doe",
+  email: "john@stylish.com",
+  role: "admin" as "admin" | "manager" | "staff",
+  avatar: "/placeholder.svg?height=80&width=80",
+  isActive: true,
+  permissions: [
+    "products.read",
+    "products.write",
+    "orders.read",
+    "orders.write",
+    "customers.read",
+    "customers.write",
+    "analytics.read",
+    "settings.write",
+    "users.read",
+    "users.write",
+  ],
+};
+
+// Sửa lại interface để chấp nhận prop 'id'
 interface UserFormProps {
-  user?: {
-    id: string;
-    name: string;
-    email: string;
-    role: "admin" | "manager" | "staff";
-    avatar: string;
-    isActive: boolean;
-    permissions: string[];
-  };
-  onSubmit: (data: Omit<UserFormProps["user"], "id">) => void;
-  onCancel: () => void;
+  id?: string;
 }
 
-export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
+export function UserForm({ id }: UserFormProps) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const isEditMode = !!id;
+
   const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    role: user?.role || "staff",
-    avatar: user?.avatar || "",
-    isActive: user?.isActive ?? true,
-    permissions: user?.permissions || [],
+    name: "",
+    email: "",
+    role: "staff" as "admin" | "manager" | "staff",
+    avatar: "",
+    isActive: true,
+    permissions: [] as string[],
   });
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  useEffect(() => {
+    if (isEditMode) {
+      // Trong ứng dụng thật, bạn sẽ fetch dữ liệu từ API dựa trên id
+      console.log("Fetching data for user ID:", id);
+      setFormData(mockUser);
+    }
+  }, [isEditMode, id]);
 
   const availablePermissions = [
     { id: "products.read", label: "View Products" },
@@ -60,11 +86,22 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user && password !== confirmPassword) {
-      alert("Passwords do not match");
+    if (!isEditMode && password !== confirmPassword) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
       return;
     }
-    onSubmit({ ...formData, password: !user ? password : undefined });
+    console.log("Submitting:", formData);
+    toast({
+      title: `User ${isEditMode ? "updated" : "created"}`,
+      description: `The user has been ${
+        isEditMode ? "updated" : "created"
+      } successfully.`,
+    });
+    router.push("/admin/users");
+  };
+
+  const onCancel = () => {
+    router.push("/admin/users");
   };
 
   const handlePermissionChange = (permissionId: string, checked: boolean) => {
@@ -109,7 +146,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{user ? "Edit User" : "Add New User"}</CardTitle>
+        <CardTitle>{isEditMode ? "Edit User" : "Add New User"}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -180,7 +217,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
           </div>
 
           {/* Password Fields (only for new users) */}
-          {!user && (
+          {!isEditMode && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
@@ -269,7 +306,7 @@ export function UserForm({ user, onSubmit, onCancel }: UserFormProps) {
 
           <div className="flex gap-4">
             <Button type="submit" className="flex-1">
-              {user ? "Update User" : "Create User"}
+              {isEditMode ? "Update User" : "Create User"}
             </Button>
             <Button
               type="button"

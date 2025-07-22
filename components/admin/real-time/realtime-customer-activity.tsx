@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion/dist/framer-motion";
+import { AnimatePresence } from "framer-motion";
+import { MotionDiv } from "@/components/providers/motion-provider";
 import {
   ShoppingCart,
   Search,
@@ -124,7 +125,7 @@ export function RealtimeCustomerActivity({
       <div className="space-y-4">
         <AnimatePresence initial={false}>
           {activities.map((activity) => (
-            <motion.div
+            <MotionDiv
               key={activity.id}
               initial={
                 activity.isNew ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }
@@ -201,7 +202,7 @@ export function RealtimeCustomerActivity({
                   </Button>
                 )}
               </div>
-            </motion.div>
+            </MotionDiv>
           ))}
         </AnimatePresence>
 

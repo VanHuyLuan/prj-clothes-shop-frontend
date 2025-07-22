@@ -1,5 +1,4 @@
-import { UsersTable } from "@/components/admin/users/users-table";
-import { UsersHeader } from "@/components/admin/users/users-header";
+import { UsersClient } from "@/components/admin/users/users-client";
 
 export const metadata = {
   title: "User Management - STYLISH Admin",
@@ -7,10 +6,5 @@ export const metadata = {
 };
 
 export default function UsersPage() {
-  return (
-    <div className="space-y-6">
-      <UsersHeader />
-      <UsersTable />
-    </div>
-  );
+  return <UsersClient />;
 }

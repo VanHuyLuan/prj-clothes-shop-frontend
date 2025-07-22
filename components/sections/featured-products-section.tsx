@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { MotionDiv } from "@/components/providers/motion-provider";
 
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ui/product-card";
@@ -39,7 +39,7 @@ export function FeaturedProductsSection() {
   return (
     <section id="featured" className="w-full py-12 md:py-24 lg:py-32">
       <div className="mx-auto max-w-screen-xl px-4 md:px-6">
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={isLoaded ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
@@ -60,20 +60,20 @@ export function FeaturedProductsSection() {
               Check out our most popular items this season.
             </p>
           </div>
-        </motion.div>
-        <motion.div
+        </MotionDiv>
+        <MotionDiv
           variants={containerVariants}
           initial="hidden"
           animate={isLoaded ? "visible" : "hidden"}
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8"
         >
           {products.map((product, index) => (
-            <motion.div key={index} variants={itemVariants}>
+            <MotionDiv key={index} variants={itemVariants}>
               <ProductCard product={product} />
-            </motion.div>
+            </MotionDiv>
           ))}
-        </motion.div>
-        <motion.div
+        </MotionDiv>
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={isLoaded ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.4 }}
@@ -88,7 +88,7 @@ export function FeaturedProductsSection() {
               <span className="absolute inset-0 z-0 bg-gradient-to-r from-primary to-primary/80 opacity-100 transition-all duration-300 group-hover:opacity-80"></span>
             </Button>
           </Link>
-        </motion.div>
+        </MotionDiv>
       </div>
     </section>
   );

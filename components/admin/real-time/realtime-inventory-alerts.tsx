@@ -1,7 +1,8 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { AlertTriangle, TrendingDown, TrendingUp, Package } from "lucide-react";
+import { MotionDiv } from "@/components/providers/motion-provider";
 
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -82,7 +83,7 @@ export function RealtimeInventoryAlerts({
       <div className="space-y-4">
         <AnimatePresence initial={false}>
           {alerts.map((alert) => (
-            <motion.div
+            <MotionDiv
               key={alert.id}
               initial={
                 alert.isNew ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }
@@ -168,7 +169,7 @@ export function RealtimeInventoryAlerts({
                   <Button size="sm">Order Stock</Button>
                 </div>
               )}
-            </motion.div>
+            </MotionDiv>
           ))}
         </AnimatePresence>
 

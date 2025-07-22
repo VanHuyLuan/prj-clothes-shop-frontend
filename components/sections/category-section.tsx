@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import {
+  MotionDiv,
+} from "@/components/providers/motion-provider";
 
 import { CategoryCard } from "@/components/ui/category-card";
 
@@ -37,7 +39,7 @@ export function CategorySection() {
       <div className="absolute inset-0 z-0 bg-gradient-to-b from-background via-muted/50 to-background" />
 
       <div className="mx-auto max-w-screen-xl relative z-10 px-4 md:px-6">
-        <motion.div
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           animate={isLoaded ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
@@ -59,19 +61,19 @@ export function CategorySection() {
               categories.
             </p>
           </div>
-        </motion.div>
-        <motion.div
+        </MotionDiv>
+        <MotionDiv
           variants={containerVariants}
           initial="hidden"
           animate={isLoaded ? "visible" : "hidden"}
           className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8"
         >
           {categories.map((category) => (
-            <motion.div key={category} variants={itemVariants}>
+            <MotionDiv key={category} variants={itemVariants}>
               <CategoryCard category={category} />
-            </motion.div>
+            </MotionDiv>
           ))}
-        </motion.div>
+        </MotionDiv>
       </div>
     </section>
   );

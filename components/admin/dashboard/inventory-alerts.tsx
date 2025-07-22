@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion/dist/framer-motion";
+import { MotionDiv } from "@/components/providers/motion-provider";
+
 import Link from "next/link";
 import { ArrowUpRight, AlertTriangle } from "lucide-react";
 
@@ -53,7 +54,7 @@ export function InventoryAlerts() {
   }, []);
 
   return (
-    <motion.div
+    <MotionDiv
       initial={{ opacity: 0, y: 20 }}
       animate={isLoaded ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: 0.4 }}
@@ -75,7 +76,7 @@ export function InventoryAlerts() {
         <CardContent>
           <div className="space-y-4">
             {inventoryAlerts.map((item, index) => (
-              <motion.div
+              <MotionDiv
                 key={item.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={isLoaded ? { opacity: 1, y: 0 } : {}}
@@ -99,11 +100,11 @@ export function InventoryAlerts() {
                     Threshold: {item.threshold}
                   </p>
                 </div>
-              </motion.div>
+              </MotionDiv>
             ))}
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </MotionDiv>
   );
 }

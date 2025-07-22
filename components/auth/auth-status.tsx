@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LogOut, User } from "lucide-react";
-import { motion } from "framer-motion/dist/framer-motion";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/components/auth/auth-provider";
+import { MotionDiv } from "@/components/providers/motion-provider";
 
 export function AuthStatus() {
   const { user, logout, isAdmin } = useAuth();
@@ -33,7 +33,7 @@ export function AuthStatus() {
           </Button>
         </Link>
         <Link href="/signup">
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <MotionDiv whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               size="sm"
               className="relative overflow-hidden rounded-full transition-all duration-300 hover:shadow-md"
@@ -41,7 +41,7 @@ export function AuthStatus() {
               <span className="relative z-10">Sign up</span>
               <span className="absolute inset-0 z-0 bg-gradient-to-r from-primary to-primary/80 opacity-100 transition-all duration-300 hover:opacity-80"></span>
             </Button>
-          </motion.div>
+          </MotionDiv>
         </Link>
       </div>
     );

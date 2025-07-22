@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import {
   Phone,
   Mail,
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface OrderItem {
   id: string;
@@ -53,19 +55,17 @@ interface Order {
   trackingNumber?: string;
 }
 
+// Sửa lại interface để chấp nhận prop 'id'
 interface OrderDetailsProps {
-  order: Order;
-  onUpdateStatus: (status: string) => void;
-  onRefund: () => void;
-  onPrint: () => void;
+  id: string;
 }
 
-export function OrderDetails({
-  order,
-  onUpdateStatus,
-  onRefund,
-  onPrint,
-}: OrderDetailsProps) {
+export function OrderDetails({ id }: OrderDetailsProps) {
+  const { toast } = useToast();
+  // Dùng state để lưu trữ thông tin order
+  const [order, setOrder] = useState<Order | null>(null);
+
+  // Dữ liệu giả để hiển thị
   const mockOrder: Order = {
     id: "1",
     orderNumber: "ORD-2024-001",
@@ -111,7 +111,31 @@ export function OrderDetails({
     trackingNumber: "TRK123456789",
   };
 
-  const displayOrder = order || mockOrder;
+  useEffect(() => {
+    // Trong ứng dụng thật, bạn sẽ fetch dữ liệu từ API dựa trên id
+    console.log("Fetching data for order ID:", id);
+    setOrder(mockOrder);
+  }, [id]);
+
+  const handleUpdateStatus = (status: string) => {
+    toast({
+      title: "Status Updated",
+      description: `Order status changed to ${status}.`,
+    });
+  };
+  const handleRefund = () => {
+    toast({
+      title: "Refund Processed",
+      description: "The order has been refunded.",
+    });
+  };
+  const handlePrint = () => {
+    toast({ title: "Print Order", description: "Printing order details..." });
+  };
+
+  if (!order) {
+    return <div>Loading...</div>; // Hoặc một skeleton loading component
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -182,25 +206,24 @@ export function OrderDetails({
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-2xl">
-                Order {displayOrder.orderNumber}
+                Order {order.orderNumber}
               </CardTitle>
               <p className="text-muted-foreground">
-                Placed on{" "}
-                {new Date(displayOrder.orderDate).toLocaleDateString()}
+                Placed on {new Date(order.orderDate).toLocaleDateString()}
               </p>
             </div>
             <div className="flex gap-2">
-              <Button onClick={onPrint} variant="outline">
+              <Button onClick={handlePrint} variant="outline">
                 Print Order
               </Button>
-              <Button onClick={onRefund} variant="destructive">
+              <Button onClick={handleRefund} variant="destructive">
                 Process Refund
               </Button>
             </div>
           </div>
           <div className="flex gap-4 mt-4">
-            {getStatusBadge(displayOrder.status)}
-            {getPaymentStatusBadge(displayOrder.paymentStatus)}
+            {getStatusBadge(order.status)}
+            {getPaymentStatusBadge(order.paymentStatus)}
           </div>
         </CardHeader>
       </Card>
@@ -214,7 +237,7 @@ export function OrderDetails({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {displayOrder.items.map((item) => (
+                {order.items.map((item) => (
                   <div
                     key={item.id}
                     className="flex items-center gap-4 p-4 border rounded-lg"
@@ -248,20 +271,20 @@ export function OrderDetails({
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>${displayOrder.subtotal.toFixed(2)}</span>
+                  <span>${order.subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tax</span>
-                  <span>${displayOrder.tax.toFixed(2)}</span>
+                  <span>${order.tax.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>${displayOrder.shipping.toFixed(2)}</span>
+                  <span>${order.shipping.toFixed(2)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-medium text-lg">
                   <span>Total</span>
-                  <span>${displayOrder.total.toFixed(2)}</span>
+                  <span>${order.total.toFixed(2)}</span>
                 </div>
               </div>
             </CardContent>
@@ -279,30 +302,28 @@ export function OrderDetails({
               <div className="flex items-center gap-3">
                 <Avatar>
                   <AvatarImage
-                    src={displayOrder.customer.avatar || "/placeholder.svg"}
-                    alt={displayOrder.customer.name}
+                    src={order.customer.avatar || "/placeholder.svg"}
+                    alt={order.customer.name}
                   />
                   <AvatarFallback>
-                    {displayOrder.customer.name
+                    {order.customer.name
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <div className="font-medium">
-                    {displayOrder.customer.name}
-                  </div>
+                  <div className="font-medium">{order.customer.name}</div>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{displayOrder.customer.email}</span>
+                  <span className="text-sm">{order.customer.email}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{displayOrder.customer.phone}</span>
+                  <span className="text-sm">{order.customer.phone}</span>
                 </div>
               </div>
             </CardContent>
@@ -317,13 +338,12 @@ export function OrderDetails({
               <div className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-muted-foreground mt-1" />
                 <div className="text-sm">
-                  <div>{displayOrder.shippingAddress.street}</div>
+                  <div>{order.shippingAddress.street}</div>
                   <div>
-                    {displayOrder.shippingAddress.city},{" "}
-                    {displayOrder.shippingAddress.state}{" "}
-                    {displayOrder.shippingAddress.zipCode}
+                    {order.shippingAddress.city}, {order.shippingAddress.state}{" "}
+                    {order.shippingAddress.zipCode}
                   </div>
-                  <div>{displayOrder.shippingAddress.country}</div>
+                  <div>{order.shippingAddress.country}</div>
                 </div>
               </div>
             </CardContent>
@@ -338,26 +358,24 @@ export function OrderDetails({
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Current Status</span>
-                  {getStatusBadge(displayOrder.status)}
+                  {getStatusBadge(order.status)}
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Payment</span>
-                  {getPaymentStatusBadge(displayOrder.paymentStatus)}
+                  {getPaymentStatusBadge(order.paymentStatus)}
                 </div>
-                {displayOrder.trackingNumber && (
+                {order.trackingNumber && (
                   <div className="flex justify-between text-sm">
                     <span>Tracking</span>
                     <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                      {displayOrder.trackingNumber}
+                      {order.trackingNumber}
                     </code>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
                   <span>Est. Delivery</span>
                   <span>
-                    {new Date(
-                      displayOrder.estimatedDelivery
-                    ).toLocaleDateString()}
+                    {new Date(order.estimatedDelivery).toLocaleDateString()}
                   </span>
                 </div>
               </div>
@@ -368,28 +386,28 @@ export function OrderDetails({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => onUpdateStatus("processing")}
+                    onClick={() => handleUpdateStatus("processing")}
                   >
                     Processing
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => onUpdateStatus("shipped")}
+                    onClick={() => handleUpdateStatus("shipped")}
                   >
                     Shipped
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => onUpdateStatus("delivered")}
+                    onClick={() => handleUpdateStatus("delivered")}
                   >
                     Delivered
                   </Button>
                   <Button
                     size="sm"
                     variant="destructive"
-                    onClick={() => onUpdateStatus("cancelled")}
+                    onClick={() => handleUpdateStatus("cancelled")}
                   >
                     Cancel
                   </Button>

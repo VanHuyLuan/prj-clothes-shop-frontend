@@ -1,5 +1,4 @@
-import { OrdersTable } from "@/components/admin/orders/orders-table";
-import { OrdersHeader } from "@/components/admin/orders/orders-header";
+import { OrdersClient } from "@/components/admin/orders/orders-client";
 
 export const metadata = {
   title: "Orders Management - STYLISH Admin",
@@ -7,10 +6,5 @@ export const metadata = {
 };
 
 export default function OrdersPage() {
-  return (
-    <div className="space-y-6">
-      <OrdersHeader />
-      <OrdersTable />
-    </div>
-  );
+  return <OrdersClient />;
 }

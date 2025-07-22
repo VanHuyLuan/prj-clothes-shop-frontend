@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import {
+  MotionDiv,
+} from "@/components/providers/motion-provider";
 import { ShoppingBag, Heart } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -29,7 +31,7 @@ export function ProductCard({
   const [isFavorite, setIsFavorite] = useState(false);
 
   return (
-    <motion.div
+    <MotionDiv
       whileHover={{ y: -5 }}
       transition={{ duration: 0.3 }}
       className="group relative"
@@ -105,6 +107,6 @@ export function ProductCard({
           </div>
         </div>
       </Link>
-    </motion.div>
+    </MotionDiv>
   );
 }

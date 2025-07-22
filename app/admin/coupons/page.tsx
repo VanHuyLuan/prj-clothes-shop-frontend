@@ -1,5 +1,4 @@
-import { CouponsTable } from "@/components/admin/coupons/coupons-table";
-import { CouponsHeader } from "@/components/admin/coupons/coupons-header";
+import { CouponsClient } from "@/components/admin/coupons/coupons-client";
 
 export const metadata = {
   title: "Coupons Management - STYLISH Admin",
@@ -7,10 +6,5 @@ export const metadata = {
 };
 
 export default function CouponsPage() {
-  return (
-    <div className="space-y-6">
-      <CouponsHeader />
-      <CouponsTable />
-    </div>
-  );
+  return <CouponsClient />;
 }

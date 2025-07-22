@@ -4,6 +4,16 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CategoryHero } from "@/components/category/category-hero";
 
+// Thêm interface để định nghĩa kiểu dữ liệu cho Product
+interface Product {
+  id: string;
+  name: string;
+  price: string;
+  image: string;
+  originalPrice?: string;
+  discount?: string;
+}
+
 // Dynamically import heavy components
 const ProductGrid = dynamic(
   () =>
@@ -27,9 +37,15 @@ const CategoryFilters = dynamic(
   }
 );
 
-// Mock data for products
-const products = [
-  // ... your products data
+// Áp dụng kiểu dữ liệu Product[] cho biến products
+const products: Product[] = [
+  // ... bạn có thể thêm dữ liệu sản phẩm giả ở đây nếu cần
+  {
+    id: "c1",
+    name: "Sample Product",
+    price: "$99.99",
+    image: "/placeholder.svg?height=600&width=400",
+  },
 ];
 
 export default function CategoryPage({

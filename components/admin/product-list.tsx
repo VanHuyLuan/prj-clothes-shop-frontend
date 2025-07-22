@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { MotionDiv, MotionTR } from "@/components/providers/motion-provider";
 import { Edit, MoreHorizontal, Plus, Trash } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -92,7 +92,7 @@ export function ProductList() {
   );
 
   return (
-    <motion.div
+    <MotionDiv
       initial={{ opacity: 0, y: 20 }}
       animate={isLoaded ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6 }}
@@ -137,7 +137,7 @@ export function ProductList() {
               </TableHeader>
               <TableBody>
                 {filteredProducts.map((product, index) => (
-                  <motion.tr
+                  <MotionTR
                     key={product.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={isLoaded ? { opacity: 1, y: 0 } : {}}
@@ -187,13 +187,13 @@ export function ProductList() {
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
-                  </motion.tr>
+                  </MotionTR>
                 ))}
               </TableBody>
             </Table>
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </MotionDiv>
   );
 }
