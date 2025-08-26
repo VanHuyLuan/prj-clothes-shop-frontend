@@ -1,9 +1,9 @@
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { HeroSection } from "@/components/sections/hero-section";
-import { CategorySection } from "@/components/sections/category-section";
-import { FeaturedProductsSection } from "@/components/sections/featured-products-section";
-import { NewsletterSection } from "@/components/sections/newsletter-section";
+import { Header } from "@/components/client/layout/header";
+import { Footer } from "@/components/client/layout/footer";
+import { HeroSection } from "@/components/client/sections/hero-section";
+import { CategorySection } from "@/components/client/sections/category-section";
+import { FeaturedProductsSection } from "@/components/client/sections/featured-products-section";
+import { NewsletterSection } from "@/components/client/sections/newsletter-section";
 
 export default function Home() {
   return (

@@ -122,29 +122,3 @@
   }
 }
 
-/* ...existing styles... */
-
-/* Override dropdown positioning */
-[data-slot="dropdown-menu-content"][data-side="bottom"][data-align="end"] {
-  transform-origin: top right !important;
-  margin-top: 8px !important;
-}
-
-/* Ensure proper positioning for end-aligned dropdown */
-[data-radix-popper-content-wrapper] {
-  z-index: 9999 !important;
-}
-
-/* Fix for dropdown content positioning */
-[data-slot="dropdown-menu-content"] {
-  background-color: white !important;
-  border: 1px solid hsl(var(--border)) !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
-  z-index: 9999 !important;
-}
-
-.dark [data-slot="dropdown-menu-content"] {
-  background-color: hsl(var(--popover)) !important;
-  border-color: hsl(var(--border)) !important;
-  color: hsl(var(--popover-foreground)) !important;
-}

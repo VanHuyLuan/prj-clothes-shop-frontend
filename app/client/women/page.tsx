@@ -1,8 +1,8 @@
-import { CategoryHero } from "@/components/category/category-hero";
-import { ProductGrid } from "@/components/category/product-grid";
-import { CategoryFilters } from "@/components/category/category-filters";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+import { CategoryHero } from "@/components/client/category/category-hero";
+import { ProductGrid } from "@/components/client/category/product-grid";
+import { CategoryFilters } from "@/components/client/category/category-filters";
+import { Header } from "@/components/client/layout/header";
+import { Footer } from "@/components/client/layout/footer";
 export const metadata = {
   title: "Women's Collection - STYLISH",
   description:

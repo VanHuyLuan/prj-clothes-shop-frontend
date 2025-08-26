@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { CategoryHero } from "@/components/category/category-hero";
+import { Header } from "@/components/client/layout/header";
+import { Footer } from "@/components/client/layout/footer";
+import { CategoryHero } from "@/components/client/category/category-hero";
 
 // Thêm interface để định nghĩa kiểu dữ liệu cho Product
 interface Product {
@@ -17,7 +17,7 @@ interface Product {
 // Dynamically import heavy components
 const ProductGrid = dynamic(
   () =>
-    import("@/components/category/product-grid").then((mod) => mod.ProductGrid),
+    import("@/components/client/category/product-grid").then((mod) => mod.ProductGrid),
   {
     loading: () => (
       <div className="h-[600px] bg-muted animate-pulse rounded-xl" />
@@ -27,7 +27,7 @@ const ProductGrid = dynamic(
 
 const CategoryFilters = dynamic(
   () =>
-    import("@/components/category/category-filters").then(
+    import("@/components/client/category/category-filters").then(
       (mod) => mod.CategoryFilters
     ),
   {
