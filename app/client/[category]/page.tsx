@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { Header } from "@/components/client/layout/header";
 import { Footer } from "@/components/client/layout/footer";
 import { CategoryHero } from "@/components/client/category/category-hero";
+import { getProductImageByIndex } from "@/lib/product-images";
 
 // Thêm interface để định nghĩa kiểu dữ liệu cho Product
 interface Product {
@@ -44,7 +45,7 @@ const products: Product[] = [
     id: "c1",
     name: "Sample Product",
     price: "$99.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getProductImageByIndex(20),
   },
 ];
 

@@ -3,6 +3,8 @@ import { ProductGrid } from "@/components/client/category/product-grid";
 import { CategoryFilters } from "@/components/client/category/category-filters";
 import { Header } from "@/components/client/layout/header";
 import { Footer } from "@/components/client/layout/footer";
+import { getCategoryImageByIndex, getCategoryHeroImage } from "@/lib/product-images";
+
 export const metadata = {
   title: "Women's Collection - STYLISH",
   description:
@@ -15,49 +17,49 @@ const products = [
     id: "w1",
     name: "Floral Summer Dress",
     price: "$49.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("women", 0),
   },
   {
     id: "w2",
     name: "Slim Fit Jeans",
     price: "$59.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("women", 1),
   },
   {
     id: "w3",
     name: "Casual Blazer",
     price: "$89.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("women", 2),
   },
   {
     id: "w4",
     name: "Cotton T-Shirt",
     price: "$24.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("women", 3),
   },
   {
     id: "w5",
     name: "Leather Jacket",
     price: "$129.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("women", 4),
   },
   {
     id: "w6",
     name: "Knit Sweater",
     price: "$45.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("women", 5),
   },
   {
     id: "w7",
     name: "Pleated Skirt",
     price: "$39.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("women", 6),
   },
   {
     id: "w8",
     name: "Silk Blouse",
     price: "$69.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("women", 7),
   },
 ];
 
@@ -68,7 +70,7 @@ export default function WomenPage() {
       <CategoryHero
         title="Women's Collection"
         description="Discover the latest trends in women's fashion. From elegant dresses to casual wear, find your perfect style."
-        image="/placeholder.svg?height=1080&width=1920"
+        image={getCategoryHeroImage("women")}
         category="women"
       />
 

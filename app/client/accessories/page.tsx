@@ -3,6 +3,8 @@ import { Footer } from "@/components/client/layout/footer";
 import { ProductGrid } from "@/components/client/category/product-grid";
 import { CategoryFilters } from "@/components/client/category/category-filters";
 import { Header } from "@/components/client/layout/header";
+import { getCategoryImageByIndex, getCategoryHeroImage } from "@/lib/product-images";
+
 export const metadata = {
   title: "Accessories Collection - STYLISH",
   description:
@@ -15,49 +17,49 @@ const products = [
     id: "a1",
     name: "Leather Handbag",
     price: "$79.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("accessories", 0),
   },
   {
     id: "a2",
     name: "Silver Necklace",
     price: "$45.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("accessories", 1),
   },
   {
     id: "a3",
     name: "Woven Belt",
     price: "$29.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("accessories", 2),
   },
   {
     id: "a4",
     name: "Silk Scarf",
     price: "$34.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("accessories", 3),
   },
   {
     id: "a5",
     name: "Aviator Sunglasses",
     price: "$59.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("accessories", 4),
   },
   {
     id: "a6",
     name: "Leather Wallet",
     price: "$49.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("accessories", 5),
   },
   {
     id: "a7",
     name: "Beaded Bracelet",
     price: "$19.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("accessories", 6),
   },
   {
     id: "a8",
     name: "Fedora Hat",
     price: "$39.99",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getCategoryImageByIndex("accessories", 7),
   },
 ];
 
@@ -68,7 +70,7 @@ export default function AccessoriesPage() {
       <CategoryHero
         title="Accessories Collection"
         description="Complete your look with our stylish accessories. From bags to jewelry, find the perfect finishing touch."
-        image="/placeholder.svg?height=1080&width=1920"
+        image={getCategoryHeroImage("accessories")}
         category="accessories"
       />
 

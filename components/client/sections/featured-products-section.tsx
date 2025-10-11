@@ -6,13 +6,30 @@ import { MotionDiv } from "@/components/providers/motion-provider";
 
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ui/product-card";
+import { getProductImageByIndex } from "@/lib/product-images";
 
 export function FeaturedProductsSection() {
   const products = [
-    { name: "Classic White Tee", price: "$29.99" },
-    { name: "Slim Fit Jeans", price: "$59.99" },
-    { name: "Casual Blazer", price: "$89.99" },
-    { name: "Summer Dress", price: "$49.99" },
+    { 
+      name: "Classic White Tee", 
+      price: "$29.99",
+      image: getProductImageByIndex(0)
+    },
+    { 
+      name: "Slim Fit Jeans", 
+      price: "$59.99",
+      image: getProductImageByIndex(1)
+    },
+    { 
+      name: "Casual Blazer", 
+      price: "$89.99",
+      image: getProductImageByIndex(2)
+    },
+    { 
+      name: "Summer Dress", 
+      price: "$49.99",
+      image: getProductImageByIndex(3)
+    },
   ];
 
   const [isLoaded, setIsLoaded] = useState(false);
@@ -69,7 +86,7 @@ export function FeaturedProductsSection() {
         >
           {products.map((product, index) => (
             <MotionDiv key={index} variants={itemVariants}>
-              <ProductCard product={product} />
+              <ProductCard product={product} image={product.image} />
             </MotionDiv>
           ))}
         </MotionDiv>

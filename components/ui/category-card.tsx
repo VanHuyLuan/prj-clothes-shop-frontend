@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { MotionDiv } from "@/components/providers/motion-provider";
 import { ChevronRight } from "lucide-react";
+import { getCategoryHeroImage } from "@/lib/product-images";
 
 interface CategoryCardProps {
   category: string;
@@ -11,6 +12,16 @@ interface CategoryCardProps {
 
 export function CategoryCard({ category }: CategoryCardProps) {
   const categoryPath = category.toLowerCase();
+  
+  // Map category names to our image system
+  const getCategoryImage = (cat: string) => {
+    const catLower = cat.toLowerCase();
+    if (catLower === "women") return getCategoryHeroImage("women");
+    if (catLower === "men") return getCategoryHeroImage("men");
+    if (catLower === "kids") return getCategoryHeroImage("kids");
+    if (catLower === "accessories") return getCategoryHeroImage("accessories");
+    return "/cloth/00006_00.jpg"; // fallback
+  };
 
   return (
     <Link
@@ -24,7 +35,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
         className="relative h-[200px] w-full overflow-hidden rounded-xl shadow-lg will-change-transform"
       >
         <Image
-          src={`/images/categories/${categoryPath}.jpg`}
+          src={getCategoryImage(category)}
           alt={category}
           fill
           priority

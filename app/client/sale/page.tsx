@@ -3,6 +3,8 @@ import { ProductGrid } from "@/components/client/category/product-grid";
 import { CategoryFilters } from "@/components/client/category/category-filters";
 import { Header } from "@/components/client/layout/header";
 import { Footer } from "@/components/client/layout/footer";
+import { getProductImageByIndex, getCategoryHeroImage } from "@/lib/product-images";
+
 export const metadata = {
   title: "Sale Items - STYLISH",
   description:
@@ -17,7 +19,7 @@ const products = [
     price: "$29.99",
     originalPrice: "$59.99",
     discount: "50%",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getProductImageByIndex(10),
   },
   {
     id: "s2",
@@ -25,7 +27,7 @@ const products = [
     price: "$49.99",
     originalPrice: "$89.99",
     discount: "44%",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getProductImageByIndex(11),
   },
   {
     id: "s3",
@@ -33,7 +35,7 @@ const products = [
     price: "$39.99",
     originalPrice: "$69.99",
     discount: "43%",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getProductImageByIndex(12),
   },
   {
     id: "s4",
@@ -41,7 +43,7 @@ const products = [
     price: "$19.99",
     originalPrice: "$34.99",
     discount: "43%",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getProductImageByIndex(13),
   },
   {
     id: "s5",
@@ -49,7 +51,7 @@ const products = [
     price: "$34.99",
     originalPrice: "$69.99",
     discount: "50%",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getProductImageByIndex(14),
   },
   {
     id: "s6",
@@ -57,7 +59,7 @@ const products = [
     price: "$29.99",
     originalPrice: "$59.99",
     discount: "50%",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getProductImageByIndex(15),
   },
   {
     id: "s7",
@@ -65,7 +67,7 @@ const products = [
     price: "$14.99",
     originalPrice: "$24.99",
     discount: "40%",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getProductImageByIndex(16),
   },
   {
     id: "s8",
@@ -73,7 +75,7 @@ const products = [
     price: "$24.99",
     originalPrice: "$49.99",
     discount: "50%",
-    image: "/placeholder.svg?height=600&width=400",
+    image: getProductImageByIndex(17),
   },
 ];
 
@@ -84,7 +86,7 @@ export default function SalePage() {
       <CategoryHero
         title="Sale Collection"
         description="Shop our sale collection. Find great deals on fashion items with discounts up to 70% off."
-        image="/placeholder.svg?height=1080&width=1920"
+        image={getCategoryHeroImage("sale")}
         category="sale"
         isSale
       />
