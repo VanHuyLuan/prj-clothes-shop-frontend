@@ -14,27 +14,13 @@ export function AuthStatus() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Test user for debugging
-  const testUser = {
-    id: "test-1",
-    username: "testuser",
-    email: "test@example.com",
-    firstName: "Test",
-    lastName: "User",
-    role: "user",
-    avatar: null,
-    phone: null
-  };
-
   const handleLogout = () => {
     logout();
     router.push("/");
     setIsOpen(false);
   };
 
-  const currentUser = user || testUser;
-
-  if (!currentUser) {
+  if (!user) {
     return (
       <div className="flex items-center gap-2">
         <Link href="/login">
@@ -72,9 +58,9 @@ export function AuthStatus() {
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-60 bg-white border rounded-md shadow-lg z-50">
           <div className="flex flex-col space-y-1 p-3 border-b">
-            <p className="text-base font-semibold leading-relaxed">{currentUser.lastName}</p>
+            <p className="text-base font-semibold leading-relaxed">{user.lastName}</p>
             <p className="text-sm leading-relaxed text-gray-500">
-              {currentUser.email}
+              {user.email}
             </p>
           </div>
           
@@ -97,7 +83,7 @@ export function AuthStatus() {
               My Orders
             </Link>
             
-            {currentUser?.role === "admin" && (
+            {user?.role === "admin" && (
               <Link 
                 href="/admin" 
                 className="flex items-center px-3 py-2.5 text-sm font-medium hover:bg-gray-100 cursor-pointer"

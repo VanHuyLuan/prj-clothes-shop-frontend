@@ -3,12 +3,23 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
+interface PriceRange {
+  id: string;
+  label: string;
+  min: number;
+  max: number | null; // null means no upper limit
+}
+
 interface CategoryFiltersProps {
   showDiscount?: boolean;
+  onPriceChange?: (selectedRanges: PriceRange[]) => void;
+  productCounts?: Record<string, number>; // Optional: show count per range
 }
 
 export function CategoryFilters({
   showDiscount = false,
+  onPriceChange,
+  productCounts,
 }: CategoryFiltersProps) {
   const [openSections, setOpenSections] = useState({
     categories: true,
@@ -18,6 +29,16 @@ export function CategoryFilters({
     discount: showDiscount,
   });
 
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
+
+  const priceRanges: PriceRange[] = [
+    { id: "price1", label: "Under $25", min: 0, max: 25 },
+    { id: "price2", label: "$25 - $50", min: 25, max: 50 },
+    { id: "price3", label: "$50 - $100", min: 50, max: 100 },
+    { id: "price4", label: "$100 - $200", min: 100, max: 200 },
+    { id: "price5", label: "$200+", min: 200, max: null },
+  ];
+
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections((prev) => ({
       ...prev,
@@ -25,11 +46,37 @@ export function CategoryFilters({
     }));
   };
 
+  const handlePriceChange = (rangeId: string) => {
+    const newSelectedRanges = selectedPriceRanges.includes(rangeId)
+      ? selectedPriceRanges.filter((id) => id !== rangeId)
+      : [...selectedPriceRanges, rangeId];
+
+    setSelectedPriceRanges(newSelectedRanges);
+
+    // Call the callback with the selected ranges
+    if (onPriceChange) {
+      const selected = priceRanges.filter((range) =>
+        newSelectedRanges.includes(range.id)
+      );
+      onPriceChange(selected);
+    }
+  };
+
+  const handleClearAll = () => {
+    setSelectedPriceRanges([]);
+    if (onPriceChange) {
+      onPriceChange([]);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold">Filters</h2>
-        <button className="text-sm text-primary hover:underline">
+        <button 
+          className="text-sm text-primary hover:underline"
+          onClick={handleClearAll}
+        >
           Clear All
         </button>
       </div>
@@ -108,56 +155,27 @@ export function CategoryFilters({
         </button>
         {openSections.price && (
           <div className="mt-2 space-y-2">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="price1"
-                className="rounded text-primary focus:ring-primary mr-2"
-              />
-              <label htmlFor="price1" className="text-sm">
-                Under $25
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="price2"
-                className="rounded text-primary focus:ring-primary mr-2"
-              />
-              <label htmlFor="price2" className="text-sm">
-                $25 - $50
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="price3"
-                className="rounded text-primary focus:ring-primary mr-2"
-              />
-              <label htmlFor="price3" className="text-sm">
-                $50 - $100
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="price4"
-                className="rounded text-primary focus:ring-primary mr-2"
-              />
-              <label htmlFor="price4" className="text-sm">
-                $100 - $200
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="price5"
-                className="rounded text-primary focus:ring-primary mr-2"
-              />
-              <label htmlFor="price5" className="text-sm">
-                $200+
-              </label>
-            </div>
+            {priceRanges.map((range) => (
+              <div key={range.id} className="flex items-center justify-between">
+                <div className="flex items-center flex-1">
+                  <input
+                    type="checkbox"
+                    id={range.id}
+                    checked={selectedPriceRanges.includes(range.id)}
+                    onChange={() => handlePriceChange(range.id)}
+                    className="rounded text-primary focus:ring-primary mr-2 cursor-pointer"
+                  />
+                  <label htmlFor={range.id} className="text-sm cursor-pointer">
+                    {range.label}
+                  </label>
+                </div>
+                {productCounts && productCounts[range.id] !== undefined && (
+                  <span className="text-xs text-muted-foreground ml-2">
+                    ({productCounts[range.id]})
+                  </span>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
