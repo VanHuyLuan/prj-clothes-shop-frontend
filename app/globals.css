@@ -122,3 +122,7 @@
   }
 }
 
+html, body {
+  pointer-events: auto !important;
+  overflow: auto !important;
+}

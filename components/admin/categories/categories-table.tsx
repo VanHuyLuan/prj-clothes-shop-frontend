@@ -1,6 +1,7 @@
 "use client";
 
-// import { useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -11,80 +12,82 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
-
-interface Category {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-  isActive: boolean;
-  productCount: number;
-  createdAt: string;
-}
+import { Category } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
+import { CategoryViewDialog } from "./category-view-dialog";
+import { CategoryDeleteDialog } from "./category-delete-dialog";
 
 interface CategoriesTableProps {
-  categories?: Category[];
-  onEdit?: (category: Category) => void;
+  categories: Category[];
+  loading?: boolean;
   onDelete?: (categoryId: string) => void;
-  onView?: (category: Category) => void;
 }
 
 export function CategoriesTable({
-  categories = [],
-  onEdit = () => {},
-  onDelete = () => {},
-  onView = () => {},
+  categories,
+  loading = false,
+  onDelete,
 }: CategoriesTableProps) {
-  //   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const router = useRouter();
+  const { toast } = useToast();
+  const [viewCategory, setViewCategory] = useState<Category | null>(null);
+  const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  const mockCategories: Category[] = [
-    {
-      id: "1",
-      name: "Women's Clothing",
-      description: "Fashion for women including dresses, tops, and more",
-      image: "/placeholder.svg?height=40&width=40",
-      isActive: true,
-      productCount: 156,
-      createdAt: "2024-01-15",
-    },
-    {
-      id: "2",
-      name: "Men's Clothing",
-      description: "Stylish clothing for men",
-      image: "/placeholder.svg?height=40&width=40",
-      isActive: true,
-      productCount: 89,
-      createdAt: "2024-01-10",
-    },
-    {
-      id: "3",
-      name: "Accessories",
-      description: "Bags, jewelry, and fashion accessories",
-      image: "/placeholder.svg?height=40&width=40",
-      isActive: false,
-      productCount: 45,
-      createdAt: "2024-01-05",
-    },
-    {
-      id: "4",
-      name: "Kids",
-      description: "Clothing for children and babies",
-      image: "/placeholder.svg?height=40&width=40",
-      isActive: true,
-      productCount: 67,
-      createdAt: "2024-01-01",
-    },
-  ];
+  const handleView = (category: Category) => {
+    setViewCategory(category);
+  };
 
-  const displayCategories = categories.length > 0 ? categories : mockCategories;
+  const handleEdit = (categoryId: string) => {
+    router.push(`/admin/categories/${categoryId}`);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteCategory) return;
+    
+    setDeleting(true);
+    try {
+      await onDelete?.(deleteCategory.id);
+      setDeleteCategory(null);
+      toast({
+        title: "Success",
+        description: "Category deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete category",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="rounded-md border p-8 text-center">
+        <p className="text-muted-foreground">Loading categories...</p>
+      </div>
+    );
+  }
+
+  if (categories.length === 0) {
+    return (
+      <div className="rounded-md border p-8 text-center">
+        <p className="text-muted-foreground">No categories found.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-md border">
@@ -92,23 +95,19 @@ export function CategoriesTable({
         <TableHeader>
           <TableRow>
             <TableHead>Category</TableHead>
+            <TableHead>Slug</TableHead>
             <TableHead>Description</TableHead>
-            <TableHead>Products</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>Parent</TableHead>
             <TableHead>Created</TableHead>
             <TableHead className="w-[70px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {displayCategories.map((category) => (
+          {categories.map((category) => (
             <TableRow key={category.id}>
               <TableCell>
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage
-                      src={category.image || "/placeholder.svg"}
-                      alt={category.name}
-                    />
                     <AvatarFallback>{category.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -117,22 +116,26 @@ export function CategoriesTable({
                 </div>
               </TableCell>
               <TableCell>
+                <code className="text-xs bg-muted px-2 py-1 rounded">
+                  {category.slug}
+                </code>
+              </TableCell>
+              <TableCell>
                 <div className="max-w-[200px] truncate text-muted-foreground">
-                  {category.description}
+                  {category.description || "—"}
                 </div>
               </TableCell>
               <TableCell>
-                <Badge variant="secondary">
-                  {category.productCount} products
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Badge variant={category.isActive ? "default" : "secondary"}>
-                  {category.isActive ? "Active" : "Inactive"}
-                </Badge>
+                {category.parent ? (
+                  <Badge variant="outline">{category.parent.name}</Badge>
+                ) : (
+                  <span className="text-muted-foreground text-xs">
+                    Root Category
+                  </span>
+                )}
               </TableCell>
               <TableCell className="text-muted-foreground">
-                {new Date(category.createdAt).toLocaleDateString()}
+                {new Date(category.created_at).toLocaleDateString()}
               </TableCell>
               <TableCell>
                 <DropdownMenu>
@@ -142,16 +145,17 @@ export function CategoriesTable({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onView(category)}>
+                    <DropdownMenuItem onClick={() => handleView(category)}>
                       <Eye className="mr-2 h-4 w-4" />
                       View
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onEdit(category)}>
+                    <DropdownMenuItem onClick={() => handleEdit(category.id)}>
                       <Edit className="mr-2 h-4 w-4" />
                       Edit
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() => onDelete(category.id)}
+                      onClick={() => setDeleteCategory(category)}
                       className="text-destructive"
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
@@ -164,6 +168,26 @@ export function CategoriesTable({
           ))}
         </TableBody>
       </Table>
+
+      {viewCategory && (
+        <CategoryViewDialog
+          key={`view-${viewCategory.id}`}
+          category={viewCategory}
+          open={true}
+          onOpenChange={(open) => { if (!open) setViewCategory(null); }}
+        />
+      )}
+
+      {deleteCategory && (
+        <CategoryDeleteDialog
+          key={`delete-${deleteCategory.id}`}
+          category={deleteCategory}
+          open={true}
+          onOpenChange={(open) => { if (!open) setDeleteCategory(null); }}
+          onConfirm={handleDelete}
+          loading={deleting}
+        />
+      )}
     </div>
   );
 }

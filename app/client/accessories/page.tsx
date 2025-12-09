@@ -1,69 +1,101 @@
+"use client";
+
+import { useState, useMemo } from "react";
 import { CategoryHero } from "@/components/client/category/category-hero";
 import { Footer } from "@/components/client/layout/footer";
 import { ProductGrid } from "@/components/client/category/product-grid";
 import { CategoryFilters } from "@/components/client/category/category-filters";
 import { Header } from "@/components/client/layout/header";
-import { getCategoryImageByIndex, getCategoryHeroImage } from "@/lib/product-images";
+import { getCategoryHeroImage } from "@/lib/product-images";
+import MockDatabase, { Product } from "@/lib/database";
 
-export const metadata = {
-  title: "Accessories Collection - STYLISH",
-  description:
-    "Complete your look with our stylish accessories. From bags to jewelry, find the perfect finishing touch.",
+interface PriceRange {
+  id: string;
+  label: string;
+  min: number;
+  max: number | null;
+}
+
+// Convert Product to display format
+interface DisplayProduct {
+  id: string;
+  name: string;
+  price: string;
+  image: string;
+}
+
+const convertToDisplayProduct = (product: Product): DisplayProduct => {
+  // Get the lowest price from variants (considering sale prices)
+  const prices = product.variants?.map(variant => {
+    const salePrice = variant.sale_price ? parseFloat(variant.sale_price) : null;
+    const regularPrice = parseFloat(variant.price);
+    return salePrice || regularPrice;
+  }) || [];
+  
+  const lowestPrice = Math.min(...prices);
+  const primaryImage = product.images?.[0]?.url || '/placeholder.jpg';
+  
+  return {
+    id: product.id,
+    name: product.name,
+    price: `$${lowestPrice.toFixed(2)}`,
+    image: primaryImage
+  };
 };
 
-// Mock data for accessories
-const products = [
-  {
-    id: "a1",
-    name: "Leather Handbag",
-    price: "$79.99",
-    image: getCategoryImageByIndex("accessories", 0),
-  },
-  {
-    id: "a2",
-    name: "Silver Necklace",
-    price: "$45.99",
-    image: getCategoryImageByIndex("accessories", 1),
-  },
-  {
-    id: "a3",
-    name: "Woven Belt",
-    price: "$29.99",
-    image: getCategoryImageByIndex("accessories", 2),
-  },
-  {
-    id: "a4",
-    name: "Silk Scarf",
-    price: "$34.99",
-    image: getCategoryImageByIndex("accessories", 3),
-  },
-  {
-    id: "a5",
-    name: "Aviator Sunglasses",
-    price: "$59.99",
-    image: getCategoryImageByIndex("accessories", 4),
-  },
-  {
-    id: "a6",
-    name: "Leather Wallet",
-    price: "$49.99",
-    image: getCategoryImageByIndex("accessories", 5),
-  },
-  {
-    id: "a7",
-    name: "Beaded Bracelet",
-    price: "$19.99",
-    image: getCategoryImageByIndex("accessories", 6),
-  },
-  {
-    id: "a8",
-    name: "Fedora Hat",
-    price: "$39.99",
-    image: getCategoryImageByIndex("accessories", 7),
-  },
-];
+const parsePrice = (priceString: string): number => {
+  return parseFloat(priceString.replace(/[$,]/g, ""));
+};
+
+const isPriceInRange = (priceString: string, range: PriceRange): boolean => {
+  const price = parsePrice(priceString);
+  return price >= range.min && (range.max === null || price < range.max);
+};
+
+// Get products from database
+const rawProducts = MockDatabase.getProductsByCategory('accessories');
+const allProducts: DisplayProduct[] = rawProducts.map(convertToDisplayProduct);
 
 export default function AccessoriesPage() {
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState<PriceRange[]>([]);
+
+  // Define price ranges
+  const priceRanges: PriceRange[] = [
+    { id: "price1", label: "Under $25", min: 0, max: 25 },
+    { id: "price2", label: "$25 - $50", min: 25, max: 50 },
+    { id: "price3", label: "$50 - $100", min: 50, max: 100 },
+    { id: "price4", label: "$100 - $200", min: 100, max: 200 },
+    { id: "price5", label: "$200+", min: 200, max: null },
+  ];
+
+  // Calculate product counts for each range
+  const productCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    priceRanges.forEach((range) => {
+      counts[range.id] = allProducts.filter((product) =>
+        isPriceInRange(product.price, range)
+      ).length;
+    });
+    return counts;
+  }, []);
+
+  // Filter products based on selected price ranges
+  const filteredProducts = useMemo(() => {
+    if (selectedPriceRanges.length === 0) {
+      return allProducts;
+    }
+
+    return allProducts.filter((product) => {
+      return selectedPriceRanges.some((range) =>
+        isPriceInRange(product.price, range)
+      );
+    });
+  }, [selectedPriceRanges]);
+
+  const handlePriceChange = (ranges: PriceRange[]) => {
+    setSelectedPriceRanges(ranges);
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -76,9 +108,20 @@ export default function AccessoriesPage() {
 
       <div className="mx-auto max-w-screen-xl px-4 md:px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <CategoryFilters />
+          <CategoryFilters
+            onPriceChange={handlePriceChange}
+            productCounts={productCounts}
+          />
           <div className="md:col-span-3">
-            <ProductGrid products={products} />
+            <div className="mb-4 text-sm text-muted-foreground">
+              Showing {filteredProducts.length} of {allProducts.length} products
+              {selectedPriceRanges.length > 0 && (
+                <span className="ml-2">
+                  ({selectedPriceRanges.length} price filter{selectedPriceRanges.length > 1 ? 's' : ''} applied)
+                </span>
+              )}
+            </div>
+            <ProductGrid products={filteredProducts} />
           </div>
         </div>
       </div>

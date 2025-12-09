@@ -97,8 +97,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // Token expiry monitoring - auto logout when token expires
+  useEffect(() => {
+    if (!user) return
+
+    const checkTokenExpiry = () => {
+      const expiry = localStorage.getItem("tokenExpiry")
+      if (expiry && Date.now() > parseInt(expiry)) {
+        console.log("Token expired, logging out automatically")
+        logout()
+      }
+    }
+
+    // Check immediately
+    checkTokenExpiry()
+    
+    // Check every minute
+    const interval = setInterval(checkTokenExpiry, 60 * 1000)
+    
+    return () => clearInterval(interval)
+  }, [user])
+
   const login = async (email: string, password: string) => {
-    const res = await fetch("http://localhost:4000/identities/login", {
+    const res = await fetch("http://159.223.72.68:31977/identities/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -126,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const token = await getAccessToken()
       if (!token) throw new Error("No token available")
 
-      const res = await fetch("http://localhost:4000/identities/profile", {
+      const res = await fetch("http://159.223.72.68:31977/identities/profile", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -144,7 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signup = async (dto: CreateUserDto) => {
-    const res = await fetch("http://localhost:4000/identities/createuser", {
+    const res = await fetch("http://159.223.72.68:31977/identities/createuser", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dto),

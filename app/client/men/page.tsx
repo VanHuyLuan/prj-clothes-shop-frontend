@@ -6,7 +6,8 @@ import { ProductGrid } from "@/components/client/category/product-grid";
 import { CategoryFilters } from "@/components/client/category/category-filters";
 import { Header } from "@/components/client/layout/header";
 import { Footer } from "@/components/client/layout/footer";
-import { getCategoryImageByIndex, getCategoryHeroImage } from "@/lib/product-images";
+import { getCategoryHeroImage } from "@/lib/product-images";
+import MockDatabase, { Product } from "@/lib/database";
 
 interface PriceRange {
   id: string;
@@ -14,6 +15,33 @@ interface PriceRange {
   min: number;
   max: number | null;
 }
+
+// Convert Product to display format
+interface DisplayProduct {
+  id: string;
+  name: string;
+  price: string;
+  image: string;
+}
+
+const convertToDisplayProduct = (product: Product): DisplayProduct => {
+  // Get the lowest price from variants (considering sale prices)
+  const prices = product.variants?.map(variant => {
+    const salePrice = variant.sale_price ? parseFloat(variant.sale_price) : null;
+    const regularPrice = parseFloat(variant.price);
+    return salePrice || regularPrice;
+  }) || [];
+  
+  const lowestPrice = Math.min(...prices);
+  const primaryImage = product.images?.[0]?.url || '/placeholder.jpg';
+  
+  return {
+    id: product.id,
+    name: product.name,
+    price: `$${lowestPrice.toFixed(2)}`,
+    image: primaryImage
+  };
+};
 
 const parsePrice = (priceString: string): number => {
   return parseFloat(priceString.replace(/[$,]/g, ""));
@@ -24,81 +52,9 @@ const isPriceInRange = (priceString: string, range: PriceRange): boolean => {
   return price >= range.min && (range.max === null || price < range.max);
 };
 
-// Mock data for men's products
-const allProducts = [
-  {
-    id: "m1",
-    name: "Classic Oxford Shirt",
-    price: "$45.99",
-    image: getCategoryImageByIndex("men", 0),
-  },
-  {
-    id: "m2",
-    name: "Slim Fit Chinos",
-    price: "$59.99",
-    image: getCategoryImageByIndex("men", 1),
-  },
-  {
-    id: "m3",
-    name: "Wool Blazer",
-    price: "$129.99",
-    image: getCategoryImageByIndex("men", 2),
-  },
-  {
-    id: "m4",
-    name: "Graphic T-Shirt",
-    price: "$29.99",
-    image: getCategoryImageByIndex("men", 3),
-  },
-  {
-    id: "m5",
-    name: "Denim Jacket",
-    price: "$89.99",
-    image: getCategoryImageByIndex("men", 4),
-  },
-  {
-    id: "m6",
-    name: "Knit Pullover",
-    price: "$55.99",
-    image: getCategoryImageByIndex("men", 5),
-  },
-  {
-    id: "m7",
-    name: "Tailored Trousers",
-    price: "$79.99",
-    image: getCategoryImageByIndex("men", 6),
-  },
-  {
-    id: "m8",
-    name: "Casual Polo",
-    price: "$39.99",
-    image: getCategoryImageByIndex("men", 7),
-  },
-  {
-    id: "m9",
-    name: "Formal Suit",
-    price: "$299.99",
-    image: getCategoryImageByIndex("men", 8),
-  },
-  {
-    id: "m10",
-    name: "Basic Tee",
-    price: "$19.99",
-    image: getCategoryImageByIndex("men", 9),
-  },
-  {
-    id: "m11",
-    name: "Leather Belt",
-    price: "$49.99",
-    image: getCategoryImageByIndex("men", 10),
-  },
-  {
-    id: "m12",
-    name: "Designer Watch",
-    price: "$249.99",
-    image: getCategoryImageByIndex("men", 11),
-  },
-];
+// Get products from database
+const rawProducts = MockDatabase.getProductsByCategory('men');
+const allProducts: DisplayProduct[] = rawProducts.map(convertToDisplayProduct);
 
 export default function MenPage() {
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<PriceRange[]>([]);

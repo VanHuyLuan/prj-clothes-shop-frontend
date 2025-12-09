@@ -132,11 +132,11 @@ export const categoryImages = {
 
 // Ảnh hero cho các danh mục
 export const categoryHeroImages = {
-  men: "/cloth/00075_00.jpg",
-  women: "/cloth/00075_00.jpg", 
-  kids: "/cloth/00075_00.jpg",
-  accessories: "/cloth/00075_00.jpg",
-  sale: "/cloth/00075_00.jpg",
+  men: "/cloth/banner_men.png",
+  women: "/cloth/banner_women.png", 
+  kids: "/cloth/banner_kids.png",
+  accessories: "/cloth/banner_accessory.png",
+  sale: "/cloth/00345_00.jpg",
 };
 
 // Hàm để lấy ảnh theo danh mục

@@ -43,25 +43,22 @@ const convertToDisplayProduct = (product: Product): DisplayProduct => {
   };
 };
 
-// Helper function to parse price string to number
 const parsePrice = (priceString: string): number => {
   return parseFloat(priceString.replace(/[$,]/g, ""));
 };
 
-// Helper function to check if price is in range
 const isPriceInRange = (priceString: string, range: PriceRange): boolean => {
   const price = parsePrice(priceString);
   return price >= range.min && (range.max === null || price < range.max);
 };
 
-// Get products from database
-const rawProducts = MockDatabase.getProductsByCategory('women');
+// Get all products from database
+const rawProducts = MockDatabase.getAllProducts();
 const allProducts: DisplayProduct[] = rawProducts.map(convertToDisplayProduct);
 
-export default function WomenPage() {
+export default function AllProductsPage() {
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<PriceRange[]>([]);
 
-  // Define price ranges (must match CategoryFilters)
   const priceRanges: PriceRange[] = [
     { id: "price1", label: "Under $25", min: 0, max: 25 },
     { id: "price2", label: "$25 - $50", min: 25, max: 50 },
@@ -70,7 +67,7 @@ export default function WomenPage() {
     { id: "price5", label: "$200+", min: 200, max: null },
   ];
 
-  // Calculate product counts for each range
+  // Count products per price range
   const productCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     priceRanges.forEach((range) => {
@@ -81,51 +78,62 @@ export default function WomenPage() {
     return counts;
   }, []);
 
-  // Filter products based on selected price ranges
+  // Filtered products
   const filteredProducts = useMemo(() => {
     if (selectedPriceRanges.length === 0) {
       return allProducts;
     }
-
-    return allProducts.filter((product) => {
-      return selectedPriceRanges.some((range) =>
+    return allProducts.filter((product) =>
+      selectedPriceRanges.some((range) =>
         isPriceInRange(product.price, range)
-      );
-    });
+      )
+    );
   }, [selectedPriceRanges]);
 
   const handlePriceChange = (ranges: PriceRange[]) => {
     setSelectedPriceRanges(ranges);
   };
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
+
+      {/* HERO BANNER */}
       <CategoryHero
-        title="Women's Collection"
-        description="Discover the latest trends in women's fashion. From elegant dresses to casual wear, find your perfect style."
+        title="All Products"
+        description="Explore our full collection across all categories. Find styles for every occasion and every member of your family."
         image={getCategoryHeroImage("women")}
-        category="women"
+        category="all"
       />
 
+      {/* CONTENT */}
       <div className="mx-auto max-w-screen-xl px-4 md:px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          
+          {/* FILTERS */}
           <CategoryFilters 
             onPriceChange={handlePriceChange}
             productCounts={productCounts}
           />
+
+          {/* PRODUCT GRID */}
           <div className="md:col-span-3">
             <div className="mb-4 text-sm text-muted-foreground">
               Showing {filteredProducts.length} of {allProducts.length} products
               {selectedPriceRanges.length > 0 && (
                 <span className="ml-2">
-                  ({selectedPriceRanges.length} price filter{selectedPriceRanges.length > 1 ? 's' : ''} applied)
+                  ({selectedPriceRanges.length} price filter
+                  {selectedPriceRanges.length > 1 ? "s" : ""} applied)
                 </span>
               )}
             </div>
+
             <ProductGrid products={filteredProducts} />
           </div>
+
         </div>
       </div>
+
       <Footer />
     </div>
   );

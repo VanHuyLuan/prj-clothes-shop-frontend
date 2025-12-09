@@ -6,31 +6,21 @@ import { MotionDiv } from "@/components/providers/motion-provider";
 
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ui/product-card";
-import { getProductImageByIndex } from "@/lib/product-images";
+import MockDatabase from "@/lib/database";
 
 export function FeaturedProductsSection() {
-  const products = [
-    { 
-      name: "Classic White Tee", 
-      price: "$29.99",
-      image: getProductImageByIndex(0)
-    },
-    { 
-      name: "Slim Fit Jeans", 
-      price: "$59.99",
-      image: getProductImageByIndex(1)
-    },
-    { 
-      name: "Casual Blazer", 
-      price: "$89.99",
-      image: getProductImageByIndex(2)
-    },
-    { 
-      name: "Summer Dress", 
-      price: "$49.99",
-      image: getProductImageByIndex(3)
-    },
-  ];
+  // Get featured products from database
+  const featuredProducts = MockDatabase.getFeaturedProducts(4);
+  
+  const products = featuredProducts.map(product => ({
+    name: product.name,
+    price: `$${Math.min(...(product.variants?.map(v => {
+      const salePrice = v.sale_price ? parseFloat(v.sale_price) : null;
+      const regularPrice = parseFloat(v.price);
+      return salePrice || regularPrice;
+    }) || [])).toFixed(2)}`,
+    image: product.images?.[0]?.url || '/placeholder.jpg'
+  }));
 
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -94,15 +84,30 @@ export function FeaturedProductsSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={isLoaded ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.4 }}
-          className="flex justify-center mt-10"
+          className="flex justify-center mt-12"
         >
-          <Link href="#">
+          <Link href="/client/products">
             <Button
               size="lg"
-              className="group relative overflow-hidden rounded-full px-8 transition-all duration-300 hover:shadow-md"
+              className="
+                relative group overflow-hidden rounded-full px-10 py-5 
+                font-semibold text-white tracking-wide
+                bg-gradient-to-r from-primary to-primary/80
+                shadow-lg hover:shadow-xl
+                transition-all duration-300 ease-out
+                hover:scale-105
+              "
             >
+              {/* Glow Overlay */}
+              <span
+                className="
+                  absolute inset-0 bg-white/20 opacity-0 
+                  group-hover:opacity-100 transition-opacity duration-300
+                "
+              />
+
+              {/* Text */}
               <span className="relative z-10">View All Products</span>
-              <span className="absolute inset-0 z-0 bg-gradient-to-r from-primary to-primary/80 opacity-100 transition-all duration-300 group-hover:opacity-80"></span>
             </Button>
           </Link>
         </MotionDiv>

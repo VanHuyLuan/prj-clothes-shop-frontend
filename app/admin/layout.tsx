@@ -7,15 +7,11 @@ export const metadata = {
   description: "Admin dashboard for STYLISH clothing store",
 };
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen">
       <AdminSidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-visible">
         <AdminHeader />
         <main className="flex-1 overflow-auto p-6">{children}</main>
       </div>

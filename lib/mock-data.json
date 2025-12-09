@@ -1,0 +1,1001 @@
+{
+  "categories": [
+    {
+      "id": "cat-001",
+      "name": "Men",
+      "slug": "men",
+      "parentId": null,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "cat-002",
+      "name": "Women",
+      "slug": "women",
+      "parentId": null,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "cat-003",
+      "name": "Kids",
+      "slug": "kids",
+      "parentId": null,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "cat-004",
+      "name": "Accessories",
+      "slug": "accessories",
+      "parentId": null,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "cat-005",
+      "name": "T-Shirts",
+      "slug": "t-shirts",
+      "parentId": "cat-001",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "cat-006",
+      "name": "Jeans",
+      "slug": "jeans",
+      "parentId": "cat-001",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "cat-007",
+      "name": "Dresses",
+      "slug": "dresses",
+      "parentId": "cat-002",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "cat-008",
+      "name": "Blouses",
+      "slug": "blouses",
+      "parentId": "cat-002",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+
+  "products": [
+    {
+      "id": "prod-001",
+      "sku": "MEN-TSHIRT-001",
+      "name": "Classic Men's T-Shirt",
+      "slug": "classic-mens-tshirt",
+      "description": "Comfortable cotton t-shirt perfect for everyday wear. Made from 100% premium cotton with a relaxed fit.",
+      "brand": "StyleCo",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-001", "cat-005"]
+    },
+    {
+      "id": "prod-002",
+      "sku": "MEN-JEANS-001",
+      "name": "Slim Fit Denim Jeans",
+      "slug": "slim-fit-denim-jeans",
+      "description": "Modern slim fit jeans with stretch denim for comfort and mobility. Perfect for casual or smart-casual occasions.",
+      "brand": "DenimCraft",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-001", "cat-006"]
+    },
+    {
+      "id": "prod-003",
+      "sku": "WOM-DRESS-001",
+      "name": "Elegant Summer Dress",
+      "slug": "elegant-summer-dress",
+      "description": "Flowing summer dress with floral print. Light and breathable fabric perfect for warm weather.",
+      "brand": "EleganceWear",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-002", "cat-007"]
+    },
+    {
+      "id": "prod-004",
+      "sku": "WOM-BLOUSE-001",
+      "name": "Professional Silk Blouse",
+      "slug": "professional-silk-blouse",
+      "description": "Luxurious silk blouse perfect for office wear. Classic design with modern touches.",
+      "brand": "ExecutiveStyle",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-002", "cat-008"]
+    },
+    {
+      "id": "prod-005",
+      "sku": "KID-TSHIRT-001",
+      "name": "Kids Colorful T-Shirt",
+      "slug": "kids-colorful-tshirt",
+      "description": "Fun and colorful t-shirt for kids. Soft cotton material with playful designs.",
+      "brand": "KidsJoy",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-003"]
+    },
+    {
+      "id": "prod-006",
+      "sku": "ACC-BAG-001",
+      "name": "Leather Handbag",
+      "slug": "leather-handbag",
+      "description": "Premium leather handbag with multiple compartments. Perfect for daily use.",
+      "brand": "LeatherCraft",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-004"]
+    },
+    {
+      "id": "prod-007",
+      "sku": "MEN-POLO-001",
+      "name": "Casual Polo Shirt",
+      "slug": "casual-polo-shirt",
+      "description": "Classic polo shirt with moisture-wicking technology. Ideal for golf or casual outings.",
+      "brand": "SportStyle",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-001"]
+    },
+    {
+      "id": "prod-008",
+      "sku": "WOM-SKIRT-001",
+      "name": "A-Line Mini Skirt",
+      "slug": "a-line-mini-skirt",
+      "description": "Trendy A-line mini skirt in various colors. Perfect for creating versatile outfits.",
+      "brand": "TrendyWear",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-002"]
+    },
+    {
+      "id": "prod-009",
+      "sku": "KID-DRESS-001",
+      "name": "Princess Party Dress",
+      "slug": "princess-party-dress",
+      "description": "Beautiful party dress for special occasions. Sparkly details and comfortable fit.",
+      "brand": "PrincessStyle",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-003"]
+    },
+    {
+      "id": "prod-010",
+      "sku": "ACC-WATCH-001",
+      "name": "Classic Wrist Watch",
+      "slug": "classic-wrist-watch",
+      "description": "Elegant wrist watch with leather strap. Water-resistant and stylish.",
+      "brand": "TimeKeeper",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-004"]
+    },
+    {
+      "id": "prod-011",
+      "sku": "MEN-HOODIE-001",
+      "name": "Comfortable Hoodie",
+      "slug": "comfortable-hoodie",
+      "description": "Warm and comfortable hoodie perfect for casual wear. Made from soft cotton blend.",
+      "brand": "ComfortWear",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-001"]
+    },
+    {
+      "id": "prod-012",
+      "sku": "WOM-CARDIGAN-001",
+      "name": "Knit Cardigan",
+      "slug": "knit-cardigan",
+      "description": "Lightweight knit cardigan perfect for layering. Available in multiple colors.",
+      "brand": "KnitStyle",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-002"]
+    },
+    {
+      "id": "prod-013",
+      "sku": "KID-SHORTS-001",
+      "name": "Kids Summer Shorts",
+      "slug": "kids-summer-shorts",
+      "description": "Comfortable summer shorts for active kids. Lightweight and durable material.",
+      "brand": "ActiveKids",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-003"]
+    },
+    {
+      "id": "prod-014",
+      "sku": "ACC-SCARF-001",
+      "name": "Silk Scarf",
+      "slug": "silk-scarf",
+      "description": "Luxurious silk scarf with elegant patterns. Perfect for any occasion.",
+      "brand": "LuxeAccessories",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-004"]
+    },
+    {
+      "id": "prod-015",
+      "sku": "MEN-BLAZER-001",
+      "name": "Business Blazer",
+      "slug": "business-blazer",
+      "description": "Professional blazer for business occasions. Tailored fit with premium fabric.",
+      "brand": "BusinessStyle",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-001"]
+    },
+    {
+      "id": "prod-016",
+      "sku": "WOM-LEGGINGS-001",
+      "name": "Athletic Leggings",
+      "slug": "athletic-leggings",
+      "description": "High-performance leggings for workouts and casual wear. Moisture-wicking fabric.",
+      "brand": "FitWear",
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "categories": ["cat-002"]
+    }
+  ],
+
+  "productVariants": [
+    {
+      "id": "var-001",
+      "product_id": "prod-001",
+      "size": "S",
+      "color": "Black",
+      "sku": "MEN-TSHIRT-001-S-BLK",
+      "price": "29.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 50,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-002",
+      "product_id": "prod-001",
+      "size": "M",
+      "color": "Black",
+      "sku": "MEN-TSHIRT-001-M-BLK",
+      "price": "29.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 75,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-003",
+      "product_id": "prod-001",
+      "size": "L",
+      "color": "Black",
+      "sku": "MEN-TSHIRT-001-L-BLK",
+      "price": "29.99",
+      "sale_price": "24.99",
+      "sale_start": "2024-12-01T00:00:00.000Z",
+      "sale_end": "2024-12-31T23:59:59.999Z",
+      "stock_qty": 60,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-004",
+      "product_id": "prod-001",
+      "size": "S",
+      "color": "White",
+      "sku": "MEN-TSHIRT-001-S-WHT",
+      "price": "29.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 45,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-005",
+      "product_id": "prod-001",
+      "size": "M",
+      "color": "White",
+      "sku": "MEN-TSHIRT-001-M-WHT",
+      "price": "29.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 80,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-006",
+      "product_id": "prod-002",
+      "size": "30",
+      "color": "Dark Blue",
+      "sku": "MEN-JEANS-001-30-DBLUE",
+      "price": "79.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 25,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-007",
+      "product_id": "prod-002",
+      "size": "32",
+      "color": "Dark Blue",
+      "sku": "MEN-JEANS-001-32-DBLUE",
+      "price": "79.99",
+      "sale_price": "69.99",
+      "sale_start": "2024-12-01T00:00:00.000Z",
+      "sale_end": "2024-12-31T23:59:59.999Z",
+      "stock_qty": 35,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-008",
+      "product_id": "prod-003",
+      "size": "S",
+      "color": "Floral Pink",
+      "sku": "WOM-DRESS-001-S-PINK",
+      "price": "89.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 20,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-009",
+      "product_id": "prod-003",
+      "size": "M",
+      "color": "Floral Pink",
+      "sku": "WOM-DRESS-001-M-PINK",
+      "price": "89.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 30,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-010",
+      "product_id": "prod-004",
+      "size": "S",
+      "color": "Ivory",
+      "sku": "WOM-BLOUSE-001-S-IVY",
+      "price": "149.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 15,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-011",
+      "product_id": "prod-005",
+      "size": "4-5Y",
+      "color": "Rainbow",
+      "sku": "KID-TSHIRT-001-4Y-RBW",
+      "price": "19.99",
+      "sale_price": "15.99",
+      "sale_start": "2024-12-01T00:00:00.000Z",
+      "sale_end": "2024-12-31T23:59:59.999Z",
+      "stock_qty": 40,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-012",
+      "product_id": "prod-006",
+      "size": "One Size",
+      "color": "Brown",
+      "sku": "ACC-BAG-001-OS-BRN",
+      "price": "199.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 10,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-013",
+      "product_id": "prod-007",
+      "size": "S",
+      "color": "Navy",
+      "sku": "MEN-POLO-001-S-NAV",
+      "price": "39.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 30,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-014",
+      "product_id": "prod-007",
+      "size": "M",
+      "color": "Navy",
+      "sku": "MEN-POLO-001-M-NAV",
+      "price": "39.99",
+      "sale_price": "34.99",
+      "sale_start": "2024-12-01T00:00:00.000Z",
+      "sale_end": "2024-12-31T23:59:59.999Z",
+      "stock_qty": 45,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-015",
+      "product_id": "prod-007",
+      "size": "L",
+      "color": "Navy",
+      "sku": "MEN-POLO-001-L-NAV",
+      "price": "39.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 25,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-016",
+      "product_id": "prod-008",
+      "size": "XS",
+      "color": "Black",
+      "sku": "WOM-SKIRT-001-XS-BLK",
+      "price": "45.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 20,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-017",
+      "product_id": "prod-008",
+      "size": "S",
+      "color": "Black",
+      "sku": "WOM-SKIRT-001-S-BLK",
+      "price": "45.99",
+      "sale_price": "39.99",
+      "sale_start": "2024-12-01T00:00:00.000Z",
+      "sale_end": "2024-12-31T23:59:59.999Z",
+      "stock_qty": 35,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-018",
+      "product_id": "prod-008",
+      "size": "M",
+      "color": "Black",
+      "sku": "WOM-SKIRT-001-M-BLK",
+      "price": "45.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 40,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-019",
+      "product_id": "prod-009",
+      "size": "3-4Y",
+      "color": "Pink",
+      "sku": "KID-DRESS-001-3Y-PNK",
+      "price": "65.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 15,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-020",
+      "product_id": "prod-009",
+      "size": "5-6Y",
+      "color": "Pink",
+      "sku": "KID-DRESS-001-5Y-PNK",
+      "price": "65.99",
+      "sale_price": "55.99",
+      "sale_start": "2024-12-01T00:00:00.000Z",
+      "sale_end": "2024-12-31T23:59:59.999Z",
+      "stock_qty": 25,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-021",
+      "product_id": "prod-010",
+      "size": "One Size",
+      "color": "Silver",
+      "sku": "ACC-WATCH-001-OS-SLV",
+      "price": "149.99",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 8,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-022",
+      "product_id": "prod-011",
+      "size": "M",
+      "color": "Gray",
+      "sku": "MEN-HOODIE-001-M-GRY",
+      "price": "45.00",
+      "sale_price": "36.00",
+      "sale_start": "2024-12-01T00:00:00.000Z",
+      "sale_end": "2024-12-31T23:59:59.999Z",
+      "stock_qty": 20,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-023",
+      "product_id": "prod-011",
+      "size": "L",
+      "color": "Navy",
+      "sku": "MEN-HOODIE-001-L-NVY",
+      "price": "45.00",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 15,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-024",
+      "product_id": "prod-012",
+      "size": "S",
+      "color": "Cream",
+      "sku": "WOM-CARDIGAN-001-S-CRM",
+      "price": "52.00",
+      "sale_price": "46.80",
+      "sale_start": "2024-12-01T00:00:00.000Z",
+      "sale_end": "2024-12-31T23:59:59.999Z",
+      "stock_qty": 18,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-025",
+      "product_id": "prod-012",
+      "size": "M",
+      "color": "Blush",
+      "sku": "WOM-CARDIGAN-001-M-BSH",
+      "price": "52.00",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 22,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-026",
+      "product_id": "prod-013",
+      "size": "4-6",
+      "color": "Blue",
+      "sku": "KID-SHORTS-001-4-6-BLU",
+      "price": "24.00",
+      "sale_price": "19.20",
+      "sale_start": "2024-12-01T00:00:00.000Z",
+      "sale_end": "2024-12-31T23:59:59.999Z",
+      "stock_qty": 25,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-027",
+      "product_id": "prod-013",
+      "size": "8-10",
+      "color": "Green",
+      "sku": "KID-SHORTS-001-8-10-GRN",
+      "price": "24.00",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 20,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-028",
+      "product_id": "prod-014",
+      "size": "One Size",
+      "color": "Floral",
+      "sku": "ACC-SCARF-001-OS-FLR",
+      "price": "38.00",
+      "sale_price": "28.50",
+      "sale_start": "2024-12-01T00:00:00.000Z",
+      "sale_end": "2024-12-31T23:59:59.999Z",
+      "stock_qty": 12,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-029",
+      "product_id": "prod-014",
+      "size": "One Size",
+      "color": "Paisley",
+      "sku": "ACC-SCARF-001-OS-PSY",
+      "price": "38.00",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 8,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-030",
+      "product_id": "prod-015",
+      "size": "42",
+      "color": "Navy",
+      "sku": "MEN-BLAZER-001-42-NVY",
+      "price": "120.00",
+      "sale_price": "96.00",
+      "sale_start": "2024-12-01T00:00:00.000Z",
+      "sale_end": "2024-12-31T23:59:59.999Z",
+      "stock_qty": 8,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-031",
+      "product_id": "prod-015",
+      "size": "44",
+      "color": "Charcoal",
+      "sku": "MEN-BLAZER-001-44-CHR",
+      "price": "120.00",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 6,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-032",
+      "product_id": "prod-016",
+      "size": "S",
+      "color": "Black",
+      "sku": "WOM-LEGGINGS-001-S-BLK",
+      "price": "36.00",
+      "sale_price": "28.80",
+      "sale_start": "2024-12-01T00:00:00.000Z",
+      "sale_end": "2024-12-31T23:59:59.999Z",
+      "stock_qty": 30,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "var-033",
+      "product_id": "prod-016",
+      "size": "M",
+      "color": "Gray",
+      "sku": "WOM-LEGGINGS-001-M-GRY",
+      "price": "36.00",
+      "sale_price": null,
+      "sale_start": null,
+      "sale_end": null,
+      "stock_qty": 25,
+      "created_at": "2024-01-01T00:00:00.000Z",
+      "updated_at": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+
+  "productImages": [
+    {
+      "id": "img-001",
+      "product_id": "prod-001",
+      "url": "/cloth/men/01_00.png",
+      "alt_text": "Classic Men's T-Shirt - Front View",
+      "sort": 1
+    },
+    {
+      "id": "img-002",
+      "product_id": "prod-001",
+      "url": "/cloth/men/01_01.png",
+      "alt_text": "Classic Men's T-Shirt - Side View",
+      "sort": 2
+    },
+    {
+      "id": "img-003",
+      "product_id": "prod-002",
+      "url": "/cloth/men/01_02.png",
+      "alt_text": "Slim Fit Denim Jeans - Front View",
+      "sort": 1
+    },
+    {
+      "id": "img-004",
+      "product_id": "prod-002",
+      "url": "/cloth/men/01_03.png",
+      "alt_text": "Slim Fit Denim Jeans - Back View",
+      "sort": 2
+    },
+    {
+      "id": "img-005",
+      "product_id": "prod-003",
+      "url": "/cloth/women/00075_00.jpg",
+      "alt_text": "Elegant Summer Dress - Front View",
+      "sort": 1
+    },
+    {
+      "id": "img-006",
+      "product_id": "prod-003",
+      "url": "/cloth/women/00084_00.jpg",
+      "alt_text": "Elegant Summer Dress - Full Length",
+      "sort": 2
+    },
+    {
+      "id": "img-007",
+      "product_id": "prod-004",
+      "url": "/cloth/women/00094_00.jpg",
+      "alt_text": "Professional Silk Blouse - Front View",
+      "sort": 1
+    },
+    {
+      "id": "img-008",
+      "product_id": "prod-005",
+      "url": "/cloth/kids/02_00.png",
+      "alt_text": "Kids Colorful T-Shirt - Front View",
+      "sort": 1
+    },
+    {
+      "id": "img-009",
+      "product_id": "prod-005",
+      "url": "/cloth/kids/02_01.png",
+      "alt_text": "Kids Colorful T-Shirt - Back View",
+      "sort": 2
+    },
+    {
+      "id": "img-010",
+      "product_id": "prod-006",
+      "url": "/cloth/00278_00.jpg",
+      "alt_text": "Leather Handbag - Main View",
+      "sort": 1
+    },
+    {
+      "id": "img-011",
+      "product_id": "prod-007",
+      "url": "/cloth/men/01_04.png",
+      "alt_text": "Casual Polo Shirt - Front View",
+      "sort": 1
+    },
+    {
+      "id": "img-012",
+      "product_id": "prod-008",
+      "url": "/cloth/women/00095_00.jpg",
+      "alt_text": "A-Line Mini Skirt - Front View",
+      "sort": 1
+    },
+    {
+      "id": "img-013",
+      "product_id": "prod-009",
+      "url": "/cloth/kids/02_02.png",
+      "alt_text": "Princess Party Dress - Front View",
+      "sort": 1
+    },
+    {
+      "id": "img-014",
+      "product_id": "prod-010",
+      "url": "/cloth/00286_00.jpg",
+      "alt_text": "Classic Wrist Watch - Product Shot",
+      "sort": 1
+    },
+    {
+      "id": "img-015",
+      "product_id": "prod-007",
+      "url": "/cloth/men/01_05.png",
+      "alt_text": "Casual Polo Shirt - Side View",
+      "sort": 2
+    },
+    {
+      "id": "img-016",
+      "product_id": "prod-008",
+      "url": "/cloth/women/00096_00.jpg",
+      "alt_text": "A-Line Mini Skirt - Side View",
+      "sort": 2
+    },
+    {
+      "id": "img-017",
+      "product_id": "prod-009",
+      "url": "/cloth/kids/02_03.png",
+      "alt_text": "Princess Party Dress - Back View",
+      "sort": 2
+    },
+    {
+      "id": "img-018",
+      "product_id": "prod-010",
+      "url": "/cloth/00287_00.jpg",
+      "alt_text": "Classic Wrist Watch - Side Angle",
+      "sort": 2
+    },
+    {
+      "id": "img-019",
+      "product_id": "prod-004",
+      "url": "/cloth/women/00110_00.jpg",
+      "alt_text": "Professional Silk Blouse - Back View",
+      "sort": 2
+    },
+    {
+      "id": "img-020",
+      "product_id": "prod-006",
+      "url": "/cloth/00291_00.jpg",
+      "alt_text": "Leather Handbag - Side View",
+      "sort": 2
+    },
+    {
+      "id": "img-021",
+      "product_id": "prod-011",
+      "url": "/cloth/men/hoodie_01.png",
+      "alt_text": "Comfortable Hoodie - Front View",
+      "sort": 1
+    },
+    {
+      "id": "img-022",
+      "product_id": "prod-011",
+      "url": "/cloth/men/hoodie_02.png",
+      "alt_text": "Comfortable Hoodie - Back View",
+      "sort": 2
+    },
+    {
+      "id": "img-023",
+      "product_id": "prod-012",
+      "url": "/cloth/women/cardigan_01.png",
+      "alt_text": "Knit Cardigan - Front View",
+      "sort": 1
+    },
+    {
+      "id": "img-024",
+      "product_id": "prod-012",
+      "url": "/cloth/women/cardigan_02.png",
+      "alt_text": "Knit Cardigan - Detail View",
+      "sort": 2
+    },
+    {
+      "id": "img-025",
+      "product_id": "prod-013",
+      "url": "/cloth/kids/shorts_01.png",
+      "alt_text": "Kids Summer Shorts - Front View",
+      "sort": 1
+    },
+    {
+      "id": "img-026",
+      "product_id": "prod-013",
+      "url": "/cloth/kids/shorts_02.png",
+      "alt_text": "Kids Summer Shorts - Back View",
+      "sort": 2
+    },
+    {
+      "id": "img-027",
+      "product_id": "prod-014",
+      "url": "/cloth/accessories/scarf_01.png",
+      "alt_text": "Silk Scarf - Pattern View",
+      "sort": 1
+    },
+    {
+      "id": "img-028",
+      "product_id": "prod-014",
+      "url": "/cloth/accessories/scarf_02.png",
+      "alt_text": "Silk Scarf - Style View",
+      "sort": 2
+    },
+    {
+      "id": "img-029",
+      "product_id": "prod-015",
+      "url": "/cloth/men/blazer_01.png",
+      "alt_text": "Business Blazer - Front View",
+      "sort": 1
+    },
+    {
+      "id": "img-030",
+      "product_id": "prod-015",
+      "url": "/cloth/men/blazer_02.png",
+      "alt_text": "Business Blazer - Detail View",
+      "sort": 2
+    },
+    {
+      "id": "img-031",
+      "product_id": "prod-016",
+      "url": "/cloth/women/leggings_01.png",
+      "alt_text": "Athletic Leggings - Front View",
+      "sort": 1
+    },
+    {
+      "id": "img-032",
+      "product_id": "prod-016",
+      "url": "/cloth/women/leggings_02.png",
+      "alt_text": "Athletic Leggings - Back View",
+      "sort": 2
+    }
+  ],
+
+  "orders": [
+    {
+      "id": "ord-001",
+      "user_id": "user-001",
+      "status": "paid",
+      "total_amount": "119.98",
+      "created_at": "2024-12-01T10:30:00.000Z",
+      "updated_at": "2024-12-01T10:35:00.000Z"
+    },
+    {
+      "id": "ord-002",
+      "user_id": "user-002",
+      "status": "shipped",
+      "total_amount": "89.99",
+      "created_at": "2024-12-01T14:15:00.000Z",
+      "updated_at": "2024-12-02T09:20:00.000Z"
+    },
+    {
+      "id": "ord-003",
+      "user_id": null,
+      "status": "pending",
+      "total_amount": "69.99",
+      "created_at": "2024-12-03T08:45:00.000Z",
+      "updated_at": "2024-12-03T08:45:00.000Z"
+    }
+  ],
+
+  "orderItems": [
+    {
+      "id": "orditem-001",
+      "order_id": "ord-001",
+      "product_variant_id": "var-003",
+      "quantity": 2,
+      "unit_price": "24.99",
+      "total_price": "49.98"
+    },
+    {
+      "id": "orditem-002",
+      "order_id": "ord-001",
+      "product_variant_id": "var-007",
+      "quantity": 1,
+      "unit_price": "69.99",
+      "total_price": "69.99"
+    },
+    {
+      "id": "orditem-003",
+      "order_id": "ord-002",
+      "product_variant_id": "var-008",
+      "quantity": 1,
+      "unit_price": "89.99",
+      "total_price": "89.99"
+    },
+    {
+      "id": "orditem-004",
+      "order_id": "ord-003",
+      "product_variant_id": "var-007",
+      "quantity": 1,
+      "unit_price": "69.99",
+      "total_price": "69.99"
+    }
+  ]
+}

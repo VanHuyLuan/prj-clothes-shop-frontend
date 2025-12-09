@@ -2,9 +2,9 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Eye, EyeOff, Mail, Lock, Sparkles, ShoppingBag } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -20,7 +20,19 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { login, profile } = useAuth()
+
+  // Show session expired message if redirected from 401
+  useEffect(() => {
+    if (searchParams.get('expired') === 'true') {
+      toast({
+        title: "Session Expired",
+        description: "Your session has expired. Please login again.",
+        variant: "destructive",
+      })
+    }
+  }, [searchParams, toast])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

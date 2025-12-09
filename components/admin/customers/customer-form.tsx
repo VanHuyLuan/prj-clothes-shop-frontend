@@ -7,37 +7,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import ApiService, { Role } from "@/lib/api";
 
-interface UserFormProps {
+interface CustomerFormProps {
   id?: string;
 }
 
-export function UserForm({ id }: UserFormProps) {
+export function CustomerForm({ id }: CustomerFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const isEditMode = !!id;
 
   const [loading, setLoading] = useState(false);
-  const [roles, setRoles] = useState<Role[]>([]);
+  const [customerRoleId, setCustomerRoleId] = useState<string>("");
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     phone: "",
     firstName: "",
     lastName: "",
-    role_id: "",
     avatar: "",
     status: true,
   });
@@ -46,55 +38,52 @@ export function UserForm({ id }: UserFormProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
-    fetchRoles();
+    fetchCustomerRole();
     if (isEditMode) {
-      fetchUser();
+      fetchCustomer();
     }
   }, [isEditMode, id]);
 
-  const fetchRoles = async () => {
+  const fetchCustomerRole = async () => {
     try {
-      const rolesData = await ApiService.getRoles();
-      // Filter to only show admin roles
-      const adminRoles = rolesData.filter((role) => 
-        role.name.toLowerCase().includes('admin') || 
-        role.name.toLowerCase().includes('manager') ||
-        role.name.toLowerCase().includes('staff')
+      const roles = await ApiService.getRoles();
+      // Find customer/user role
+      const customerRole = roles.find((role) => 
+        role.name.toLowerCase() === 'customer' || 
+        role.name.toLowerCase() === 'user'
       );
-      setRoles(adminRoles);
-      if (adminRoles.length > 0 && !isEditMode) {
-        setFormData((prev) => ({ ...prev, role_id: adminRoles[0].id }));
+      if (customerRole) {
+        setCustomerRoleId(customerRole.id);
       }
     } catch (error) {
       console.error("Failed to fetch roles:", error);
       toast({
         title: "Error",
-        description: "Failed to load roles",
+        description: "Failed to load customer role",
         variant: "destructive",
       });
     }
   };
 
-  const fetchUser = async () => {
+  const fetchCustomer = async () => {
     if (!id) return;
     setLoading(true);
     try {
-      const user = await ApiService.getUserById(id);
+      const customer = await ApiService.getCustomerById(id);
       setFormData({
-        username: user.username,
-        email: user.email || "",
-        phone: user.phone || "",
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        role_id: user.role_id,
-        avatar: user.avatar || "",
-        status: user.status,
+        username: customer.username,
+        email: customer.email || "",
+        phone: customer.phone || "",
+        firstName: customer.firstName || "",
+        lastName: customer.lastName || "",
+        avatar: customer.avatar || "",
+        status: customer.status,
       });
     } catch (error) {
-      console.error("Failed to fetch user:", error);
+      console.error("Failed to fetch customer:", error);
       toast({
         title: "Error",
-        description: "Failed to load user data",
+        description: "Failed to load customer data",
         variant: "destructive",
       });
     } finally {
@@ -122,30 +111,40 @@ export function UserForm({ id }: UserFormProps) {
       return;
     }
 
+    if (!customerRoleId) {
+      toast({
+        title: "Error",
+        description: "Customer role not found",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       if (isEditMode && id) {
         await ApiService.updateUser(id, formData);
         toast({
           title: "Success",
-          description: "Admin user updated successfully",
+          description: "Customer updated successfully",
         });
       } else {
         await ApiService.createUser({
           ...formData,
+          role_id: customerRoleId,
           password,
         });
         toast({
           title: "Success",
-          description: "Admin user created successfully",
+          description: "Customer created successfully",
         });
       }
-      router.push("/admin/users");
+      router.push("/admin/customers");
     } catch (error) {
-      console.error("Failed to save user:", error);
+      console.error("Failed to save customer:", error);
       toast({
         title: "Error",
-        description: isEditMode ? "Failed to update user" : "Failed to create user",
+        description: isEditMode ? "Failed to update customer" : "Failed to create customer",
         variant: "destructive",
       });
     } finally {
@@ -154,14 +153,14 @@ export function UserForm({ id }: UserFormProps) {
   };
 
   const onCancel = () => {
-    router.push("/admin/users");
+    router.push("/admin/customers");
   };
 
   if (loading && isEditMode) {
     return (
       <Card>
         <CardContent className="p-8">
-          <p className="text-center text-muted-foreground">Loading user data...</p>
+          <p className="text-center text-muted-foreground">Loading customer data...</p>
         </CardContent>
       </Card>
     );
@@ -170,7 +169,7 @@ export function UserForm({ id }: UserFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{isEditMode ? "Edit Admin User" : "Add New Admin User"}</CardTitle>
+        <CardTitle>{isEditMode ? "Edit Customer" : "Add New Customer"}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -274,31 +273,9 @@ export function UserForm({ id }: UserFormProps) {
                 placeholder="Enter phone number"
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="role">Admin Role *</Label>
-              <Select 
-                value={formData.role_id} 
-                onValueChange={(value) => setFormData({ ...formData, role_id: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roles.map((role) => (
-                    <SelectItem key={role.id} value={role.id}>
-                      {role.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-sm text-muted-foreground">
-                {roles.find(r => r.id === formData.role_id)?.description}
-              </p>
-            </div>
           </div>
 
-          {/* Password Fields (only for new users) */}
+          {/* Password Fields (only for new customers) */}
           {!isEditMode && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -338,12 +315,12 @@ export function UserForm({ id }: UserFormProps) {
                 setFormData({ ...formData, status: checked })
               }
             />
-            <Label htmlFor="status">Active User</Label>
+            <Label htmlFor="status">Active Customer</Label>
           </div>
 
           <div className="flex gap-4">
             <Button type="submit" className="flex-1" disabled={loading}>
-              {loading ? "Saving..." : isEditMode ? "Update User" : "Create User"}
+              {loading ? "Saving..." : isEditMode ? "Update Customer" : "Create Customer"}
             </Button>
             <Button
               type="button"

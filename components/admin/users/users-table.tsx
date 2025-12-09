@@ -23,80 +23,130 @@ import { MoreHorizontal, Shield, ShieldAlert, ShieldCheck } from "lucide-react";
 
 interface User {
   id: string;
-  name: string;
-  email: string;
-  role: "admin" | "manager" | "editor";
-  status: "active" | "inactive";
-  lastLogin: string;
-  createdAt: string;
+  username: string;
+  email: string | null;
+  phone: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  role_id: string;
+  role?: {
+    id: string;
+    name: string;
+    description: string;
+  };
+  status: boolean;
+  avatar: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface UsersTableProps {
   users?: User[];
+  loading?: boolean;
   onEdit?: (user: User) => void;
-  onDelete?: (user: User) => void;
-  onStatusChange?: (user: User, status: "active" | "inactive") => void;
+  onDelete?: (userId: string) => void;
+  onStatusChange?: (user: User, status: boolean) => void;
 }
 
 // Mock data for preview
 const mockUsers: User[] = [
   {
     id: "1",
-    name: "John Doe",
+    username: "johndoe",
+    firstName: "John",
+    lastName: "Doe",
     email: "john@stylish.com",
-    role: "admin",
-    status: "active",
-    lastLogin: "2023-05-28 09:15 AM",
-    createdAt: "2022-01-15",
+    phone: "+1234567890",
+    role_id: "role-1",
+    role: { id: "role-1", name: "Admin", description: "Full system access" },
+    status: true,
+    avatar: "/placeholder.svg?height=40&width=40",
+    created_at: "2022-01-15T00:00:00Z",
+    updated_at: "2023-05-28T09:15:00Z",
   },
   {
     id: "2",
-    name: "Jane Smith",
+    username: "janesmith",
+    firstName: "Jane",
+    lastName: "Smith",
     email: "jane@stylish.com",
-    role: "manager",
-    status: "active",
-    lastLogin: "2023-05-27 03:22 PM",
-    createdAt: "2022-02-10",
+    phone: "+1234567891",
+    role_id: "role-2",
+    role: { id: "role-2", name: "Manager", description: "Manage products and orders" },
+    status: true,
+    avatar: "/placeholder.svg?height=40&width=40",
+    created_at: "2022-02-10T00:00:00Z",
+    updated_at: "2023-05-27T15:22:00Z",
   },
   {
     id: "3",
-    name: "Robert Johnson",
+    username: "robertj",
+    firstName: "Robert",
+    lastName: "Johnson",
     email: "robert@stylish.com",
-    role: "editor",
-    status: "inactive",
-    lastLogin: "2023-05-15 11:30 AM",
-    createdAt: "2022-03-05",
+    phone: "+1234567892",
+    role_id: "role-3",
+    role: { id: "role-3", name: "Editor", description: "Edit content" },
+    status: false,
+    avatar: "/placeholder.svg?height=40&width=40",
+    created_at: "2022-03-05T00:00:00Z",
+    updated_at: "2023-05-15T11:30:00Z",
   },
   {
     id: "4",
-    name: "Emily Davis",
+    username: "emilyd",
+    firstName: "Emily",
+    lastName: "Davis",
     email: "emily@stylish.com",
-    role: "manager",
-    status: "active",
-    lastLogin: "2023-05-28 08:45 AM",
-    createdAt: "2022-04-20",
+    phone: "+1234567893",
+    role_id: "role-2",
+    role: { id: "role-2", name: "Manager", description: "Manage products and orders" },
+    status: true,
+    avatar: "/placeholder.svg?height=40&width=40",
+    created_at: "2022-04-20T00:00:00Z",
+    updated_at: "2023-05-28T08:45:00Z",
   },
   {
     id: "5",
-    name: "Michael Wilson",
+    username: "michaelw",
+    firstName: "Michael",
+    lastName: "Wilson",
     email: "michael@stylish.com",
-    role: "editor",
-    status: "inactive",
-    lastLogin: "2023-05-20 02:15 PM",
-    createdAt: "2022-05-12",
+    phone: "+1234567894",
+    role_id: "role-3",
+    role: { id: "role-3", name: "Editor", description: "Edit content" },
+    status: false,
+    avatar: "/placeholder.svg?height=40&width=40",
+    created_at: "2022-05-12T00:00:00Z",
+    updated_at: "2023-05-20T14:15:00Z",
   },
 ];
 
 export function UsersTable({
   users = [],
+  loading = false,
   onEdit = () => {},
   onDelete = () => {},
   onStatusChange = () => {},
 }: UsersTableProps) {
-  const [sortColumn, setSortColumn] = useState<keyof User>("name");
+  const [sortColumn, setSortColumn] = useState<keyof User>("username");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
-  const displayUsers = users.length > 0 ? users : mockUsers;
+  if (loading) {
+    return (
+      <div className="rounded-md border p-8 text-center">
+        <p className="text-muted-foreground">Loading users...</p>
+      </div>
+    );
+  }
+
+  if (users.length === 0) {
+    return (
+      <div className="rounded-md border p-8 text-center">
+        <p className="text-muted-foreground">No users found.</p>
+      </div>
+    );
+  }
 
   const handleSort = (column: keyof User) => {
     if (sortColumn === column) {
@@ -107,9 +157,14 @@ export function UsersTable({
     }
   };
 
-  const sortedUsers = [...displayUsers].sort((a, b) => {
+  const sortedUsers = [...users].sort((a, b) => {
     const aValue = a[sortColumn];
     const bValue = b[sortColumn];
+
+    // Handle null/undefined values
+    if (aValue == null && bValue == null) return 0;
+    if (aValue == null) return 1;
+    if (bValue == null) return -1;
 
     if (sortDirection === "asc") {
       return aValue > bValue ? 1 : -1;
@@ -118,59 +173,48 @@ export function UsersTable({
     }
   });
 
-  const getRoleBadge = (role: string) => {
-    switch (role) {
-      case "admin":
-        return (
-          <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
-            <ShieldAlert className="mr-1 h-3 w-3" />
-            Admin
-          </Badge>
-        );
-      case "manager":
-        return (
-          <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-            <ShieldCheck className="mr-1 h-3 w-3" />
-            Manager
-          </Badge>
-        );
-      case "editor":
-        return (
-          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-            <Shield className="mr-1 h-3 w-3" />
-            Editor
-          </Badge>
-        );
-      default:
-        return (
-          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-            {role}
-          </Badge>
-        );
+  const getRoleBadge = (roleName: string) => {
+    const lowerRole = roleName.toLowerCase();
+    if (lowerRole.includes("admin")) {
+      return (
+        <Badge className="bg-red-100 text-red-800 hover:bg-red-100">
+          <ShieldAlert className="mr-1 h-3 w-3" />
+          {roleName}
+        </Badge>
+      );
+    } else if (lowerRole.includes("manager")) {
+      return (
+        <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">
+          <ShieldCheck className="mr-1 h-3 w-3" />
+          {roleName}
+        </Badge>
+      );
+    } else if (lowerRole.includes("editor")) {
+      return (
+        <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+          <Shield className="mr-1 h-3 w-3" />
+          {roleName}
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
+          {roleName}
+        </Badge>
+      );
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "active":
-        return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-            Active
-          </Badge>
-        );
-      case "inactive":
-        return (
-          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-            Inactive
-          </Badge>
-        );
-      default:
-        return (
-          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
-            {status}
-          </Badge>
-        );
-    }
+  const getStatusBadge = (status: boolean) => {
+    return status ? (
+      <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+        Active
+      </Badge>
+    ) : (
+      <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
+        Inactive
+      </Badge>
+    );
   };
 
   return (
@@ -180,10 +224,21 @@ export function UsersTable({
           <TableRow>
             <TableHead
               className="cursor-pointer"
-              onClick={() => handleSort("name")}
+              onClick={() => handleSort("username")}
             >
-              Name
-              {sortColumn === "name" && (
+              Username
+              {sortColumn === "username" && (
+                <span className="ml-1">
+                  {sortDirection === "asc" ? "↑" : "↓"}
+                </span>
+              )}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("firstName")}
+            >
+              Full Name
+              {sortColumn === "firstName" && (
                 <span className="ml-1">
                   {sortDirection === "asc" ? "↑" : "↓"}
                 </span>
@@ -200,12 +255,13 @@ export function UsersTable({
                 </span>
               )}
             </TableHead>
+            <TableHead>Phone</TableHead>
             <TableHead
               className="cursor-pointer"
-              onClick={() => handleSort("role")}
+              onClick={() => handleSort("role_id")}
             >
               Role
-              {sortColumn === "role" && (
+              {sortColumn === "role_id" && (
                 <span className="ml-1">
                   {sortDirection === "asc" ? "↑" : "↓"}
                 </span>
@@ -224,21 +280,10 @@ export function UsersTable({
             </TableHead>
             <TableHead
               className="cursor-pointer"
-              onClick={() => handleSort("lastLogin")}
-            >
-              Last Login
-              {sortColumn === "lastLogin" && (
-                <span className="ml-1">
-                  {sortDirection === "asc" ? "↑" : "↓"}
-                </span>
-              )}
-            </TableHead>
-            <TableHead
-              className="cursor-pointer"
-              onClick={() => handleSort("createdAt")}
+              onClick={() => handleSort("created_at")}
             >
               Created
-              {sortColumn === "createdAt" && (
+              {sortColumn === "created_at" && (
                 <span className="ml-1">
                   {sortDirection === "asc" ? "↑" : "↓"}
                 </span>
@@ -250,12 +295,19 @@ export function UsersTable({
         <TableBody>
           {sortedUsers.map((user) => (
             <TableRow key={user.id}>
-              <TableCell className="font-medium">{user.name}</TableCell>
-              <TableCell>{user.email}</TableCell>
-              <TableCell>{getRoleBadge(user.role)}</TableCell>
+              <TableCell className="font-medium">{user.username}</TableCell>
+              <TableCell>
+                {user.firstName && user.lastName
+                  ? `${user.firstName} ${user.lastName}`
+                  : user.firstName || user.lastName || "—"}
+              </TableCell>
+              <TableCell>{user.email || "—"}</TableCell>
+              <TableCell>{user.phone || "—"}</TableCell>
+              <TableCell>{getRoleBadge(user.role?.name || "User")}</TableCell>
               <TableCell>{getStatusBadge(user.status)}</TableCell>
-              <TableCell>{user.lastLogin}</TableCell>
-              <TableCell>{user.createdAt}</TableCell>
+              <TableCell>
+                {new Date(user.created_at).toLocaleDateString()}
+              </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -271,18 +323,13 @@ export function UsersTable({
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() =>
-                        onStatusChange(
-                          user,
-                          user.status === "active" ? "inactive" : "active"
-                        )
-                      }
+                      onClick={() => onStatusChange(user, !user.status)}
                     >
-                      {user.status === "active" ? "Deactivate" : "Activate"}
+                      {user.status ? "Deactivate" : "Activate"}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-red-600"
-                      onClick={() => onDelete(user)}
+                      onClick={() => onDelete(user.id)}
                     >
                       Delete
                     </DropdownMenuItem>

@@ -1,5 +1,4 @@
-import { ProductsTable } from "@/components/admin/products/products-table";
-import { ProductsHeader } from "@/components/admin/products/products-header";
+import { ProductsClient } from "@/components/admin/products/products-client";
 
 export const metadata = {
   title: "Products Management - STYLISH Admin",
@@ -7,10 +6,5 @@ export const metadata = {
 };
 
 export default function ProductsPage() {
-  return (
-    <div className="space-y-6">
-      <ProductsHeader />
-      <ProductsTable />
-    </div>
-  );
+  return <ProductsClient />;
 }

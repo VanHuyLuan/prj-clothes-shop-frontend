@@ -7,22 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Upload, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import ApiService, { Category } from "@/lib/api";
 
-// Dữ liệu giả để hiển thị trong chế độ chỉnh sửa
-const mockCategory = {
-  id: "1",
-  name: "Women's Clothing",
-  description: "Fashion for women including dresses, tops, and more",
-  image: "/placeholder.svg?height=40&width=40",
-  isActive: true,
-  parentId: "",
-};
-
-// Sửa lại interface để chấp nhận prop 'id'
 interface CategoryFormProps {
   id?: string;
 }
@@ -34,42 +29,115 @@ export function CategoryForm({ id }: CategoryFormProps) {
 
   const [formData, setFormData] = useState({
     name: "",
+    slug: "",
     description: "",
-    image: "",
-    isActive: true,
     parentId: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
-    if (isEditMode) {
-      // Trong ứng dụng thật, bạn sẽ fetch dữ liệu từ API dựa trên id
-      // Ở đây chúng ta dùng dữ liệu giả để minh họa
-      console.log("Fetching data for category ID:", id);
-      setFormData({
-        name: mockCategory.name,
-        description: mockCategory.description,
-        image: mockCategory.image,
-        isActive: mockCategory.isActive,
-        parentId: mockCategory.parentId || "",
-      });
+    // Fetch all categories for parent selection
+    const fetchCategories = async () => {
+      try {
+        const data = await ApiService.getCategories();
+        setCategories(data.filter((cat) => cat.id !== id)); // Exclude current category
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+    fetchCategories();
+
+    // Fetch category data if editing
+    if (isEditMode && id) {
+      const fetchCategory = async () => {
+        try {
+          setLoading(true);
+          const category = await ApiService.getCategory(id);
+          setFormData({
+            name: category.name,
+            slug: category.slug,
+            description: category.description || "",
+            parentId: category.parentId || "",
+          });
+        } catch (error) {
+          console.error("Failed to fetch category:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load category data.",
+            variant: "destructive",
+          });
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchCategory();
     }
   }, [isEditMode, id]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Submitting:", formData);
-    toast({
-      title: `Category ${isEditMode ? "updated" : "created"}`,
-      description: `The category has been ${
-        isEditMode ? "updated" : "created"
-      } successfully.`,
+  // Auto-generate slug from name
+  const handleNameChange = (value: string) => {
+    setFormData({
+      ...formData,
+      name: value,
+      slug: value
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, ""),
     });
-    router.push("/admin/categories");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const payload = {
+        name: formData.name,
+        slug: formData.slug,
+        description: formData.description || undefined,
+        parentId: formData.parentId || undefined,
+      };
+
+      if (isEditMode && id) {
+        await ApiService.updateCategory(id, payload);
+        toast({
+          title: "Success",
+          description: "Category updated successfully.",
+        });
+      } else {
+        await ApiService.createCategory(payload);
+        toast({
+          title: "Success",
+          description: "Category created successfully.",
+        });
+      }
+      router.push("/admin/categories");
+    } catch (error: any) {
+      console.error("Failed to save category:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save category.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onCancel = () => {
     router.push("/admin/categories");
   };
+
+  if (loading && isEditMode) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <p className="text-muted-foreground">Loading category data...</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -81,16 +149,32 @@ export function CategoryForm({ id }: CategoryFormProps) {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Category Name</Label>
+            <Label htmlFor="name">Category Name *</Label>
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => handleNameChange(e.target.value)}
               placeholder="Enter category name"
               required
+              disabled={loading}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="slug">Slug *</Label>
+            <Input
+              id="slug"
+              value={formData.slug}
+              onChange={(e) =>
+                setFormData({ ...formData, slug: e.target.value })
+              }
+              placeholder="category-slug"
+              required
+              disabled={loading}
+            />
+            <p className="text-xs text-muted-foreground">
+              Auto-generated from name. Can be edited manually.
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -103,63 +187,50 @@ export function CategoryForm({ id }: CategoryFormProps) {
               }
               placeholder="Enter category description"
               rows={3}
+              disabled={loading}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Category Image</Label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-              {formData.image ? (
-                <div className="relative">
-                  <img
-                    src={formData.image || "/placeholder.svg"}
-                    alt="Category"
-                    className="mx-auto h-32 w-32 object-cover rounded-lg"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    className="absolute -top-2 -right-2"
-                    onClick={() => setFormData({ ...formData, image: "" })}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div>
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <p className="mt-2 text-sm text-gray-600">
-                    Click to upload or drag and drop
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    PNG, JPG, GIF up to 10MB
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="isActive"
-              checked={formData.isActive}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, isActive: checked })
+            <Label htmlFor="parentId">Parent Category</Label>
+            <Select
+              value={formData.parentId || "none"}
+              onValueChange={(value) =>
+                setFormData({ ...formData, parentId: value === "none" ? "" : value })
               }
-            />
-            <Label htmlFor="isActive">Active Category</Label>
+              disabled={loading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select parent category (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None (Root Category)</SelectItem>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Leave empty to create a root category.
+            </p>
           </div>
 
           <div className="flex gap-4">
-            <Button type="submit" className="flex-1">
-              {isEditMode ? "Update Category" : "Create Category"}
+            <Button type="submit" className="flex-1" disabled={loading}>
+              {loading
+                ? "Saving..."
+                : isEditMode
+                ? "Update Category"
+                : "Create Category"}
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
               className="flex-1"
+              disabled={loading}
             >
               Cancel
             </Button>
