@@ -55,7 +55,7 @@ export interface CreateUserDto {
   password: string;
 }
 
-const API_BASE = "http://api.be-clothesshop.app";
+const API_BASE = "https://api.be-clothesshop.app";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
