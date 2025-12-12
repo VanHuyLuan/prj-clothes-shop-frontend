@@ -47,7 +47,7 @@ export function LoginForm() {
       })
       const userData = await profile()
       console.log("User data:", userData)
-      if (userData?.role === "admin") {
+      if (userData?.role.name === "admin") {
         console.log("Redirecting to admin dashboard")
         router.push("/admin")
       } else {

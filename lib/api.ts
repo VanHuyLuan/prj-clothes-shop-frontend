@@ -1,5 +1,5 @@
 // API service layer for backend integration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://159.223.72.68:31977';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.be-clothesshop.app';
 
 // Types matching the new backend schema
 export interface Role {
@@ -533,7 +533,7 @@ export class ApiService {
 
   static async clearGuestCart(cartId: string): Promise<void> {
     return this.request<void>(`/cart/guest/${cartId}/clear`, {
-      method: 'DELETE',
+      method: 'DELETE', 
     });
   }
 
@@ -580,38 +580,49 @@ export class ApiService {
     });
   }
 
-  // ============ ADMIN DASHBOARD STATS ============
-  static async getDashboardStats(): Promise<{
-    totalRevenue: number;
-    totalOrders: number;
-    totalCustomers: number;
-    conversionRate: number;
-    recentOrders: Order[];
-    topProducts: (Product & { sales: number })[];
-    lowStockProducts: ProductVariant[];
-  }> {
-    return this.authenticatedRequest<any>('/admin/dashboard/stats');
-  }
-
-
-
-  static async createRole(data: Partial<Role>): Promise<Role> {
-    return this.authenticatedRequest<Role>('/admin/roles', {
+  // ============ ADMIN USER MANAGEMENT API ============
+  static async createUserByAdmin(data: {
+    username: string;
+    firstname: string;
+    lastname: string;
+    email: string;
+    phone: string;
+    role: string;
+  }): Promise<User> {
+    return this.authenticatedRequest<User>('/identities/createuser-by-admin', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  static async updateRole(id: string, data: Partial<Role>): Promise<Role> {
-    return this.authenticatedRequest<Role>(`/admin/roles/${id}`, {
-      method: 'PATCH',
+  static async updateUserByAdmin(userId: string, data: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    avatar?: string;
+    role?: string;
+  }): Promise<{ message: string; user: User }> {
+    return this.authenticatedRequest(`/identities/update-user-by-admin?userId=${userId}`, {
+      method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  static async deleteRole(id: string): Promise<void> {
-    return this.authenticatedRequest<void>(`/admin/roles/${id}`, {
-      method: 'DELETE',
+  static async setUserStatus(userId: string, status: boolean): Promise<{ message: string }> {
+    return this.authenticatedRequest(`/identities/set-user-status?userId=${userId}&status=${status}`, {
+      method: 'POST',
+    });
+  }
+
+  static async resetPasswordByAdmin(userId: string): Promise<{ message: string }> {
+    return this.authenticatedRequest(`/identities/reset-password-by-admin?userId=${userId}`, {
+      method: 'POST',
+    });
+  }
+
+  static async deleteUserByAdmin(userId: string): Promise<{ message: string }> {
+    return this.authenticatedRequest(`/identities/delete-user?userId=${userId}`, {
+      method: 'POST',
     });
   }
 
@@ -763,13 +774,14 @@ export class ApiService {
     username: string;
     email?: string;
     phone?: string;
-    firstName?: string;
-    lastName?: string;
+    firstname?: string;
+    lastname?: string;
     password: string;
-    role_id: string;
+    role_id?: string;
     status?: boolean;
   }): Promise<User> {
-    return this.authenticatedRequest<User>('/users', {
+    // BE uses /identities/createuser endpoint
+    return this.request<User>('/identities/createuser', {
       method: 'POST',
       body: JSON.stringify(data),
     });
@@ -779,8 +791,8 @@ export class ApiService {
     username?: string;
     email?: string;
     phone?: string;
-    firstName?: string;
-    lastName?: string;
+    firstname?: string;
+    lastname?: string;
     role_id?: string;
     status?: boolean;
     avatar?: string;
@@ -834,15 +846,14 @@ export class ApiService {
   }): Promise<PaginatedResponse<User>> {
     const queryParams = new URLSearchParams();
     
+    queryParams.append('role_id', '34fa9429-f7ef-4dcc-8b8d-06b3734456cb');
+    
     if (params?.search) queryParams.append('search', params.search);
     if (params?.status && params.status !== 'all') queryParams.append('status', params.status);
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
     if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
-
-    // Filter to only get customer/user role (not admin)
-    queryParams.append('role_id', '34fa9429-f7ef-4dcc-8b8d-06b3734456cb');
 
     const endpoint = `/identities/list-users?${queryParams.toString()}`;
     return this.authenticatedRequest<PaginatedResponse<User> | User[]>(endpoint) as Promise<any>;

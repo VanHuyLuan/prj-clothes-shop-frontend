@@ -83,7 +83,7 @@ export function AuthStatus() {
               My Orders
             </Link>
             
-            {user?.role === "admin" && (
+            {user?.role?.name === "admin" && (
               <Link 
                 href="/admin" 
                 className="flex items-center px-3 py-2.5 text-sm font-medium hover:bg-gray-100 cursor-pointer"

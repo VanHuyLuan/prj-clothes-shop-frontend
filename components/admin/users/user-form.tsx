@@ -35,8 +35,8 @@ export function UserForm({ id }: UserFormProps) {
     username: "",
     email: "",
     phone: "",
-    firstName: "",
-    lastName: "",
+    firstname: "",
+    lastname: "",
     role_id: "",
     avatar: "",
     status: true,
@@ -84,8 +84,8 @@ export function UserForm({ id }: UserFormProps) {
         username: user.username,
         email: user.email || "",
         phone: user.phone || "",
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
+        firstname: user.firstName || "",
+        lastname: user.lastName || "",
         role_id: user.role_id,
         avatar: user.avatar || "",
         status: user.status,
@@ -184,8 +184,8 @@ export function UserForm({ id }: UserFormProps) {
                   alt={formData.username}
                 />
                 <AvatarFallback className="text-lg">
-                  {formData.firstName && formData.lastName
-                    ? `${formData.firstName[0]}${formData.lastName[0]}`
+                  {formData.firstname && formData.lastname
+                    ? `${formData.firstname[0]}${formData.lastname[0]}`
                     : formData.username.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -239,24 +239,24 @@ export function UserForm({ id }: UserFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
+              <Label htmlFor="firstname">First Name</Label>
               <Input
-                id="firstName"
-                value={formData.firstName}
+                id="firstname"
+                value={formData.firstname}
                 onChange={(e) =>
-                  setFormData({ ...formData, firstName: e.target.value })
+                  setFormData({ ...formData, firstname: e.target.value })
                 }
                 placeholder="Enter first name"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
+              <Label htmlFor="lastname">Last Name</Label>
               <Input
-                id="lastName"
-                value={formData.lastName}
+                id="lastname"
+                value={formData.lastname}
                 onChange={(e) =>
-                  setFormData({ ...formData, lastName: e.target.value })
+                  setFormData({ ...formData, lastname: e.target.value })
                 }
                 placeholder="Enter last name"
               />

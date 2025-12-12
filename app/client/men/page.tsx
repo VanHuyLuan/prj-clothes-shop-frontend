@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { CategoryHero } from "@/components/client/category/category-hero";
 import { ProductGrid } from "@/components/client/category/product-grid";
 import { CategoryFilters } from "@/components/client/category/category-filters";
 import { Header } from "@/components/client/layout/header";
 import { Footer } from "@/components/client/layout/footer";
 import { getCategoryHeroImage } from "@/lib/product-images";
-import MockDatabase, { Product } from "@/lib/database";
+import { ApiService, Product } from "@/lib/api";
 
 interface PriceRange {
   id: string;
@@ -32,7 +32,7 @@ const convertToDisplayProduct = (product: Product): DisplayProduct => {
     return salePrice || regularPrice;
   }) || [];
   
-  const lowestPrice = Math.min(...prices);
+  const lowestPrice = prices.length > 0 ? Math.min(...prices) : 0;
   const primaryImage = product.images?.[0]?.url || '/placeholder.jpg';
   
   return {
@@ -52,20 +52,52 @@ const isPriceInRange = (priceString: string, range: PriceRange): boolean => {
   return price >= range.min && (range.max === null || price < range.max);
 };
 
-// Get products from database
-const rawProducts = MockDatabase.getProductsByCategory('men');
-const allProducts: DisplayProduct[] = rawProducts.map(convertToDisplayProduct);
-
 export default function MenPage() {
+  const [allProducts, setAllProducts] = useState<DisplayProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<PriceRange[]>([]);
 
   const priceRanges: PriceRange[] = [
-    { id: "price1", label: "Under $25", min: 0, max: 25 },
-    { id: "price2", label: "$25 - $50", min: 25, max: 50 },
-    { id: "price3", label: "$50 - $100", min: 50, max: 100 },
-    { id: "price4", label: "$100 - $200", min: 100, max: 200 },
-    { id: "price5", label: "$200+", min: 200, max: null },
+    { id: "price1", label: "Under $10", min: 0, max: 10 },
+    { id: "price2", label: "$10 - $25", min: 10, max: 25 },
+    { id: "price3", label: "$25 - $50", min: 25, max: 50 },
+    { id: "price4", label: "$50 - $100", min: 50, max: 100 },
+    { id: "price5", label: "$100+", min: 100, max: null },
   ];
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // First get the "men" category to get its ID
+        const category = await ApiService.getCategoryBySlug("men");
+        
+        // Then fetch products for this category
+        const response = await ApiService.getCategoryProducts(category.id, {
+          includeSubcategories: true,
+          limit: 1000 // Get all products
+        });
+        
+        // Handle both response formats: array or object with data property
+        const productsArray = Array.isArray(response) ? response : response.data;
+        
+        // Convert to display format
+        const displayProducts = productsArray.map(convertToDisplayProduct);
+        setAllProducts(displayProducts);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+        setError(err instanceof Error ? err.message : "Failed to load products");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const productCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -75,7 +107,7 @@ export default function MenPage() {
       ).length;
     });
     return counts;
-  }, []);
+  }, [allProducts]);
 
   const filteredProducts = useMemo(() => {
     if (selectedPriceRanges.length === 0) {
@@ -86,11 +118,54 @@ export default function MenPage() {
         isPriceInRange(product.price, range)
       );
     });
-  }, [selectedPriceRanges]);
+  }, [selectedPriceRanges, allProducts]);
 
   const handlePriceChange = (ranges: PriceRange[]) => {
     setSelectedPriceRanges(ranges);
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <CategoryHero
+          title="Men's Collection"
+          description="Explore our men's fashion collection. From formal suits to casual streetwear, elevate your style."
+          image={getCategoryHeroImage("men")}
+          category="men"
+        />
+        <div className="mx-auto max-w-screen-xl px-4 md:px-6 py-12">
+          <div className="text-center text-muted-foreground">
+            Loading products...
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <CategoryHero
+          title="Men's Collection"
+          description="Explore our men's fashion collection. From formal suits to casual streetwear, elevate your style."
+          image={getCategoryHeroImage("men")}
+          category="men"
+        />
+        <div className="mx-auto max-w-screen-xl px-4 md:px-6 py-12">
+          <div className="text-center text-red-500">
+            Error: {error}
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />

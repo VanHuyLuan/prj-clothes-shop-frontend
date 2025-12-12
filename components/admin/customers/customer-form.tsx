@@ -28,8 +28,8 @@ export function CustomerForm({ id }: CustomerFormProps) {
     username: "",
     email: "",
     phone: "",
-    firstName: "",
-    lastName: "",
+    firstname: "",
+    lastname: "",
     avatar: "",
     status: true,
   });
@@ -46,15 +46,9 @@ export function CustomerForm({ id }: CustomerFormProps) {
 
   const fetchCustomerRole = async () => {
     try {
-      const roles = await ApiService.getRoles();
-      // Find customer/user role
-      const customerRole = roles.find((role) => 
-        role.name.toLowerCase() === 'customer' || 
-        role.name.toLowerCase() === 'user'
-      );
-      if (customerRole) {
-        setCustomerRoleId(customerRole.id);
-      }
+      // Use predefined customer role ID from backend
+      const customerRoleId = '34fa9429-f7ef-4dcc-8b8d-06b3734456cb';
+      setCustomerRoleId(customerRoleId);
     } catch (error) {
       console.error("Failed to fetch roles:", error);
       toast({
@@ -74,8 +68,8 @@ export function CustomerForm({ id }: CustomerFormProps) {
         username: customer.username,
         email: customer.email || "",
         phone: customer.phone || "",
-        firstName: customer.firstName || "",
-        lastName: customer.lastName || "",
+        firstname: customer.firstName || "",
+        lastname: customer.lastName || "",
         avatar: customer.avatar || "",
         status: customer.status,
       });
@@ -94,24 +88,7 @@ export function CustomerForm({ id }: CustomerFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isEditMode && password !== confirmPassword) {
-      toast({ 
-        title: "Passwords do not match", 
-        variant: "destructive" 
-      });
-      return;
-    }
-
-    if (!isEditMode && password.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!customerRoleId) {
+    if (!customerRoleId && !isEditMode) {
       toast({
         title: "Error",
         description: "Customer role not found",
@@ -123,20 +100,31 @@ export function CustomerForm({ id }: CustomerFormProps) {
     setLoading(true);
     try {
       if (isEditMode && id) {
-        await ApiService.updateUser(id, formData);
+        // Use admin update endpoint
+        await ApiService.updateUserByAdmin(id, {
+          firstName: formData.firstname,
+          lastName: formData.lastname,
+          phone: formData.phone,
+          avatar: formData.avatar,
+          role: 'user',
+        });
         toast({
           title: "Success",
           description: "Customer updated successfully",
         });
       } else {
-        await ApiService.createUser({
-          ...formData,
-          role_id: customerRoleId,
-          password,
+        // Use admin create endpoint - backend will send email with default password
+        await ApiService.createUserByAdmin({
+          username: formData.username,
+          firstname: formData.firstname,
+          lastname: formData.lastname,
+          email: formData.email,
+          phone: formData.phone,
+          role: 'user',
         });
         toast({
           title: "Success",
-          description: "Customer created successfully",
+          description: "Customer created successfully. Email sent with login credentials.",
         });
       }
       router.push("/admin/customers");
@@ -183,8 +171,8 @@ export function CustomerForm({ id }: CustomerFormProps) {
                   alt={formData.username}
                 />
                 <AvatarFallback className="text-lg">
-                  {formData.firstName && formData.lastName
-                    ? `${formData.firstName[0]}${formData.lastName[0]}`
+                  {formData.firstname && formData.lastname
+                    ? `${formData.firstname[0]}${formData.lastname[0]}`
                     : formData.username.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -238,24 +226,24 @@ export function CustomerForm({ id }: CustomerFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
+              <Label htmlFor="firstname">First Name</Label>
               <Input
-                id="firstName"
-                value={formData.firstName}
+                id="firstname"
+                value={formData.firstname}
                 onChange={(e) =>
-                  setFormData({ ...formData, firstName: e.target.value })
+                  setFormData({ ...formData, firstname: e.target.value })
                 }
                 placeholder="Enter first name"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
+              <Label htmlFor="lastname">Last Name</Label>
               <Input
-                id="lastName"
-                value={formData.lastName}
+                id="lastname"
+                value={formData.lastname}
                 onChange={(e) =>
-                  setFormData({ ...formData, lastName: e.target.value })
+                  setFormData({ ...formData, lastname: e.target.value })
                 }
                 placeholder="Enter last name"
               />
@@ -275,34 +263,13 @@ export function CustomerForm({ id }: CustomerFormProps) {
             </div>
           </div>
 
-          {/* Password Fields (only for new customers) */}
+          {/* Password Info (only for new customers) */}
           {!isEditMode && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="password">Password *</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter password (min 6 characters)"
-                  required
-                  minLength={6}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password *</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm password"
-                  required
-                  minLength={6}
-                />
-              </div>
+            <div className="rounded-lg border bg-muted/50 p-4">
+              <p className="text-sm text-muted-foreground">
+                ℹ️ A default password (Clothesshop123@) will be automatically sent to the customer's email address.
+                The customer will be able to change it after logging in.
+              </p>
             </div>
           )}
 

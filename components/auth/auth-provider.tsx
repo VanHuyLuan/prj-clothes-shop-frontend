@@ -1,201 +1,287 @@
-"use client"
+"use client";
 
-import { createContext, useContext, useState, type ReactNode, useEffect } from "react"
+import {
+  createContext,
+  useContext,
+  useState,
+  type ReactNode,
+  useEffect,
+} from "react";
 
-export interface User {
-  id: string
-  username: string
-  email: string | null
-  phone: string | null
-  firstName: string | null
-  lastName: string | null
-  role: string
-  avatar: string | null
+export interface Role {
+  id: string;
+  name: string;
+  description: string;
 }
 
-type AuthContextType = {
-  user: User | null
-  login: (email: string, password: string) => Promise<void>
-  profile: () => Promise<User | null>
-  signup: (data: CreateUserDto) => Promise<void>
-  logout: () => void
+export interface Address {
+  id: string;
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+}
+
+export interface User {
+  id: string;
+  username: string;
+  email: string | null;
+  phone: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  avatar: string | null;
+  status: boolean;
+  created_at: string;
+  updated_at: string;
+  role: Role;
+  address: Address[];
+}
+
+interface AuthContextType {
+  user: User | null;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (data: CreateUserDto) => Promise<void>;
+  logout: () => Promise<void>;
+  profile: () => Promise<User | null>;
 }
 
 export interface CreateUserDto {
-  username: string
-  firstname: string
-  lastname: string
-  email: string
-  phone: string
-  password: string
+  username: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  phone: string;
+  password: string;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const API_BASE = "http://159.223.72.68:31977";
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// ============================================
+// GLOBAL REFRESH LOCK (prevent refresh spam)
+// ============================================
+let isRefreshing = false;
+let refreshPromise: Promise<string | null> | null = null;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<User | null>(null);
 
-  // Hàm lấy access token từ localStorage (tự refresh nếu hết hạn)
+  // ============================
+  // GET TOKEN (auto refresh)
+  // ============================
   const getAccessToken = async (): Promise<string | null> => {
-    const token = localStorage.getItem("token")
-    const expiry = localStorage.getItem("tokenExpiry")
+    const token = localStorage.getItem("token");
+    const expiry = localStorage.getItem("tokenExpiry");
 
-    if (!token || !expiry) return null
+    if (!token || !expiry) return null;
 
     if (Date.now() > parseInt(expiry)) {
-      // Token đã hết hạn → gọi refresh
-      const newToken = await refreshAccessToken()
-      return newToken
+      // token đã hết hạn → refresh
+      return await refreshAccessToken();
     }
 
-    return token
-  }
+    return token;
+  };
 
-  // Hàm refresh token
+  // ============================
+  // REFRESH TOKEN FUNCTION
+  // ============================
   const refreshAccessToken = async (): Promise<string | null> => {
-    const refreshToken = localStorage.getItem("refreshToken")
+    const refreshToken = localStorage.getItem("refreshToken");
     if (!refreshToken) {
-      logout()
-      return null
+      logout();
+      return null;
     }
 
-    try {
-      const res = await fetch("http://localhost:4000/identities/refresh", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken }),
-      })
-
-      if (!res.ok) throw new Error("Refresh token failed")
-
-      const data = await res.json()
-      localStorage.setItem("token", data.accessToken)
-      localStorage.setItem("tokenExpiry", String(Date.now() + data.expiresIn * 1000))
-
-      if (data.refreshToken) {
-        localStorage.setItem("refreshToken", data.refreshToken) // Nếu BE trả refresh token mới
-      }
-
-      return data.accessToken
-    } catch (err) {
-      console.error("Error refreshing token:", err)
-      logout()
-      return null
+    // Nếu đang refresh, đợi refreshPromise
+    if (isRefreshing && refreshPromise) {
+      return refreshPromise;
     }
-  }
 
-  // Load user khi refresh trang
-  useEffect(() => {
-    const savedUser = localStorage.getItem("user")
-    if (savedUser && savedUser !== "undefined") {
+    // Tạo refreshPromise mới
+    isRefreshing = true;
+    refreshPromise = (async () => {
       try {
-        setUser(JSON.parse(savedUser))
+        const res = await fetch(`${API_BASE}/identities/refresh-token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        });
+
+        if (!res.ok) throw new Error("Refresh failed");
+
+        const data = await res.json();
+
+        // Backend returns new accessToken and expiresIn
+        localStorage.setItem("token", data.accessToken);
+        localStorage.setItem(
+          "tokenExpiry",
+          String(Date.now() + data.expiresIn * 1000)
+        );
+        // Note: refreshToken is not updated, keep using the old one
+
+        return data.accessToken;
       } catch (err) {
-        console.error("Error parsing savedUser:", err)
-        setUser(null)
+        console.error("Refresh Error:", err);
+        logout();
+        return null;
+      } finally {
+        isRefreshing = false;
+        refreshPromise = null;
       }
-    }
-  }, [])
+    })();
 
-  // Token expiry monitoring - auto logout when token expires
-  useEffect(() => {
-    if (!user) return
+    return refreshPromise;
+  };
 
-    const checkTokenExpiry = () => {
-      const expiry = localStorage.getItem("tokenExpiry")
-      if (expiry && Date.now() > parseInt(expiry)) {
-        console.log("Token expired, logging out automatically")
-        logout()
+  // ============================
+  // FETCH PROFILE (auto retry)
+  // ============================
+  const profile = async (): Promise<User | null> => {
+    try {
+      let token = await getAccessToken();
+      if (!token) return null;
+
+      let res = await fetch(`${API_BASE}/identities/profile`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.status === 401) {
+        // token expired unexpectedly → refresh
+        token = await refreshAccessToken();
+        if (!token) return null;
+
+        // retry request
+        res = await fetch(`${API_BASE}/identities/profile`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
       }
+
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (err) {
+      console.error("Profile error:", err);
+      return null;
     }
+  };
 
-    // Check immediately
-    checkTokenExpiry()
-    
-    // Check every minute
-    const interval = setInterval(checkTokenExpiry, 60 * 1000)
-    
-    return () => clearInterval(interval)
-  }, [user])
-
+  // ============================
+  // LOGIN
+  // ============================
   const login = async (email: string, password: string) => {
-    const res = await fetch("http://159.223.72.68:31977/identities/login", {
+    const res = await fetch(`${API_BASE}/identities/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
-    })
+    });
 
-    if (!res.ok) throw new Error("Invalid credentials")
+    if (!res.ok) throw new Error("Invalid email or password");
 
-    const data = await res.json()
-    console.log("Login response:", data)
+    const data = await res.json();
 
-    // Lưu token + expiry
-    localStorage.setItem("token", data.accessToken)
-    localStorage.setItem("tokenExpiry", String(Date.now() + data.expiresIn * 1000))
-    localStorage.setItem("refreshToken", data.refreshToken)
+    // Save tokens - backend returns accessToken, refreshToken, expiresIn
+    localStorage.setItem("token", data.accessToken);
+    localStorage.setItem(
+      "tokenExpiry",
+      String(Date.now() + data.expiresIn * 1000)
+    );
+    localStorage.setItem("refreshToken", data.refreshToken);
 
-    const userProfile = await profile()
+    // Load user info
+    const userProfile = await profile();
     if (userProfile) {
-      setUser(userProfile)
-      localStorage.setItem("user", JSON.stringify(userProfile))
+      setUser(userProfile);
+      localStorage.setItem("user", JSON.stringify(userProfile));
+      
+      // Route based on user role
+      if (typeof window !== 'undefined') {
+        const userRole = userProfile.role.name.toLowerCase();
+        if (userRole === 'admin' || userRole === 'administrator') {
+          window.location.href = '/admin/';
+        } else {
+          window.location.href = '/';
+        }
+      }
     }
-  }
+  };
 
-  const profile = async () => {
-    try {
-      const token = await getAccessToken()
-      if (!token) throw new Error("No token available")
-
-      const res = await fetch("http://159.223.72.68:31977/identities/profile", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`)
-
-      return await res.json()
-    } catch (error) {
-      console.error("Error fetching profile:", error)
-      return null
-    }
-  }
-
+  // ============================
+  // SIGNUP
+  // ============================
   const signup = async (dto: CreateUserDto) => {
-    const res = await fetch("http://159.223.72.68:31977/identities/createuser", {
+    const res = await fetch(`${API_BASE}/identities/createuser`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dto),
-    })
+    });
 
-    if (!res.ok) throw new Error("Signup failed")
+    if (!res.ok) throw new Error("Signup failed");
+  };
 
-    const data = await res.json()
-    console.log("User created:", data)
-  }
+  // ============================
+  // LOGOUT
+  // ============================
+  const logout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        // Call backend logout to invalidate tokens
+        await fetch(`${API_BASE}/identities/logout`, {
+          method: "POST",
+          headers: { 
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+        });
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      // Always clear local storage
+      setUser(null);
+      localStorage.removeItem("token");
+      localStorage.removeItem("tokenExpiry");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+    }
+  };
 
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem("user")
-    localStorage.removeItem("token")
-    localStorage.removeItem("tokenExpiry")
-    localStorage.removeItem("refreshToken")
-  }
+  // ============================
+  // LOAD USER ON PAGE REFRESH
+  // ============================
+  useEffect(() => {
+    const saved = localStorage.getItem("user");
+
+    if (saved) {
+      try {
+        setUser(JSON.parse(saved));
+      } catch {
+        setUser(null);
+      }
+    }
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, profile, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        signup,
+        logout,
+        profile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider")
-  }
-  return context
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
 }
