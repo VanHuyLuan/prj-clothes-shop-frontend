@@ -10,6 +10,26 @@ import { ShoppingBag, Heart } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ProductQuickView } from "@/components/client/product/product-quick-view";
+
+interface ProductVariant {
+  id: string;
+  size?: string | null;
+  color?: string | null;
+  sku: string;
+  price: number;
+  sale_price?: number | null;
+  stock_qty: number;
+}
+
+interface FullProduct {
+  id: string;
+  name: string;
+  description?: string | null;
+  brand?: string | null;
+  variants?: ProductVariant[];
+  images?: Array<{ url: string; alt_text?: string | null }>;
+}
 
 interface ProductCardProps {
   product: {
@@ -20,26 +40,36 @@ interface ProductCardProps {
   };
   image?: string;
   showDiscount?: boolean;
+  fullProduct?: FullProduct;
 }
 
 export function ProductCard({
   product,
   image = "/placeholder.svg?height=600&width=400",
   showDiscount = false,
+  fullProduct,
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showQuickView, setShowQuickView] = useState(false);
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (fullProduct) {
+      setShowQuickView(true);
+    }
+  };
 
   return (
     <MotionDiv
       whileHover={{ y: -5 }}
       transition={{ duration: 0.3 }}
-      className="group relative"
+      className="group relative rounded-xl border border-border/40 bg-card p-3 shadow-sm hover:shadow-md hover:border-primary/50 transition-all duration-300"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link href="#" className="block">
-        <div className="relative h-[300px] w-full overflow-hidden rounded-xl bg-muted/30">
+      <div className="block cursor-pointer" onClick={handleCardClick}>
+        <div className="relative h-[300px] w-full overflow-hidden rounded-lg bg-muted/30">
           <div
             className={cn(
               "absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 transition-opacity duration-300",
@@ -64,6 +94,13 @@ export function ProductCard({
             <Button
               className="w-full bg-white/90 text-black backdrop-blur-sm hover:bg-white"
               size="sm"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (fullProduct) {
+                  setShowQuickView(true);
+                }
+              }}
             >
               <ShoppingBag className="mr-2 h-4 w-4" />
               Add to Cart
@@ -106,7 +143,15 @@ export function ProductCard({
             )}
           </div>
         </div>
-      </Link>
+      </div>
+      
+      {fullProduct && (
+        <ProductQuickView
+          open={showQuickView}
+          onOpenChange={setShowQuickView}
+          product={fullProduct}
+        />
+      )}
     </MotionDiv>
   );
 }

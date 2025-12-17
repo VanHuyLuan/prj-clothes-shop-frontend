@@ -85,7 +85,7 @@ export function NewsletterSection() {
           >
             <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent z-10" />
             <Image
-              src="/cloth/00330_00.jpg"
+              src="https://pos.nvncdn.com/fa2431-2286/album/20250417_LZDdKSEp.png"
               alt="Newsletter Image"
               fill
               className="object-cover transition-transform duration-10000 hover:scale-110"

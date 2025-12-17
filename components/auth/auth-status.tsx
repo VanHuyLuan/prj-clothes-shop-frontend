@@ -75,7 +75,7 @@ export function AuthStatus() {
             </Link>
             
             <Link 
-              href="/orders" 
+              href="/client/orders" 
               className="flex items-center px-3 py-2.5 text-sm font-medium hover:bg-gray-100 cursor-pointer"
               onClick={() => setIsOpen(false)}
             >

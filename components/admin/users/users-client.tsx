@@ -91,7 +91,7 @@ export function UsersClient() {
 
   const handleStatusChange = async (user: User, status: boolean) => {
     try {
-      await ApiService.updateUserStatus(user.id, status);
+      await ApiService.setUserStatus(user.id, status);
       toast({
         title: "Success",
         description: `User ${status ? "activated" : "deactivated"} successfully`,

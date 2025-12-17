@@ -45,7 +45,7 @@ export function ProductViewDialog({
   const images = product?.images || [];
   const categories = product?.categories || [];
   const totalStock = variants.reduce((sum, v) => sum + v.stock_qty, 0);
-  const prices = variants.map((v) => parseFloat(v.price));
+  const prices = variants.map((v) => typeof v.price === 'number' ? v.price : parseFloat(v.price));
   const minPrice = prices.length ? Math.min(...prices) : 0;
   const maxPrice = prices.length ? Math.max(...prices) : 0;
 
@@ -193,7 +193,7 @@ export function ProductViewDialog({
                         </div>
                         <div className="text-right">
                           <div className="font-semibold">
-                            ${parseFloat(variant.price).toFixed(2)}
+                            ${(typeof variant.price === 'number' ? variant.price : parseFloat(variant.price)).toFixed(2)}
                           </div>
                           <Badge
                             variant={

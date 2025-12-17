@@ -134,8 +134,8 @@ export function ProductForm({ id }: ProductFormProps) {
               size: v.size || "",
               color: v.color || "",
               sku: v.sku,
-              price: v.price,
-              sale_price: v.sale_price || "",
+              price: typeof v.price === 'number' ? v.price.toString() : v.price,
+              sale_price: v.sale_price ? (typeof v.sale_price === 'number' ? v.sale_price.toString() : v.sale_price) : "",
               stock_qty: v.stock_qty.toString(),
             })));
           }
@@ -385,8 +385,8 @@ export function ProductForm({ id }: ProductFormProps) {
           size: v.size || undefined,
           color: v.color || undefined,
           sku: v.sku,
-          price: v.price, // API expects string format (Decimal)
-          sale_price: v.sale_price || undefined,
+          price: parseFloat(v.price), // Convert to number
+          sale_price: v.sale_price ? parseFloat(v.sale_price) : undefined, // Convert to number
           stock_qty: parseInt(v.stock_qty),
         })),
         images: images.length > 0 ? images.map((img) => ({

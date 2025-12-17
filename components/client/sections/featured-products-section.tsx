@@ -6,26 +6,73 @@ import { MotionDiv } from "@/components/providers/motion-provider";
 
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ui/product-card";
-import MockDatabase from "@/lib/database";
+import { ApiService, Product } from "@/lib/api";
 
 export function FeaturedProductsSection() {
-  // Get featured products from database
-  const featuredProducts = MockDatabase.getFeaturedProducts(4);
-  
-  const products = featuredProducts.map(product => ({
-    name: product.name,
-    price: `$${Math.min(...(product.variants?.map(v => {
-      const salePrice = v.sale_price ? parseFloat(v.sale_price) : null;
-      const regularPrice = parseFloat(v.price);
-      return salePrice || regularPrice;
-    }) || [])).toFixed(2)}`,
-    image: product.images?.[0]?.url || '/placeholder.jpg'
-  }));
-
+  const [products, setProducts] = useState<Array<{ id: string; name: string; price: string; image: string }>>([]);
+  const [fullProducts, setFullProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoaded(true);
+    const fetchFeaturedProducts = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch first 4 products as featured
+        const response = await ApiService.getProducts({
+          limit: 4,
+          status: 'active'
+        });
+        
+        // Handle both response formats
+        const productsArray = Array.isArray(response) ? response : response.data;
+        
+        // Store full products for modal
+        setFullProducts(productsArray);
+        
+        // Convert to display format
+        const displayProducts = productsArray.map(product => {
+          interface Variant {
+            sale_price?: number | null;
+            price: number;
+          }
+
+          interface ProductType {
+            id: string;
+            name: string;
+            variants?: Variant[];
+            images?: Array<{ url: string }>;
+          }
+
+          const prices: number[] = (product as ProductType).variants?.map((variant: Variant): number => {
+            const salePrice: number | null = variant.sale_price ? variant.sale_price : null;
+            const regularPrice: number = variant.price;
+            return salePrice || regularPrice;
+          }) || [];
+          
+          const lowestPrice = prices.length > 0 ? Math.min(...prices) : 0;
+          
+          return {
+            id: (product as ProductType).id,
+            name: product.name,
+            price: `$${lowestPrice.toFixed(2)}`,
+            image: product.images?.[0]?.url || '/placeholder.jpg'
+          };
+        });
+        
+        setProducts(displayProducts);
+      } catch (error) {
+        console.error("Error fetching featured products:", error);
+        // Set empty array on error to show section without products
+        setProducts([]);
+      } finally {
+        setLoading(false);
+        setIsLoaded(true);
+      }
+    };
+
+    fetchFeaturedProducts();
   }, []);
 
   const containerVariants = {
@@ -74,11 +121,28 @@ export function FeaturedProductsSection() {
           animate={isLoaded ? "visible" : "hidden"}
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8"
         >
-          {products.map((product, index) => (
-            <MotionDiv key={index} variants={itemVariants}>
-              <ProductCard product={product} image={product.image} />
-            </MotionDiv>
-          ))}
+          {loading ? (
+            <div className="col-span-full text-center text-muted-foreground">
+              Loading featured products...
+            </div>
+          ) : products.length > 0 ? (
+            products.map((product, index) => {
+              const fullProduct = fullProducts.find(fp => fp.id === product.id);
+              return (
+                <MotionDiv key={product.id || index} variants={itemVariants}>
+                  <ProductCard 
+                    product={product} 
+                    image={product.image}
+                    fullProduct={fullProduct}
+                  />
+                </MotionDiv>
+              );
+            })
+          ) : (
+            <div className="col-span-full text-center text-muted-foreground">
+              No featured products available
+            </div>
+          )}
         </MotionDiv>
         <MotionDiv
           initial={{ opacity: 0, y: 20 }}

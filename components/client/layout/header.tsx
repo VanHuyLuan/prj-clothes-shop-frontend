@@ -13,11 +13,13 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { AuthStatus } from "@/components/auth/auth-status";
 import { cn } from "@/lib/utils";
 import { MotionForm } from "@/components/providers/motion-provider";
+import { useCart } from "@/contexts/cart-context";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
+  const { getTotalItems } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,6 +41,7 @@ export function Header() {
     { name: "Kids", href: "/client/kids" },
     { name: "Accessories", href: "/client/accessories" },
     { name: "Sale", href: "/client/sale" },
+    { name: "✨ Virtual Try-On", href: "/client/virtual-tryon" },
   ];
 
   return (
@@ -176,19 +179,26 @@ export function Header() {
               </MotionDiv>
             )}
           </AnimatePresence>
-          <Button
-            variant="outline"
-            size="icon"
-            className={cn(
-              "rounded-full",
-              isHomePage && !scrolled
-                ? "border-white/30 hover:bg-white/10"
-                : "border-muted/30 hover:bg-muted/80"
-            )}
-          >
-            <ShoppingBag className="h-5 w-5" />
-            <span className="sr-only">Cart</span>
-          </Button>
+          <Link href="/client/cart">
+            <Button
+              variant="outline"
+              size="icon"
+              className={cn(
+                "rounded-full relative",
+                isHomePage && !scrolled
+                  ? "border-white/30 hover:bg-white/10"
+                  : "border-muted/30 hover:bg-muted/80"
+              )}
+            >
+              <ShoppingBag className="h-5 w-5" />
+              {getTotalItems() > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {getTotalItems()}
+                </span>
+              )}
+              <span className="sr-only">Cart</span>
+            </Button>
+          </Link>
           <AuthStatus />
         </div>
       </div>

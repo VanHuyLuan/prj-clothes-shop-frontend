@@ -33,6 +33,11 @@ export function Footer() {
                   Sale
                 </Link>
               </li>
+              <li>
+                <Link href="/client/virtual-tryon" className="hover:underline text-primary font-medium">
+                  ✨ Virtual Try-On
+                </Link>
+              </li>
             </ul>
           </div>
           <div className="space-y-4">

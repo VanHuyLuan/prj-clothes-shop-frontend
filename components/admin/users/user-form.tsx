@@ -46,34 +46,10 @@ export function UserForm({ id }: UserFormProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
-    fetchRoles();
     if (isEditMode) {
       fetchUser();
     }
   }, [isEditMode, id]);
-
-  const fetchRoles = async () => {
-    try {
-      const rolesData = await ApiService.getRoles();
-      // Filter to only show admin roles
-      const adminRoles = rolesData.filter((role) => 
-        role.name.toLowerCase().includes('admin') || 
-        role.name.toLowerCase().includes('manager') ||
-        role.name.toLowerCase().includes('staff')
-      );
-      setRoles(adminRoles);
-      if (adminRoles.length > 0 && !isEditMode) {
-        setFormData((prev) => ({ ...prev, role_id: adminRoles[0].id }));
-      }
-    } catch (error) {
-      console.error("Failed to fetch roles:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load roles",
-        variant: "destructive",
-      });
-    }
-  };
 
   const fetchUser = async () => {
     if (!id) return;
@@ -125,7 +101,7 @@ export function UserForm({ id }: UserFormProps) {
     setLoading(true);
     try {
       if (isEditMode && id) {
-        await ApiService.updateUser(id, formData);
+        await ApiService.updateUser( formData);
         toast({
           title: "Success",
           description: "Admin user updated successfully",

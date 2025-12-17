@@ -22,6 +22,8 @@ export interface User {
   updated_at: string;
   role?: Role;
   address?: Address[];
+  gender?: string | null;
+  birthdate?: string | null;
 }
 
 export interface Address {
@@ -67,8 +69,8 @@ export interface ProductVariant {
   size?: string | null;
   color?: string | null;
   sku: string;
-  price: string;
-  sale_price?: string | null;
+  price: number;
+  sale_price?: number | null;
   stock_qty: number;
   created_at: string;
   updated_at: string;
@@ -87,8 +89,8 @@ export interface CreateProductDto {
     size?: string;
     color?: string;
     sku: string;
-    price: string;
-    sale_price?: string;
+    price: number;
+    sale_price?: number;
     stock_qty: number;
   }[];
   images?: {
@@ -208,7 +210,14 @@ export class ApiService {
         throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
       }
 
-      return await response.json();
+      // Handle empty responses (204 No Content or empty body)
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        return {} as T;
+      }
+
+      const text = await response.text();
+      return text ? JSON.parse(text) : {} as T;
     } catch (error) {
       console.error(`API Request failed: ${endpoint}`, error);
       throw error;
@@ -476,7 +485,7 @@ export class ApiService {
   }
 
   static async addToCart(data: {
-    product_variant_id: string;
+    productVariantId: string;
     quantity: number;
   }): Promise<Cart> {
     return this.authenticatedRequest<Cart>('/cart/add', {
@@ -486,15 +495,16 @@ export class ApiService {
   }
 
   static async addToGuestCart(data: {
-    product_variant_id: string;
+    productVariantId: string;
     quantity: number;
     cart_id?: string;
   }): Promise<Cart> {
+    const { cart_id, ...bodyData } = data;
     return this.request<Cart>('/cart/guest/add', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(bodyData),
       headers: {
-        'x-guest-cart-id': data.cart_id || '',
+        'x-guest-cart-id': cart_id || '',
       },
     });
   }
@@ -599,12 +609,12 @@ export class ApiService {
     firstName?: string;
     lastName?: string;
     phone?: string;
+    email?: string;
     avatar?: string;
-    role?: string;
   }): Promise<{ message: string; user: User }> {
-    return this.authenticatedRequest(`/identities/update-user-by-admin?userId=${userId}`, {
+    return this.authenticatedRequest(`/identities/update-user-by-admin`, {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ userId, ...data }),
     });
   }
 
@@ -777,8 +787,6 @@ export class ApiService {
     firstname?: string;
     lastname?: string;
     password: string;
-    role_id?: string;
-    status?: boolean;
   }): Promise<User> {
     // BE uses /identities/createuser endpoint
     return this.request<User>('/identities/createuser', {
@@ -787,52 +795,44 @@ export class ApiService {
     });
   }
 
-  static async updateUser(userId: string, data: {
+  static async updateUser(data: {
     username?: string;
     email?: string;
     phone?: string;
     firstname?: string;
     lastname?: string;
-    role_id?: string;
-    status?: boolean;
+    gender?: string;
+    birthday?: string;
     avatar?: string;
   }): Promise<User> {
-    return this.authenticatedRequest<User>(`/users/${userId}`, {
-      method: 'PATCH',
+    return this.authenticatedRequest<User>(`/identities/update-user`, {
+      method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   static async deleteUser(userId: string): Promise<void> {
-    return this.authenticatedRequest<void>(`/users/${userId}`, {
+    return this.authenticatedRequest<void>(`/identities/delete-user`, {
       method: 'DELETE',
+      body: JSON.stringify({ userId }),
     });
   }
 
-  static async updateUserStatus(userId: string, status: boolean): Promise<User> {
-    return this.authenticatedRequest<User>(`/users/${userId}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    });
-  }
-
-  static async changeUserPassword(userId: string, data: {
-    oldPassword?: string;
-    newPassword: string;
+  static async changeUserPassword(data: {
+    old_password?: string;
+    new_password: string;
   }): Promise<void> {
-    return this.authenticatedRequest<void>(`/users/${userId}/password`, {
-      method: 'PATCH',
+    return this.authenticatedRequest<void>(`/identities/change-password`, {
+      method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  // ============ ROLES API ============
-  static async getRoles(): Promise<Role[]> {
-    return this.authenticatedRequest<Role[]>('/roles');
-  }
-
-  static async getRoleById(roleId: string): Promise<Role> {
-    return this.authenticatedRequest<Role>(`/roles/${roleId}`);
+  static async setAvatar(avatarUrl: string): Promise<User> {
+    return this.authenticatedRequest<User>(`/identities/set-avatar`, {
+      method: 'POST',
+      body: JSON.stringify({ avatarUrl }),
+    });
   }
 
   // ============ CUSTOMERS API (Regular Users - Customer/User Role Only) ============

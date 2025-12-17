@@ -36,6 +36,8 @@ export interface User {
   updated_at: string;
   role: Role;
   address: Address[];
+  gender?: string | null;
+  birthday?: string | null;
 }
 
 interface AuthContextType {
@@ -44,6 +46,7 @@ interface AuthContextType {
   signup: (data: CreateUserDto) => Promise<void>;
   logout: () => Promise<void>;
   profile: () => Promise<User | null>;
+  refreshUser: () => Promise<void>;
 }
 
 export interface CreateUserDto {
@@ -55,7 +58,7 @@ export interface CreateUserDto {
   password: string;
 }
 
-const API_BASE = "https://api.be-clothesshop.app";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.be-clothesshop.app';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -191,6 +194,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
     localStorage.setItem("refreshToken", data.refreshToken);
 
+    // Merge guest cart if exists
+    const guestCartId = localStorage.getItem("guestCartId");
+    if (guestCartId) {
+      try {
+        // Import ApiService dynamically to avoid circular dependency
+        const { ApiService } = await import("@/lib/api");
+        await ApiService.mergeCart(guestCartId);
+        localStorage.removeItem("guestCartId");
+      } catch (error) {
+        console.error("Error merging cart:", error);
+      }
+    }
+
     // Load user info
     const userProfile = await profile();
     if (userProfile) {
@@ -247,6 +263,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("tokenExpiry");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");
+      localStorage.removeItem("guestCartId"); // Clear cart on logout
+    }
+  };
+
+  // ============================
+  // REFRESH USER DATA
+  // ============================
+  const refreshUser = async () => {
+    try {
+      console.log(" Refreshing user data...");
+      const userData = await profile();
+      console.log(" Got fresh user data:", userData);
+      if (userData) {
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+        console.log(" User data updated in state and localStorage");
+      } else {
+        console.warn(" No user data returned from profile API");
+      }
+    } catch (error) {
+      console.error(" Error refreshing user:", error);
     }
   };
 
@@ -273,6 +310,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signup,
         logout,
         profile,
+        refreshUser,
       }}
     >
       {children}

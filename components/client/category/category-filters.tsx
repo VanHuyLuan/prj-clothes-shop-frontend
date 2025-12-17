@@ -13,12 +13,16 @@ interface PriceRange {
 interface CategoryFiltersProps {
   showDiscount?: boolean;
   onPriceChange?: (selectedRanges: PriceRange[]) => void;
+  onSizeChange?: (selectedSizes: string[]) => void;
+  onColorChange?: (selectedColors: string[]) => void;
   productCounts?: Record<string, number>; // Optional: show count per range
 }
 
 export function CategoryFilters({
   showDiscount = false,
   onPriceChange,
+  onSizeChange,
+  onColorChange,
   productCounts,
 }: CategoryFiltersProps) {
   const [openSections, setOpenSections] = useState({
@@ -30,6 +34,8 @@ export function CategoryFilters({
   });
 
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
 
   const priceRanges: PriceRange[] = [
     { id: "price1", label: "Under $25", min: 0, max: 25 },
@@ -62,10 +68,40 @@ export function CategoryFilters({
     }
   };
 
+  const handleSizeChange = (size: string) => {
+    const newSelectedSizes = selectedSizes.includes(size)
+      ? selectedSizes.filter((s) => s !== size)
+      : [...selectedSizes, size];
+
+    setSelectedSizes(newSelectedSizes);
+    if (onSizeChange) {
+      onSizeChange(newSelectedSizes);
+    }
+  };
+
+  const handleColorChange = (color: string) => {
+    const newSelectedColors = selectedColors.includes(color)
+      ? selectedColors.filter((c) => c !== color)
+      : [...selectedColors, color];
+
+    setSelectedColors(newSelectedColors);
+    if (onColorChange) {
+      onColorChange(newSelectedColors);
+    }
+  };
+
   const handleClearAll = () => {
     setSelectedPriceRanges([]);
+    setSelectedSizes([]);
+    setSelectedColors([]);
     if (onPriceChange) {
       onPriceChange([]);
+    }
+    if (onSizeChange) {
+      onSizeChange([]);
+    }
+    if (onColorChange) {
+      onColorChange([]);
     }
   };
 
@@ -198,7 +234,12 @@ export function CategoryFilters({
             {["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL"].map((size) => (
               <button
                 key={size}
-                className="border rounded-md py-1 px-2 text-sm hover:border-primary hover:bg-primary/5 transition-colors"
+                onClick={() => handleSizeChange(size)}
+                className={`border rounded-md py-1 px-2 text-sm transition-colors ${
+                  selectedSizes.includes(size)
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "hover:border-primary hover:bg-primary/5"
+                }`}
               >
                 {size}
               </button>
@@ -236,11 +277,16 @@ export function CategoryFilters({
             ].map((colorOption) => (
               <button
                 key={colorOption.name}
+                onClick={() => handleColorChange(colorOption.name)}
                 className="w-8 h-8 rounded-full flex items-center justify-center group"
                 title={colorOption.name}
               >
                 <span
-                  className={`w-6 h-6 rounded-full ${colorOption.color} group-hover:ring-2 ring-offset-2 ring-primary transition-all`}
+                  className={`w-6 h-6 rounded-full ${colorOption.color} transition-all ${
+                    selectedColors.includes(colorOption.name)
+                      ? "ring-2 ring-offset-2 ring-primary scale-110"
+                      : "group-hover:ring-2 ring-offset-2 ring-primary"
+                  }`}
                 ></span>
               </button>
             ))}

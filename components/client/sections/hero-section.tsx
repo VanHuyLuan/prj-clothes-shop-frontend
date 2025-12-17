@@ -96,6 +96,27 @@ export function HeroSection() {
                 </Button>
               </Link>
             </MotionDiv>
+            <MotionDiv
+              initial={{ opacity: 0, y: 20 }}
+              animate={isLoaded ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.7, delay: 0.7 }}
+              className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-md rounded-xl border border-white/10"
+            >
+              <span className="text-2xl">✨</span>
+              <div className="flex-1">
+                <p className="text-white font-semibold text-sm">Try AI Virtual Try-On</p>
+                <p className="text-white/70 text-xs">See how clothes look on you instantly!</p>
+              </div>
+              <Link href="/client/virtual-tryon">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="bg-white text-black hover:bg-white/90"
+                >
+                  Try Now
+                </Button>
+              </Link>
+            </MotionDiv>
           </MotionDiv>
           <MotionDiv
             initial={{ opacity: 0, scale: 0.95 }}

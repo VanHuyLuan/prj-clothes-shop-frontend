@@ -106,7 +106,7 @@ export function CustomerForm({ id }: CustomerFormProps) {
           lastName: formData.lastname,
           phone: formData.phone,
           avatar: formData.avatar,
-          role: 'user',
+          email: formData.email,
         });
         toast({
           title: "Success",

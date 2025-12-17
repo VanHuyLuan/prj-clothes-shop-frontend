@@ -6,6 +6,7 @@ import {
 } from "@/components/providers/motion-provider";
 import { ProductCard } from "@/components/ui/product-card";
 import { SlidersHorizontal, Grid3x3, LayoutGrid } from "lucide-react";
+import { Product as FullProduct } from "@/lib/api";
 
 interface Product {
   id: string;
@@ -19,6 +20,7 @@ interface Product {
 interface ProductGridProps {
   products: Product[];
   showDiscount?: boolean;
+  fullProducts?: FullProduct[];
 }
 
 type SortOption = "featured" | "price-asc" | "price-desc" | "name-asc" | "discount";
@@ -27,6 +29,7 @@ type GridColumns = 3 | 4;
 export function ProductGrid({
   products,
   showDiscount = false,
+  fullProducts,
 }: ProductGridProps) {
   const [visibleProducts, setVisibleProducts] = useState(12);
   const [sortBy, setSortBy] = useState<SortOption>("featured");
@@ -169,23 +172,27 @@ export function ProductGrid({
             animate="show"
             className={`grid ${gridClass}`}
           >
-            {sortedProducts.slice(0, visibleProducts).map((product) => (
-              <MotionDiv key={product.id} variants={item}>
-                <ProductCard
-                  product={{
-                    name: product.name,
-                    price: product.price,
-                    ...(showDiscount &&
-                      product.originalPrice && {
-                        originalPrice: product.originalPrice,
-                        discount: product.discount,
-                      }),
-                  }}
-                  image={product.image}
-                  showDiscount={showDiscount}
-                />
-              </MotionDiv>
-            ))}
+            {sortedProducts.slice(0, visibleProducts).map((product) => {
+              const fullProduct = fullProducts?.find(fp => fp.id === product.id);
+              return (
+                <MotionDiv key={product.id} variants={item}>
+                  <ProductCard
+                    product={{
+                      name: product.name,
+                      price: product.price,
+                      ...(showDiscount &&
+                        product.originalPrice && {
+                          originalPrice: product.originalPrice,
+                          discount: product.discount,
+                        }),
+                    }}
+                    image={product.image}
+                    showDiscount={showDiscount}
+                    fullProduct={fullProduct}
+                  />
+                </MotionDiv>
+              );
+            })}
           </MotionDiv>
 
           {/* Load More Button */}

@@ -27,8 +27,9 @@ interface DisplayProduct {
 const convertToDisplayProduct = (product: Product): DisplayProduct => {
   // Get the lowest price from variants (considering sale prices)
   const prices = product.variants?.map(variant => {
-    const salePrice = variant.sale_price ? parseFloat(variant.sale_price) : null;
-    const regularPrice = parseFloat(variant.price);
+    // price and sale_price are now numbers from backend
+    const salePrice = variant.sale_price ? variant.sale_price : null;
+    const regularPrice = variant.price;
     return salePrice || regularPrice;
   }) || [];
   
@@ -53,10 +54,12 @@ const isPriceInRange = (priceString: string, range: PriceRange): boolean => {
 };
 
 export default function MenPage() {
-  const [allProducts, setAllProducts] = useState<DisplayProduct[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<PriceRange[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
 
   const priceRanges: PriceRange[] = [
     { id: "price1", label: "Under $10", min: 0, max: 10 },
@@ -85,9 +88,8 @@ export default function MenPage() {
         // Handle both response formats: array or object with data property
         const productsArray = Array.isArray(response) ? response : response.data;
         
-        // Convert to display format
-        const displayProducts = productsArray.map(convertToDisplayProduct);
-        setAllProducts(displayProducts);
+        // Store full product data for variant filtering
+        setAllProducts(productsArray);
       } catch (err) {
         console.error("Error fetching products:", err);
         setError(err instanceof Error ? err.message : "Failed to load products");
@@ -102,26 +104,59 @@ export default function MenPage() {
   const productCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     priceRanges.forEach((range) => {
-      counts[range.id] = allProducts.filter((product) =>
-        isPriceInRange(product.price, range)
-      ).length;
+      counts[range.id] = allProducts.filter((product) => {
+        const displayProduct = convertToDisplayProduct(product);
+        return isPriceInRange(displayProduct.price, range);
+      }).length;
     });
     return counts;
   }, [allProducts]);
 
   const filteredProducts = useMemo(() => {
-    if (selectedPriceRanges.length === 0) {
-      return allProducts;
+    let filtered = allProducts;
+
+    // Filter by price
+    if (selectedPriceRanges.length > 0) {
+      filtered = filtered.filter((product) => {
+        const displayProduct = convertToDisplayProduct(product);
+        return selectedPriceRanges.some((range) =>
+          isPriceInRange(displayProduct.price, range)
+        );
+      });
     }
-    return allProducts.filter((product) => {
-      return selectedPriceRanges.some((range) =>
-        isPriceInRange(product.price, range)
-      );
-    });
-  }, [selectedPriceRanges, allProducts]);
+
+    // Filter by size - check if product has any variant with selected size
+    if (selectedSizes.length > 0) {
+      filtered = filtered.filter((product) => {
+        return product.variants?.some((variant) =>
+          selectedSizes.includes(variant.size || '')
+        );
+      });
+    }
+
+    // Filter by color - check if product has any variant with selected color
+    if (selectedColors.length > 0) {
+      filtered = filtered.filter((product) => {
+        return product.variants?.some((variant) =>
+          selectedColors.includes(variant.color || '')
+        );
+      });
+    }
+
+    // Convert to display format
+    return filtered.map(convertToDisplayProduct);
+  }, [selectedPriceRanges, selectedSizes, selectedColors, allProducts]);
 
   const handlePriceChange = (ranges: PriceRange[]) => {
     setSelectedPriceRanges(ranges);
+  };
+
+  const handleSizeChange = (sizes: string[]) => {
+    setSelectedSizes(sizes);
+  };
+
+  const handleColorChange = (colors: string[]) => {
+    setSelectedColors(colors);
   };
 
   // Show loading state
@@ -180,18 +215,20 @@ export default function MenPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <CategoryFilters 
             onPriceChange={handlePriceChange}
+            onSizeChange={handleSizeChange}
+            onColorChange={handleColorChange}
             productCounts={productCounts}
           />
           <div className="md:col-span-3">
             <div className="mb-4 text-sm text-muted-foreground">
               Showing {filteredProducts.length} of {allProducts.length} products
-              {selectedPriceRanges.length > 0 && (
+              {(selectedPriceRanges.length > 0 || selectedSizes.length > 0 || selectedColors.length > 0) && (
                 <span className="ml-2">
-                  ({selectedPriceRanges.length} price filter{selectedPriceRanges.length > 1 ? 's' : ''} applied)
+                  ({selectedPriceRanges.length + selectedSizes.length + selectedColors.length} filter{(selectedPriceRanges.length + selectedSizes.length + selectedColors.length) > 1 ? 's' : ''} applied)
                 </span>
               )}
             </div>
-            <ProductGrid products={filteredProducts} />
+            <ProductGrid products={filteredProducts} fullProducts={allProducts} />
           </div>
         </div>
       </div>

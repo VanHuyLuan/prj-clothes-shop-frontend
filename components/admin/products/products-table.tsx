@@ -181,7 +181,7 @@ export function ProductsTable({
           <TableBody>
             {products.map((product) => {
               const variants = product.variants || [];
-              const prices = variants.map((v) => parseFloat(v.price));
+              const prices = variants.map((v) => typeof v.price === 'number' ? v.price : parseFloat(v.price));
               const minPrice = prices.length ? Math.min(...prices) : 0;
               const maxPrice = prices.length ? Math.max(...prices) : 0;
               const categories = product.categories || [];
