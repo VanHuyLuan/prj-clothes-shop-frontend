@@ -6,7 +6,8 @@ import Image from "next/image";
 import {
   MotionDiv,
 } from "@/components/providers/motion-provider";
-import { ShoppingBag, Heart } from "lucide-react";
+import { ShoppingBag, Heart, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -91,20 +92,36 @@ export function ProductCard({
               isHovered && "translate-y-0 opacity-100"
             )}
           >
-            <Button
-              className="w-full bg-white/90 text-black backdrop-blur-sm hover:bg-white"
-              size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (fullProduct) {
-                  setShowQuickView(true);
-                }
-              }}
-            >
-              <ShoppingBag className="mr-2 h-4 w-4" />
-              Add to Cart
-            </Button>
+            <div className="space-y-2">
+              <Button
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white backdrop-blur-sm hover:from-purple-600 hover:to-pink-600"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const imageUrl = encodeURIComponent(image || '/placeholder.svg');
+                  const productName = encodeURIComponent(product.name);
+                  window.location.href = `/client/virtual-tryon?garment=${imageUrl}&name=${productName}`;
+                }}
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                Thử đồ ảo
+              </Button>
+              <Button
+                className="w-full bg-white/90 text-black backdrop-blur-sm hover:bg-white"
+                size="sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (fullProduct) {
+                    setShowQuickView(true);
+                  }
+                }}
+              >
+                <ShoppingBag className="mr-2 h-4 w-4" />
+                Add to Cart
+              </Button>
+            </div>
           </div>
           <Button
             size="icon"

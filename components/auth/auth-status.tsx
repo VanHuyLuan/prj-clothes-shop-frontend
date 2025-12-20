@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { LogOut, User, ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MotionDiv } from "@/components/providers/motion-provider";
 
@@ -47,21 +48,35 @@ export function AuthStatus() {
     <div className="relative">
       <Button
         variant="ghost"
-        size="icon"
-        className="rounded-full border border-muted/30 bg-muted/30 hover:bg-muted/80 flex items-center gap-1 px-3"
+        className="rounded-full hover:bg-muted/80 flex items-center gap-2 px-2 h-auto py-1"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <User className="h-5 w-5" />
+        <Avatar className="h-8 w-8 border-2 border-primary/20">
+          <AvatarImage src={user.avatar || ""} alt={user.username} />
+          <AvatarFallback className="text-xs font-semibold bg-primary/10 text-primary">
+            {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+          </AvatarFallback>
+        </Avatar>
         <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </Button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-60 bg-white border rounded-md shadow-lg z-50">
-          <div className="flex flex-col space-y-1 p-3 border-b">
-            <p className="text-base font-semibold leading-relaxed">{user.lastName}</p>
-            <p className="text-sm leading-relaxed text-gray-500">
-              {user.email}
-            </p>
+        <div className="absolute right-0 top-full mt-2 w-60 bg-white dark:bg-gray-800 border rounded-md shadow-lg z-50">
+          <div className="flex items-center gap-3 p-3 border-b">
+            <Avatar className="h-12 w-12 border-2 border-primary">
+              <AvatarImage src={user.avatar || ""} alt={user.username} />
+              <AvatarFallback className="font-semibold bg-primary/10 text-primary">
+                {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col space-y-1">
+              <p className="text-base font-semibold leading-relaxed">
+                {user.firstName} {user.lastName}
+              </p>
+              <p className="text-sm leading-relaxed text-gray-500">
+                {user.email}
+              </p>
+            </div>
           </div>
           
           <div className="py-1">

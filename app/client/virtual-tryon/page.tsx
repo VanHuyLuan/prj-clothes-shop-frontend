@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Header } from "@/components/client/layout/header";
 import { Footer } from "@/components/client/layout/footer";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { toast } from "sonner";
 import Image from "next/image";
 
 export default function VirtualTryOnPage() {
+  const searchParams = useSearchParams();
   const [personImage, setPersonImage] = useState<File | null>(null);
   const [garmentImage, setGarmentImage] = useState<File | null>(null);
   const [personPreview, setPersonPreview] = useState<string>("");
@@ -71,6 +73,37 @@ export default function VirtualTryOnPage() {
     };
     reader.readAsDataURL(file);
   };
+
+  // Load garment from URL params if provided (from product pages)
+  useEffect(() => {
+    const garmentUrl = searchParams.get('garment');
+    const garmentName = searchParams.get('name');
+    
+    if (garmentUrl) {
+      const loadGarmentFromUrl = async () => {
+        try {
+          const decodedUrl = decodeURIComponent(garmentUrl);
+          setGarmentPreview(decodedUrl);
+          if (garmentName) {
+            setGarmentDescription(decodeURIComponent(garmentName));
+          }
+          
+          // Convert URL to File object
+          const response = await fetch(decodedUrl);
+          const blob = await response.blob();
+          const file = new File([blob], 'product-garment.jpg', { type: 'image/jpeg' });
+          setGarmentImage(file);
+          
+          toast.success("Đã tải quần áo từ trang sản phẩm!");
+        } catch (error) {
+          console.error("Failed to load garment from URL:", error);
+          toast.error("Không thể tải ảnh quần áo");
+        }
+      };
+      
+      loadGarmentFromUrl();
+    }
+  }, [searchParams]);
 
   const handleVirtualTryOn = async () => {
     if (!personImage || !garmentImage) {
@@ -227,7 +260,7 @@ export default function VirtualTryOnPage() {
                       Ảnh quần áo
                     </CardTitle>
                     <CardDescription>
-                      Upload ảnh quần áo, nền trắng hoặc trong suốt tốt nhất
+                      Upload ảnh quần áo hoặc chọn từ trang sản phẩm
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
