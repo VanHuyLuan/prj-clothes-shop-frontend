@@ -35,34 +35,7 @@ import {
   Package,
   Loader2,
 } from "lucide-react";
-
-interface OrderItem {
-  id: string;
-  product_variant_id: string;
-  quantity: number;
-  unit_price: number;
-  total_price: number;
-}
-
-interface Order {
-  id: string;
-  user_id: string | null;
-  order_number: string;
-  status: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
-  total_amount: number;
-  shipping_address: any | null;
-  created_at: string;
-  updated_at: string;
-  user?: {
-    id: string;
-    username: string;
-    email: string | null;
-    firstName: string | null;
-    lastName: string | null;
-    avatar: string | null;
-  } | null;
-  items: OrderItem[];
-}
+import { Order, OrderItem } from "@/lib/api";
 
 interface OrdersTableProps {
   orders?: Order[];
@@ -94,7 +67,7 @@ export function OrdersTable({
       user_id: "user-1",
       order_number: "ORD-2024-001",
       status: "confirmed",
-      total_amount: 171.96,
+      total_amount: "171.96",
       shipping_address: {
         street: "123 Main St",
         city: "New York",
@@ -108,24 +81,31 @@ export function OrdersTable({
         id: "user-1",
         username: "sarahj",
         email: "sarah.johnson@email.com",
+        phone: null,
         firstName: "Sarah",
         lastName: "Johnson",
+        role_id: "customer",
+        status: true,
         avatar: "/placeholder.svg?height=40&width=40",
+        created_at: "2024-01-01T00:00:00Z",
+        updated_at: "2024-01-01T00:00:00Z",
       },
       items: [
         {
           id: "item-1",
+          order_id: "1",
           product_variant_id: "var-1",
           quantity: 2,
-          unit_price: 59.99,
-          total_price: 119.98,
+          unit_price: "59.99",
+          total_price: "119.98",
         },
         {
           id: "item-2",
+          order_id: "1",
           product_variant_id: "var-2",
           quantity: 1,
-          unit_price: 51.98,
-          total_price: 51.98,
+          unit_price: "51.98",
+          total_price: "51.98",
         },
       ],
     },
@@ -134,7 +114,7 @@ export function OrdersTable({
       user_id: "user-2",
       order_number: "ORD-2024-002",
       status: "shipped",
-      total_amount: 89.98,
+      total_amount: "89.98",
       shipping_address: {
         street: "456 Oak Ave",
         city: "Los Angeles",
@@ -148,17 +128,23 @@ export function OrdersTable({
         id: "user-2",
         username: "michaelc",
         email: "michael.chen@email.com",
+        phone: null,
         firstName: "Michael",
         lastName: "Chen",
+        role_id: "customer",
+        status: true,
         avatar: "/placeholder.svg?height=40&width=40",
+        created_at: "2024-01-01T00:00:00Z",
+        updated_at: "2024-01-01T00:00:00Z",
       },
       items: [
         {
           id: "item-3",
+          order_id: "2",
           product_variant_id: "var-3",
           quantity: 2,
-          unit_price: 44.99,
-          total_price: 89.98,
+          unit_price: "44.99",
+          total_price: "89.98",
         },
       ],
     },
@@ -167,7 +153,7 @@ export function OrdersTable({
       user_id: "user-3",
       order_number: "ORD-2024-003",
       status: "delivered",
-      total_amount: 59.99,
+      total_amount: "59.99",
       shipping_address: {
         street: "789 Pine Rd",
         city: "Chicago",
@@ -181,17 +167,23 @@ export function OrdersTable({
         id: "user-3",
         username: "emilyd",
         email: "emily.davis@email.com",
+        phone: null,
         firstName: "Emily",
         lastName: "Davis",
+        role_id: "customer",
+        status: true,
         avatar: "/placeholder.svg?height=40&width=40",
+        created_at: "2024-01-01T00:00:00Z",
+        updated_at: "2024-01-01T00:00:00Z",
       },
       items: [
         {
           id: "item-4",
+          order_id: "3",
           product_variant_id: "var-4",
           quantity: 1,
-          unit_price: 59.99,
-          total_price: 59.99,
+          unit_price: "59.99",
+          total_price: "59.99",
         },
       ],
     },
@@ -200,7 +192,7 @@ export function OrdersTable({
       user_id: null,
       order_number: "ORD-2024-004",
       status: "pending",
-      total_amount: 245.5,
+      total_amount: "245.50",
       shipping_address: {
         street: "321 Elm St",
         city: "Houston",
@@ -210,14 +202,15 @@ export function OrdersTable({
       },
       created_at: "2024-01-21T08:00:00Z",
       updated_at: "2024-01-21T08:00:00Z",
-      user: null,
+      user: undefined,
       items: [
         {
           id: "item-5",
+          order_id: "4",
           product_variant_id: "var-5",
           quantity: 3,
-          unit_price: 81.83,
-          total_price: 245.5,
+          unit_price: "81.83",
+          total_price: "245.50",
         },
       ],
     },
@@ -355,9 +348,7 @@ export function OrdersTable({
                     </TableCell>
                     <TableCell>
                       <div className="font-medium">
-                        ${typeof order.total_amount === 'string' 
-                          ? parseFloat(order.total_amount).toFixed(2)
-                          : order.total_amount.toFixed(2)}
+                        ${parseFloat(order.total_amount).toFixed(2)}
                       </div>
                     </TableCell>
                     <TableCell>{getStatusBadge(order.status)}</TableCell>
