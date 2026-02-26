@@ -640,14 +640,23 @@ export class ApiService {
   static async searchProducts(query: string, params?: {
     categoryId?: string;
     brand?: string;
+    status?: string;
     page?: number;
     limit?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
   }): Promise<PaginatedResponse<Product>> {
-    const queryParams = new URLSearchParams({ search: query });
+    const queryParams = new URLSearchParams();
     
+    // Add search query
+    if (query) {
+      queryParams.append('search', query);
+    }
+    
+    // Add optional parameters
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
+        if (value !== undefined && value !== null && value !== '') {
           queryParams.append(key, value.toString());
         }
       });

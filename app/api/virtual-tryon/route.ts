@@ -1,104 +1,85 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Client, handle_file } from "@gradio/client";
-import { writeFile } from 'fs/promises';
-import { join } from 'path';
-import { tmpdir } from 'os';
 
-const HF_TOKEN = process.env.HUGGINGFACE_TOKEN;
-const SPACE_NAME = "yisol/IDM-VTON"; 
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export async function POST(request: NextRequest) {
-  let personTempPath: string | null = null;
-  let garmentTempPath: string | null = null;
-
   try {
     const formData = await request.formData();
     const personImage = formData.get('person_image') as File;
     const garmentImage = formData.get('garment_image') as File;
-    const garmentDescription = formData.get('garment_description') as string || 'Virtual try-on';
-    const denoiseSteps = parseInt(formData.get('denoise_steps') as string) || 30;
-    const seed = parseInt(formData.get('seed') as string) || 42;
+    const garmentImageUrl = formData.get('garment_image_url') as string;
+    const category = formData.get('category') as string || 'Upper-body';
+    const denoiseSteps = formData.get('denoise_steps') as string;
+    const seed = formData.get('seed') as string;
 
-    if (!personImage || !garmentImage) {
-      return NextResponse.json({ error: 'Missing required images' }, { status: 400 });
+    if (!personImage) {
+      return NextResponse.json({ error: 'Missing person image' }, { status: 400 });
     }
 
-    // Save files temporarily to disk (required for handle_file)
-    const personBuffer = Buffer.from(await personImage.arrayBuffer());
-    const garmentBuffer = Buffer.from(await garmentImage.arrayBuffer());
-    
-    personTempPath = join(tmpdir(), `person_${Date.now()}.${personImage.type.split('/')[1]}`);
-    garmentTempPath = join(tmpdir(), `garment_${Date.now()}.${garmentImage.type.split('/')[1]}`);
-    
-    await writeFile(personTempPath, personBuffer);
-    await writeFile(garmentTempPath, garmentBuffer);
-
-    // Initialize Gradio Client (yisol/IDM-VTON is a public space, no token needed)
-    const client = await Client.connect(SPACE_NAME);
-
-    // Call API with correct format according to HuggingFace docs
-    const result = await client.predict("/tryon", {
-      dict: {
-        background: handle_file(personTempPath),
-        layers: [],
-        composite: null
-      },
-      garm_img: handle_file(garmentTempPath),
-      garment_des: garmentDescription,
-      is_checked: true,
-      is_checked_crop: false,
-      denoise_steps: denoiseSteps,
-      seed: seed
-    });
-
-    // Clean up temp files
-    try {
-      const fs = require('fs');
-      if (personTempPath && fs.existsSync(personTempPath)) fs.unlinkSync(personTempPath);
-      if (garmentTempPath && fs.existsSync(garmentTempPath)) fs.unlinkSync(garmentTempPath);
-    } catch (cleanupError) {
-      console.error('Cleanup error:', cleanupError);
+    // Kiểm tra xem có garment image hoặc garment image URL
+    if (!garmentImage && !garmentImageUrl) {
+      return NextResponse.json({ error: 'Missing garment image or garment image URL' }, { status: 400 });
     }
 
-    // Return result - result.data is tuple [output_image, masked_image]
-    // Extract URL from response (can be string or object)
-    const extractUrl = (data: any): string => {
-      if (typeof data === 'string') return data;
-      if (data?.url) return data.url;
-      if (data?.path) return data.path;
-      return data;
-    };
+    // Backend API hiện tại chỉ hỗ trợ garmentImageUrl (string URL)
+    // Nếu user upload file từ local, cần endpoint khác hoặc xử lý upload trước
+    if (garmentImage && !garmentImageUrl) {
+      return NextResponse.json({ 
+        error: 'Direct garment file upload not supported', 
+        details: 'Please use product images from the catalog. Upload feature requires backend support for file upload.' 
+      }, { status: 400 });
+    }
 
-    const outputImageUrl = extractUrl((result.data as any[])[0]);
-    const maskedImageUrl = extractUrl((result.data as any[])[1]);
+    // Tạo FormData để gửi đến backend
+    const backendFormData = new FormData();
+    backendFormData.append('personImage', personImage);
+    backendFormData.append('garmentImageUrl', garmentImageUrl);
+    
+    backendFormData.append('category', category);
+    
+    if (denoiseSteps) {
+      backendFormData.append('denoiseSteps', denoiseSteps);
+    }
+    
+    if (seed) {
+      backendFormData.append('seed', seed);
+    }
 
-    console.log('API Result:', { 
-      raw: result.data,
-      outputImageUrl, 
-      maskedImageUrl 
+    // Gọi API backend
+    const response = await fetch(`${BACKEND_API_URL}/virtual-tryon/try-with-product`, {
+      method: 'POST',
+      body: backendFormData,
     });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return NextResponse.json(
+        { 
+          error: 'Backend API error', 
+          details: errorData.message || response.statusText 
+        },
+        { status: response.status }
+      );
+    }
+
+    const result = await response.json();
+
+    console.log('Backend API Result:', result);
 
     return NextResponse.json({
-      success: true,
-      data: [outputImageUrl, maskedImageUrl],
-      message: 'Virtual try-on completed successfully'
+      success: result.success,
+      outputImage: result.outputImage,
+      message: result.message,
+      requestId: result.requestId,
+      processingTime: result.processingTime
     });
 
   } catch (error: any) {
     console.error('Virtual Try-on error:', error);
     
-    // Clean up temp files on error
-    try {
-      const fs = require('fs');
-      if (personTempPath && fs.existsSync(personTempPath)) fs.unlinkSync(personTempPath);
-      if (garmentTempPath && fs.existsSync(garmentTempPath)) fs.unlinkSync(garmentTempPath);
-    } catch (cleanupError) {
-      console.error('Cleanup error:', cleanupError);
-    }
-    
     return NextResponse.json(
       { 
-        error: 'HuggingFace API error', 
+        error: 'Virtual try-on failed', 
         details: error.message || 'Unknown error'
       },
       { status: 500 }

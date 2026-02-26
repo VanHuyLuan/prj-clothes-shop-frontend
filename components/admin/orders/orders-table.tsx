@@ -17,6 +17,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   MoreHorizontal,
   Edit,
   Eye,
@@ -25,6 +33,7 @@ import {
   XCircle,
   Clock,
   Package,
+  Loader2,
 } from "lucide-react";
 
 interface OrderItem {
@@ -57,16 +66,27 @@ interface Order {
 
 interface OrdersTableProps {
   orders?: Order[];
+  loading?: boolean;
   onEdit?: (order: Order) => void;
   onView?: (order: Order) => void;
   onUpdateStatus?: (orderId: string, status: string) => void;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  onPageChange?: (page: number) => void;
 }
 
 export function OrdersTable({
   orders = [],
+  loading = false,
   onEdit = () => {},
   onView = () => {},
   onUpdateStatus = () => {},
+  pagination,
+  onPageChange = () => {},
 }: OrdersTableProps) {
   const mockOrders: Order[] = [
     {
@@ -203,6 +223,7 @@ export function OrdersTable({
     },
   ];
 
+  // Use actual orders from props or fallback to mock data if empty
   const displayOrders = orders.length > 0 ? orders : mockOrders;
 
   const getStatusBadge = (status: string) => {
@@ -248,130 +269,222 @@ export function OrdersTable({
   };
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Order Number</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Items</TableHead>
-            <TableHead>Total Amount</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Shipping Address</TableHead>
-            <TableHead>Order Date</TableHead>
-            <TableHead className="w-[70px]">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {displayOrders.map((order) => {
-            const customerName = order.user
-              ? `${order.user.firstName || ""} ${order.user.lastName || ""}`.trim() ||
-                order.user.username
-              : "Guest";
-            const customerEmail = order.user?.email || "—";
-            const shippingCity = order.shipping_address?.city || "—";
-            const shippingCountry = order.shipping_address?.country || "";
-            const shippingDisplay =
-              shippingCity !== "—"
-                ? `${shippingCity}, ${shippingCountry}`
-                : "—";
-
-            return (
-              <TableRow key={order.id}>
-                <TableCell>
-                  <div>
-                    <div className="font-medium">{order.order_number}</div>
-                    <div className="text-xs text-muted-foreground">
-                      ID: {order.id.slice(0, 8)}
-                    </div>
+    <div className="space-y-4">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Order Number</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Items</TableHead>
+              <TableHead>Total Amount</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Shipping Address</TableHead>
+              <TableHead>Order Date</TableHead>
+              <TableHead className="w-[70px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={8} className="h-24 text-center">
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    <span className="ml-2 text-muted-foreground">
+                      Loading orders...
+                    </span>
                   </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={order.user?.avatar || "/placeholder.svg"}
-                        alt={customerName}
-                      />
-                      <AvatarFallback>
-                        {customerName
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium">{customerName}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {customerEmail}
-                      </div>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">{order.items.length} items</Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="font-medium">
-                    ${order.total_amount.toFixed(2)}
-                  </div>
-                </TableCell>
-                <TableCell>{getStatusBadge(order.status)}</TableCell>
-                <TableCell>
-                  <div className="text-sm">{shippingDisplay}</div>
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {new Date(order.created_at).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onView(order)}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onEdit(order)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Order
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => onUpdateStatus(order.id, "confirmed")}
-                      >
-                        <Package className="mr-2 h-4 w-4" />
-                        Mark Confirmed
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => onUpdateStatus(order.id, "shipped")}
-                      >
-                        <Truck className="mr-2 h-4 w-4" />
-                        Mark Shipped
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => onUpdateStatus(order.id, "delivered")}
-                      >
-                        <CheckCircle className="mr-2 h-4 w-4" />
-                        Mark Delivered
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => onUpdateStatus(order.id, "cancelled")}
-                        className="text-destructive"
-                      >
-                        <XCircle className="mr-2 h-4 w-4" />
-                        Cancel Order
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </TableCell>
               </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+            ) : displayOrders.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={8} className="h-24 text-center">
+                  <div className="text-muted-foreground">No orders found</div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              displayOrders.map((order) => {
+                const customerName = order.user
+                  ? `${order.user.firstName || ""} ${order.user.lastName || ""}`.trim() ||
+                    order.user.username
+                  : "Guest";
+                const customerEmail = order.user?.email || "—";
+                const shippingCity = order.shipping_address?.city || "—";
+                const shippingCountry = order.shipping_address?.country || "";
+                const shippingDisplay =
+                  shippingCity !== "—"
+                    ? `${shippingCity}, ${shippingCountry}`
+                    : "—";
+
+                return (
+                  <TableRow key={order.id}>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{order.order_number}</div>
+                        <div className="text-xs text-muted-foreground">
+                          ID: {order.id.slice(0, 8)}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage
+                            src={order.user?.avatar || "/placeholder.svg"}
+                            alt={customerName}
+                          />
+                          <AvatarFallback>
+                            {customerName
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">{customerName}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {customerEmail}
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {order.items?.length || 0} items
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-medium">
+                        ${typeof order.total_amount === 'string' 
+                          ? parseFloat(order.total_amount).toFixed(2)
+                          : order.total_amount.toFixed(2)}
+                      </div>
+                    </TableCell>
+                    <TableCell>{getStatusBadge(order.status)}</TableCell>
+                    <TableCell>
+                      <div className="text-sm">{shippingDisplay}</div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {new Date(order.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => onView(order)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onEdit(order)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit Order
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => onUpdateStatus(order.id, "confirmed")}
+                          >
+                            <Package className="mr-2 h-4 w-4" />
+                            Mark Confirmed
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => onUpdateStatus(order.id, "shipped")}
+                          >
+                            <Truck className="mr-2 h-4 w-4" />
+                            Mark Shipped
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => onUpdateStatus(order.id, "delivered")}
+                          >
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Mark Delivered
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => onUpdateStatus(order.id, "cancelled")}
+                            className="text-destructive"
+                          >
+                            <XCircle className="mr-2 h-4 w-4" />
+                            Cancel Order
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Showing {((pagination.page - 1) * pagination.limit) + 1} to{" "}
+            {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
+            {pagination.total} orders
+          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => onPageChange(pagination.page - 1)}
+                  className={
+                    pagination.page === 1
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
+                .filter((page) => {
+                  // Show first page, last page, current page, and pages around current
+                  return (
+                    page === 1 ||
+                    page === pagination.totalPages ||
+                    Math.abs(page - pagination.page) <= 1
+                  );
+                })
+                .map((page, index, array) => {
+                  // Add ellipsis if there's a gap
+                  const showEllipsis =
+                    index > 0 && array[index - 1] !== page - 1;
+                  return (
+                    <div key={page} className="flex items-center">
+                      {showEllipsis && (
+                        <PaginationItem>
+                          <span className="px-4">...</span>
+                        </PaginationItem>
+                      )}
+                      <PaginationItem>
+                        <PaginationLink
+                          onClick={() => onPageChange(page)}
+                          isActive={pagination.page === page}
+                          className="cursor-pointer"
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    </div>
+                  );
+                })}
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => onPageChange(pagination.page + 1)}
+                  className={
+                    pagination.page === pagination.totalPages
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   );
 }

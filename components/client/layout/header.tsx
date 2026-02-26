@@ -3,21 +3,17 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Search, ShoppingBag } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
-import { MotionDiv } from "@/components/providers/motion-provider";
+import { Menu, ShoppingBag } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { AuthStatus } from "@/components/auth/auth-status";
 import { cn } from "@/lib/utils";
-import { MotionForm } from "@/components/providers/motion-provider";
 import { useCart } from "@/contexts/cart-context";
+import { SearchButton } from "@/components/client/search/search-button";
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
   const { getTotalItems } = useCart();
 
@@ -120,65 +116,10 @@ export function Header() {
           })}
         </nav>
         <div className="flex items-center gap-4">
-          <AnimatePresence>
-            {searchOpen ? (
-              <MotionForm
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: "300px", opacity: 1 }}
-                exit={{ width: 0, opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="hidden md:flex items-center gap-2"
-              >
-                <Input
-                  type="search"
-                  placeholder="Search..."
-                  className={cn(
-                    "w-full rounded-full border-muted/30 focus-visible:ring-primary",
-                    isHomePage && !scrolled
-                      ? "bg-white/10 backdrop-blur-sm"
-                      : "bg-background"
-                  )}
-                  autoFocus
-                  onBlur={() => setSearchOpen(false)}
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  variant="ghost"
-                  className={
-                    isHomePage && !scrolled
-                      ? "text-foreground"
-                      : "text-foreground"
-                  }
-                >
-                  <Search className="h-5 w-5" />
-                  <span className="sr-only">Search</span>
-                </Button>
-              </MotionForm>
-            ) : (
-              <MotionDiv
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="hidden md:block"
-              >
-                <Button
-                  onClick={() => setSearchOpen(true)}
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "rounded-full",
-                    isHomePage && !scrolled
-                      ? " hover:bg-white/10"
-                      : "text-foreground hover:bg-muted/80"
-                  )}
-                >
-                  <Search className="h-5 w-5" />
-                  <span className="sr-only">Search</span>
-                </Button>
-              </MotionDiv>
-            )}
-          </AnimatePresence>
+          <SearchButton 
+            isHomePage={isHomePage}
+            scrolled={scrolled}
+          />
           <Link href="/client/cart">
             <Button
               variant="outline"

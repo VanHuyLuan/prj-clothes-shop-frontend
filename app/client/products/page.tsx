@@ -1,11 +1,15 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Search, X } from "lucide-react";
 import { CategoryHero } from "@/components/client/category/category-hero";
 import { ProductGrid } from "@/components/client/category/product-grid";
 import { CategoryFilters } from "@/components/client/category/category-filters";
 import { Header } from "@/components/client/layout/header";
 import { Footer } from "@/components/client/layout/footer";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { getCategoryHeroImage } from "@/lib/product-images";
 import { ApiService, Product } from "@/lib/api";
 
@@ -54,6 +58,10 @@ const isPriceInRange = (priceString: string, range: PriceRange): boolean => {
 };
 
 export default function AllProductsPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const searchQuery = searchParams.get("search");
+  const [searchInput, setSearchInput] = useState(searchQuery || "");
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,16 +84,21 @@ export default function AllProductsPage() {
         setLoading(true);
         setError(null);
         
-        // Fetch all products
-        const response = await ApiService.getProducts({
-          limit: 1000 // Get all products
-        });
-        
-        // Handle both response formats: array or object with data property
-        const productsArray = Array.isArray(response) ? response : response.data;
-        
-        // Store full product data for variant filtering
-        setAllProducts(productsArray);
+        // If there's a search query, use search API
+        if (searchQuery) {
+          const response = await ApiService.searchProducts(searchQuery, {
+            limit: 1000
+          });
+          const productsArray = Array.isArray(response) ? response : response.data;
+          setAllProducts(productsArray);
+        } else {
+          // Otherwise fetch all products
+          const response = await ApiService.getProducts({
+            limit: 1000
+          });
+          const productsArray = Array.isArray(response) ? response : response.data;
+          setAllProducts(productsArray);
+        }
       } catch (err) {
         console.error("Error fetching products:", err);
         setError(err instanceof Error ? err.message : "Failed to load products");
@@ -95,7 +108,27 @@ export default function AllProductsPage() {
     };
 
     fetchProducts();
-  }, []);
+  }, [searchQuery]);
+
+  // Update search input when URL changes
+  useEffect(() => {
+    setSearchInput(searchQuery || "");
+  }, [searchQuery]);
+
+  // Handle search
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchInput.trim()) {
+      router.push(`/client/products?search=${encodeURIComponent(searchInput)}`);
+    } else {
+      router.push("/client/products");
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchInput("");
+    router.push("/client/products");
+  };
 
   // Count products per price range
   const productCounts = useMemo(() => {
@@ -162,13 +195,21 @@ export default function AllProductsPage() {
     return (
       <div className="flex flex-col min-h-screen">
         <Header />
-        <CategoryHero
-          title="All Products"
-          description="Explore our full collection across all categories. Find styles for every occasion and every member of your family."
-          image={getCategoryHeroImage("women")}
-          category="all"
-        />
+        {!searchQuery && (
+          <CategoryHero
+            title="All Products"
+            description="Explore our full collection across all categories. Find styles for every occasion and every member of your family."
+            image={getCategoryHeroImage("women")}
+            category="all"
+          />
+        )}
         <div className="mx-auto max-w-screen-xl px-4 md:px-6 py-12">
+          {searchQuery && (
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold mb-2">Search Results for "{searchQuery}"</h1>
+              <p className="text-muted-foreground">Finding products matching "{searchQuery}"</p>
+            </div>
+          )}
           <div className="text-center text-muted-foreground">
             Loading products...
           </div>
@@ -183,13 +224,21 @@ export default function AllProductsPage() {
     return (
       <div className="flex flex-col min-h-screen">
         <Header />
-        <CategoryHero
-          title="All Products"
-          description="Explore our full collection across all categories. Find styles for every occasion and every member of your family."
-          image={getCategoryHeroImage("women")}
-          category="all"
-        />
+        {!searchQuery && (
+          <CategoryHero
+            title="All Products"
+            description="Explore our full collection across all categories. Find styles for every occasion and every member of your family."
+            image={getCategoryHeroImage("women")}
+            category="all"
+          />
+        )}
         <div className="mx-auto max-w-screen-xl px-4 md:px-6 py-12">
+          {searchQuery && (
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold mb-2">Search Results for "{searchQuery}"</h1>
+              <p className="text-muted-foreground">Showing results for "{searchQuery}"</p>
+            </div>
+          )}
           <div className="text-center text-red-500">
             Error: {error}
           </div>
@@ -203,16 +252,61 @@ export default function AllProductsPage() {
     <div className="flex flex-col min-h-screen">
       <Header />
 
-      {/* HERO BANNER */}
-      <CategoryHero
-        title="All Products"
-        description="Explore our full collection across all categories. Find styles for every occasion and every member of your family."
-        image={getCategoryHeroImage("women")}
-        category="all"
-      />
+      {/* HERO BANNER - Only show for All Products */}
+      {!searchQuery && (
+        <CategoryHero
+          title="All Products"
+          description="Explore our full collection across all categories. Find styles for every occasion and every member of your family."
+          image={getCategoryHeroImage("women")}
+          category="all"
+        />
+      )}
 
       {/* CONTENT */}
       <div className="mx-auto max-w-screen-xl px-4 md:px-6 py-12">
+        {/* SEARCH RESULTS HEADER */}
+        {searchQuery && (
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">Search Results for "{searchQuery}"</h1>
+            <p className="text-muted-foreground">Found {allProducts.length} {allProducts.length === 1 ? 'product' : 'products'} matching your search</p>
+          </div>
+        )}
+        {/* SEARCH BAR */}
+        <div className="mb-8">
+          <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
+            <div className="relative flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search products, brands, categories..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="pl-12 pr-12 h-12 text-base bg-background border-2 focus-visible:ring-2 focus-visible:ring-primary/20 rounded-xl"
+                />
+                {searchInput && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={clearSearch}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full hover:bg-muted"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <Button
+                type="submit"
+                size="lg"
+                className="h-12 px-8 rounded-xl font-semibold"
+              >
+                Search
+              </Button>
+            </div>
+          </form>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           
           {/* FILTERS */}
@@ -226,6 +320,11 @@ export default function AllProductsPage() {
           {/* PRODUCT GRID */}
           <div className="md:col-span-3">
             <div className="mb-4 text-sm text-muted-foreground">
+              {searchQuery && (
+                <div className="mb-2 font-medium text-foreground">
+                  Found {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} for "{searchQuery}"
+                </div>
+              )}
               Showing {filteredProducts.length} of {allProducts.length} products
               {(selectedPriceRanges.length > 0 || selectedSizes.length > 0 || selectedColors.length > 0) && (
                 <span className="ml-2">
@@ -234,7 +333,18 @@ export default function AllProductsPage() {
               )}
             </div>
 
-            <ProductGrid products={filteredProducts} fullProducts={allProducts} />
+            {filteredProducts.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">
+                  {searchQuery 
+                    ? `No products found matching "${searchQuery}"`
+                    : "No products found with the selected filters"
+                  }
+                </p>
+              </div>
+            ) : (
+              <ProductGrid products={filteredProducts} fullProducts={allProducts} />
+            )}
           </div>
 
         </div>

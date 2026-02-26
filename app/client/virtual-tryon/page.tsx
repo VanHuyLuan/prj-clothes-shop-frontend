@@ -17,6 +17,7 @@ export default function VirtualTryOnPage() {
   const searchParams = useSearchParams();
   const [personImage, setPersonImage] = useState<File | null>(null);
   const [garmentImage, setGarmentImage] = useState<File | null>(null);
+  const [garmentImageUrl, setGarmentImageUrl] = useState<string>(""); // Lưu URL từ product
   const [personPreview, setPersonPreview] = useState<string>("");
   const [garmentPreview, setGarmentPreview] = useState<string>("");
   const [resultImage, setResultImage] = useState<string>("");
@@ -67,6 +68,7 @@ export default function VirtualTryOnPage() {
     }
 
     setGarmentImage(file);
+    setGarmentImageUrl(""); // Clear URL khi upload file mới
     const reader = new FileReader();
     reader.onloadend = () => {
       setGarmentPreview(reader.result as string);
@@ -79,21 +81,21 @@ export default function VirtualTryOnPage() {
     const garmentUrl = searchParams.get('garment');
     const garmentName = searchParams.get('name');
     
+    console.log('🔍 Debug - garmentUrl from URL params:', garmentUrl);
+    
     if (garmentUrl) {
       const loadGarmentFromUrl = async () => {
         try {
           const decodedUrl = decodeURIComponent(garmentUrl);
+          console.log('✅ Decoded URL:', decodedUrl);
           setGarmentPreview(decodedUrl);
+          setGarmentImageUrl(decodedUrl); // Lưu URL để gửi đến backend
+          setGarmentImage(null); // Clear file cũ nếu có
           if (garmentName) {
             setGarmentDescription(decodeURIComponent(garmentName));
           }
           
-          // Convert URL to File object
-          const response = await fetch(decodedUrl);
-          const blob = await response.blob();
-          const file = new File([blob], 'product-garment.jpg', { type: 'image/jpeg' });
-          setGarmentImage(file);
-          
+          // Không cần convert thành File nữa, giữ URL để gửi trực tiếp
           toast.success("Đã tải quần áo từ trang sản phẩm!");
         } catch (error) {
           console.error("Failed to load garment from URL:", error);
@@ -106,8 +108,20 @@ export default function VirtualTryOnPage() {
   }, [searchParams]);
 
   const handleVirtualTryOn = async () => {
-    if (!personImage || !garmentImage) {
-      toast.error("Vui lòng upload cả ảnh người và ảnh quần áo");
+    console.log('🔍 Debug - States:', {
+      hasPersonImage: !!personImage,
+      hasGarmentImage: !!garmentImage,
+      garmentImageUrl: garmentImageUrl,
+      garmentImageUrlLength: garmentImageUrl?.length
+    });
+
+    if (!personImage) {
+      toast.error("Vui lòng upload ảnh người");
+      return;
+    }
+
+    if (!garmentImage && (!garmentImageUrl || garmentImageUrl.trim() === '')) {
+      toast.error("Vui lòng chọn quần áo từ trang sản phẩm hoặc upload ảnh");
       return;
     }
 
@@ -117,8 +131,15 @@ export default function VirtualTryOnPage() {
     try {
       const formData = new FormData();
       formData.append('person_image', personImage);
-      formData.append('garment_image', garmentImage);
-      formData.append('garment_description', garmentDescription);
+      
+      // Ưu tiên gửi URL nếu có (từ product page)
+      if (garmentImageUrl) {
+        formData.append('garment_image_url', garmentImageUrl);
+      } else if (garmentImage) {
+        formData.append('garment_image', garmentImage);
+      }
+      
+      formData.append('category', 'Upper-body'); // Default category
       formData.append('denoise_steps', denoiseSteps.toString());
       formData.append('seed', seed.toString());
 
@@ -134,8 +155,12 @@ export default function VirtualTryOnPage() {
 
       const result = await response.json();
       
-      if (result.success && result.data && result.data[0]) {
-        // Result image is in data[0]
+      if (result.success && result.outputImage) {
+        // New backend response format
+        setResultImage(result.outputImage);
+        toast.success(result.message || "Thử đồ ảo thành công!");
+      } else if (result.success && result.data && result.data[0]) {
+        // Legacy format fallback
         setResultImage(result.data[0]);
         toast.success("Thử đồ ảo thành công!");
       } else {
@@ -260,7 +285,7 @@ export default function VirtualTryOnPage() {
                       Ảnh quần áo
                     </CardTitle>
                     <CardDescription>
-                      Upload ảnh quần áo hoặc chọn từ trang sản phẩm
+                      Chọn quần áo từ <a href="/client/women" className="text-primary hover:underline">trang sản phẩm</a> để thử đồ (Upload file chưa được hỗ trợ)
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -356,7 +381,7 @@ export default function VirtualTryOnPage() {
                   <div className="flex gap-4">
                     <Button
                       onClick={handleVirtualTryOn}
-                      disabled={!personImage || !garmentImage || isProcessing}
+                      disabled={!personImage || (!garmentImage && !garmentImageUrl) || isProcessing}
                       className="flex-1"
                       size="lg"
                     >
