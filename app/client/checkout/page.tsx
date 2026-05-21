@@ -1,13 +1,14 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Loader2, MapPin, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, ShoppingBag, CreditCard, Banknote, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import QRCode from "react-qr-code";
 import { Header } from "@/components/client/layout/header";
 import { Footer } from "@/components/client/layout/footer";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -28,7 +35,6 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { ApiService } from "@/lib/api";
 import { toast } from "sonner";
 
-// Validation schema for shipping address
 const addressSchema = z.object({
   street: z.string().min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
   city: z.string().min(2, "Thành phố không được để trống"),
@@ -43,16 +49,51 @@ interface SavedAddress extends AddressFormData {
   id: string;
 }
 
+type PaymentStatus = "waiting" | "success" | "failed";
+
+const MOMO_QR_TTL = 10 * 60; // 10 phút (giây)
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const { items, getTotalPrice, getTotalItems } = useCart();
+  const { items, refreshCart } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | "new">("new");
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"cod" | "momo">("cod");
+  const [selectedItemIds, setSelectedItemIds] = useState<Set<string> | null>(null);
 
-  // Form for address
+  // MoMo QR dialog state
+  const [momoDialogOpen, setMomoDialogOpen] = useState(false);
+  const [momoQrValue, setMomoQrValue] = useState("");
+  const [momoDeeplink, setMomoDeeplink] = useState("");
+  const [pendingOrderNumber, setPendingOrderNumber] = useState("");
+  const [pendingAmount, setPendingAmount] = useState(0);
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("waiting");
+  const [countdown, setCountdown] = useState(MOMO_QR_TTL);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem("checkoutSelectedIds");
+    if (stored) {
+      setSelectedItemIds(new Set(JSON.parse(stored) as string[]));
+      sessionStorage.removeItem("checkoutSelectedIds");
+    }
+  }, []);
+
+  const checkoutItems =
+    selectedItemIds && selectedItemIds.size > 0
+      ? items.filter((i) => selectedItemIds.has(i.id))
+      : items;
+
+  const checkoutTotal = checkoutItems.reduce(
+    (sum, i) => sum + Number(i.price) * i.quantity,
+    0
+  );
+  const checkoutCount = checkoutItems.reduce((sum, i) => sum + i.quantity, 0);
+
   const form = useForm<AddressFormData>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
@@ -64,21 +105,29 @@ export default function CheckoutPage() {
     },
   });
 
-  // Load saved addresses for logged-in users
   useEffect(() => {
-    if (user) {
-      loadSavedAddresses();
-    }
+    if (user) loadSavedAddresses();
   }, [user]);
 
-  // Load addresses from user profile or address API
+  useEffect(() => {
+    if (items.length === 0) router.push("/client/cart");
+  }, [items, router]);
+
+  // Cleanup intervals on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, []);
+
   const loadSavedAddresses = async () => {
     try {
       setIsLoadingAddresses(true);
       const addresses = await ApiService.getAddresses();
       if (addresses && addresses.length > 0) {
         setSavedAddresses(addresses);
-        setSelectedAddressId(addresses[0].id); // Select first address by default
+        setSelectedAddressId(addresses[0].id);
       }
     } catch (error) {
       console.error("Error loading addresses:", error);
@@ -87,23 +136,72 @@ export default function CheckoutPage() {
     }
   };
 
-  // Redirect if cart is empty
-  useEffect(() => {
-    if (items.length === 0) {
-      router.push("/client/cart");
-    }
-  }, [items, router]);
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null; }
+    if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+  }, []);
 
-  // Handle checkout
+  const startMomoPolling = useCallback(
+    (orderNumber: string) => {
+      // Countdown timer
+      setCountdown(MOMO_QR_TTL);
+      countdownRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            stopPolling();
+            setPaymentStatus("failed");
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      // Payment status polling
+      pollingRef.current = setInterval(async () => {
+        try {
+          const payment = await ApiService.getPaymentByOrderId(orderNumber);
+          if (payment?.status === "completed") {
+            stopPolling();
+            setPaymentStatus("success");
+            setTimeout(() => {
+              setMomoDialogOpen(false);
+              toast.success("Thanh toán thành công! Đơn hàng đã được xác nhận.");
+              router.push(`/client/orders/${orderNumber}`);
+            }, 2000);
+          } else if (payment?.status === "failed") {
+            stopPolling();
+            setPaymentStatus("failed");
+          }
+        } catch {
+          // ignore transient errors
+        }
+      }, 3000);
+    },
+    [router, stopPolling]
+  );
+
+  const handleCancelMomo = () => {
+    stopPolling();
+    setMomoDialogOpen(false);
+    toast.info("Thanh toán bị huỷ. Bạn có thể thanh toán lại từ trang đơn hàng.");
+    router.push(`/client/orders/${pendingOrderNumber}`);
+  };
+
+  const handlePlaceOrder = () => {
+    if (user && selectedAddressId !== "new") {
+      onSubmit({} as AddressFormData);
+    } else {
+      form.handleSubmit(onSubmit)();
+    }
+  };
+
   const onSubmit = async (data: AddressFormData) => {
     try {
       setIsLoading(true);
 
       let shippingAddress: AddressFormData;
 
-      // Determine shipping address
       if (user && selectedAddressId !== "new") {
-        // Use selected saved address
         const selectedAddr = savedAddresses.find((addr) => addr.id === selectedAddressId);
         if (!selectedAddr) {
           toast.error("Vui lòng chọn địa chỉ giao hàng");
@@ -117,75 +215,94 @@ export default function CheckoutPage() {
           country: selectedAddr.country,
         };
       } else {
-        // Use form data (new address or guest)
         shippingAddress = data;
       }
 
       let order;
 
       if (user) {
-        // User checkout
-        order = await ApiService.checkout({
+        order = await ApiService.createOrder({
+          items: checkoutItems.map((i) => ({
+            product_variant_id: i.variantId,
+            quantity: i.quantity,
+          })),
           shipping_address: shippingAddress,
         });
+        await Promise.all(
+          checkoutItems.map((i) => ApiService.removeCartItem(i.id).catch(() => {}))
+        );
+        refreshCart();
       } else {
-        // Guest checkout
         const guestCartId = localStorage.getItem("guestCartId");
         if (!guestCartId) {
           toast.error("Không tìm thấy giỏ hàng");
           router.push("/client/cart");
           return;
         }
-
         order = await ApiService.guestCheckout({
           cart_id: guestCartId,
           shipping_address: shippingAddress,
         });
-
-        // Clear guest cart after successful checkout
         localStorage.removeItem("guestCartId");
       }
 
-      // Success - redirect to order confirmation
+      if (paymentMethod === "momo") {
+        // Prices stored in USD → convert to VND (1 USD ≈ 25,000 VND)
+        const amountVnd = Math.round(Number(order.total_amount) * 25000);
+        const momoResult = await ApiService.createMomoPayment({
+          orderId: order.order_number,
+          amount: amountVnd,
+          orderInfo: `Thanh toán đơn hàng ${order.order_number}`,
+        });
+
+        if (momoResult.qrCodeUrl || momoResult.payUrl) {
+          setPendingOrderNumber(order.order_number);
+          setPendingAmount(amountVnd);
+          setMomoQrValue(momoResult.qrCodeUrl || momoResult.payUrl);
+          setMomoDeeplink(momoResult.deeplink || momoResult.payUrl);
+          setPaymentStatus("waiting");
+          setMomoDialogOpen(true);
+          startMomoPolling(order.order_number);
+        } else {
+          toast.error("Không thể tạo thanh toán MoMo. Vui lòng thử lại.");
+          router.push(`/client/orders/${order.order_number}`);
+        }
+        return;
+      }
+
       toast.success("Đặt hàng thành công!");
       router.push(`/client/orders/${order.order_number}`);
     } catch (error: any) {
       console.error("Checkout error:", error);
-
-      // Handle specific errors
       if (error.message?.includes("409") || error.message?.includes("stock")) {
         toast.error("Một số sản phẩm đã hết hàng", {
           description: "Vui lòng kiểm tra lại giỏ hàng",
-          action: {
-            label: "Xem giỏ hàng",
-            onClick: () => router.push("/client/cart"),
-          },
+          action: { label: "Xem giỏ hàng", onClick: () => router.push("/client/cart") },
         });
       } else if (error.message?.includes("401")) {
-        toast.error("Phiên đăng nhập đã hết hạn", {
-          description: "Vui lòng đăng nhập lại",
-        });
+        toast.error("Phiên đăng nhập đã hết hạn", { description: "Vui lòng đăng nhập lại" });
         router.push("/login");
       } else {
-        toast.error("Không thể đặt hàng", {
-          description: error.message || "Vui lòng thử lại sau",
-        });
+        toast.error("Không thể đặt hàng", { description: error.message || "Vui lòng thử lại sau" });
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (items.length === 0) {
-    return null; // Will redirect in useEffect
-  }
+  const formatCountdown = (s: number) => {
+    const m = Math.floor(s / 60).toString().padStart(2, "0");
+    const sec = (s % 60).toString().padStart(2, "0");
+    return `${m}:${sec}`;
+  };
+
+  if (items.length === 0 || checkoutItems.length === 0) return null;
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-1 py-12 bg-muted/30">
         <div className="mx-auto max-w-7xl px-4 md:px-6">
-          {/* Back button */}
           <Link
             href="/client/cart"
             className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
@@ -207,7 +324,6 @@ export default function CheckoutPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Saved addresses for logged-in users */}
                   {user && savedAddresses.length > 0 && (
                     <div className="space-y-4">
                       <Label>Chọn địa chỉ giao hàng</Label>
@@ -222,17 +338,12 @@ export default function CheckoutPage() {
                             className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
                           >
                             <RadioGroupItem value={addr.id} id={addr.id} />
-                            <Label
-                              htmlFor={addr.id}
-                              className="flex-1 cursor-pointer"
-                            >
+                            <Label htmlFor={addr.id} className="flex-1 cursor-pointer">
                               <div className="font-medium">{addr.street}</div>
                               <div className="text-sm text-muted-foreground">
                                 {addr.state}, {addr.city}, {addr.zip}
                               </div>
-                              <div className="text-sm text-muted-foreground">
-                                {addr.country}
-                              </div>
+                              <div className="text-sm text-muted-foreground">{addr.country}</div>
                             </Label>
                           </div>
                         ))}
@@ -246,7 +357,6 @@ export default function CheckoutPage() {
                     </div>
                   )}
 
-                  {/* Address form - show for guest or when "new" is selected */}
                   {(!user || selectedAddressId === "new") && (
                     <Form {...form}>
                       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -257,16 +367,12 @@ export default function CheckoutPage() {
                             <FormItem>
                               <FormLabel>Địa chỉ</FormLabel>
                               <FormControl>
-                                <Input
-                                  placeholder="Số nhà, tên đường"
-                                  {...field}
-                                />
+                                <Input placeholder="Số nhà, tên đường" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
                             control={form.control}
@@ -281,7 +387,6 @@ export default function CheckoutPage() {
                               </FormItem>
                             )}
                           />
-
                           <FormField
                             control={form.control}
                             name="state"
@@ -296,7 +401,6 @@ export default function CheckoutPage() {
                             )}
                           />
                         </div>
-
                         <div className="grid grid-cols-2 gap-4">
                           <FormField
                             control={form.control}
@@ -311,7 +415,6 @@ export default function CheckoutPage() {
                               </FormItem>
                             )}
                           />
-
                           <FormField
                             control={form.control}
                             name="country"
@@ -339,13 +442,12 @@ export default function CheckoutPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ShoppingBag className="h-5 w-5" />
-                    Đơn hàng ({getTotalItems()} sản phẩm)
+                    Đơn hàng ({checkoutCount} sản phẩm)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Order items */}
                   <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                    {items.map((item) => (
+                    {checkoutItems.map((item) => (
                       <div key={item.id} className="flex gap-3">
                         <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted flex-shrink-0">
                           {item.image ? (
@@ -362,9 +464,7 @@ export default function CheckoutPage() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">
-                            {item.productName}
-                          </p>
+                          <p className="text-sm font-medium truncate">{item.productName}</p>
                           <p className="text-xs text-muted-foreground">
                             {item.size} / {item.color}
                           </p>
@@ -379,7 +479,7 @@ export default function CheckoutPage() {
                   <div className="border-t pt-4 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Tạm tính</span>
-                      <span>${getTotalPrice().toFixed(2)}</span>
+                      <span>${checkoutTotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Phí vận chuyển</span>
@@ -387,17 +487,45 @@ export default function CheckoutPage() {
                     </div>
                     <div className="border-t pt-2 flex justify-between font-bold text-lg">
                       <span>Tổng cộng</span>
-                      <span className="text-primary">
-                        ${getTotalPrice().toFixed(2)}
-                      </span>
+                      <span className="text-primary">${checkoutTotal.toFixed(2)}</span>
                     </div>
                   </div>
 
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Phương thức thanh toán</p>
+                    <RadioGroup
+                      value={paymentMethod}
+                      onValueChange={(v) => setPaymentMethod(v as "cod" | "momo")}
+                      className="space-y-2"
+                    >
+                      <div
+                        className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${paymentMethod === "cod" ? "border-primary bg-primary/5" : "hover:bg-muted/50"}`}
+                      >
+                        <RadioGroupItem value="cod" id="pm-cod" />
+                        <Label htmlFor="pm-cod" className="flex items-center gap-2 cursor-pointer flex-1">
+                          <Banknote className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">Thanh toán khi nhận hàng (COD)</span>
+                        </Label>
+                      </div>
+                      <div
+                        className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-colors ${paymentMethod === "momo" ? "border-pink-500 bg-pink-50 dark:bg-pink-950/20" : "hover:bg-muted/50"}`}
+                      >
+                        <RadioGroupItem value="momo" id="pm-momo" />
+                        <Label htmlFor="pm-momo" className="flex items-center gap-2 cursor-pointer flex-1">
+                          <div className="w-4 h-4 rounded bg-gradient-to-br from-pink-600 to-pink-800 flex items-center justify-center flex-shrink-0">
+                            <CreditCard className="h-2.5 w-2.5 text-white" />
+                          </div>
+                          <span className="text-sm">Thanh toán qua MoMo</span>
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
                   <Button
-                    type="submit"
-                    onClick={form.handleSubmit(onSubmit)}
+                    type="button"
+                    onClick={handlePlaceOrder}
                     disabled={isLoading || items.length === 0}
-                    className="w-full"
+                    className={`w-full ${paymentMethod === "momo" ? "bg-pink-600 hover:bg-pink-700 text-white" : ""}`}
                     size="lg"
                   >
                     {isLoading ? (
@@ -405,6 +533,8 @@ export default function CheckoutPage() {
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Đang xử lý...
                       </>
+                    ) : paymentMethod === "momo" ? (
+                      "Thanh toán qua MoMo"
                     ) : (
                       "Đặt hàng"
                     )}
@@ -424,6 +554,127 @@ export default function CheckoutPage() {
         </div>
       </main>
       <Footer />
+
+      {/* MoMo QR Payment Dialog */}
+      <Dialog
+        open={momoDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            if (paymentStatus === "waiting") handleCancelMomo();
+            else setMomoDialogOpen(false);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-pink-600">
+              <div className="w-6 h-6 rounded bg-gradient-to-br from-pink-600 to-pink-800 flex items-center justify-center">
+                <CreditCard className="h-3.5 w-3.5 text-white" />
+              </div>
+              Thanh toán MoMo
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex flex-col items-center gap-5 py-2">
+            {paymentStatus === "waiting" && (
+              <>
+                <p className="text-sm text-muted-foreground text-center">
+                  Mở ứng dụng MoMo và quét mã QR bên dưới để thanh toán
+                </p>
+
+                {/* QR Code */}
+                <div className="p-4 bg-white rounded-xl border-2 border-pink-200 shadow-sm">
+                  {momoQrValue ? (
+                    <QRCode
+                      value={momoQrValue}
+                      size={200}
+                      style={{ height: "auto", maxWidth: "100%", width: "200px" }}
+                    />
+                  ) : (
+                    <div className="w-[200px] h-[200px] flex items-center justify-center text-muted-foreground">
+                      <Loader2 className="h-8 w-8 animate-spin" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Amount */}
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground">Số tiền thanh toán</p>
+                  <p className="text-2xl font-bold text-pink-600">
+                    {pendingAmount.toLocaleString("vi-VN")}₫
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Đơn hàng: {pendingOrderNumber}
+                  </p>
+                </div>
+
+                {/* Countdown */}
+                <div className="flex items-center gap-2 text-sm">
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                  <span className="text-muted-foreground">Đang chờ thanh toán...</span>
+                  <span
+                    className={`font-mono font-semibold ${countdown < 60 ? "text-red-500" : "text-foreground"}`}
+                  >
+                    {formatCountdown(countdown)}
+                  </span>
+                </div>
+
+                {/* Open MoMo App button (for mobile) */}
+                {momoDeeplink && (
+                  <a
+                    href={momoDeeplink}
+                    className="w-full"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">
+                      Mở ứng dụng MoMo
+                    </Button>
+                  </a>
+                )}
+
+                <Button
+                  variant="ghost"
+                  className="w-full text-muted-foreground"
+                  onClick={handleCancelMomo}
+                >
+                  Huỷ thanh toán
+                </Button>
+              </>
+            )}
+
+            {paymentStatus === "success" && (
+              <div className="flex flex-col items-center gap-4 py-4">
+                <CheckCircle2 className="h-16 w-16 text-green-500" />
+                <p className="text-lg font-semibold text-green-600">Thanh toán thành công!</p>
+                <p className="text-sm text-muted-foreground text-center">
+                  Đơn hàng của bạn đã được xác nhận. Đang chuyển hướng...
+                </p>
+              </div>
+            )}
+
+            {paymentStatus === "failed" && (
+              <div className="flex flex-col items-center gap-4 py-4">
+                <XCircle className="h-16 w-16 text-red-500" />
+                <p className="text-lg font-semibold text-red-600">Thanh toán thất bại</p>
+                <p className="text-sm text-muted-foreground text-center">
+                  Mã QR đã hết hạn hoặc thanh toán không thành công.
+                </p>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setMomoDialogOpen(false);
+                    router.push(`/client/orders/${pendingOrderNumber}`);
+                  }}
+                >
+                  Xem đơn hàng
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

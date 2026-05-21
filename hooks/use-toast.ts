@@ -1,3 +1,4 @@
+﻿import { useCallback } from "react";
 import { toast } from "@/lib/utils";
 
 export type ToastProps = {
@@ -7,7 +8,7 @@ export type ToastProps = {
 };
 
 export function useToast() {
-  const showToast = (props: ToastProps) => {
+  const showToast = useCallback((props: ToastProps) => {
     const { title, description, variant = "default" } = props;
 
     if (variant === "destructive") {
@@ -15,7 +16,7 @@ export function useToast() {
     }
 
     return toast.success(title);
-  };
+  }, []);
 
   return {
     toast: showToast,

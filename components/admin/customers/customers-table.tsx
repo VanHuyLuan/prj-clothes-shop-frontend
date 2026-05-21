@@ -15,9 +15,19 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Trash2, Eye, Mail } from "lucide-react";
+import {
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Eye,
+  Mail,
+  KeyRound,
+  UserCheck,
+  UserX,
+} from "lucide-react";
 
 interface Customer {
   id: string;
@@ -43,6 +53,8 @@ interface CustomersTableProps {
   onDelete?: (customerId: string) => void;
   onView?: (customer: Customer) => void;
   onEmail?: (customer: Customer) => void;
+  onResetPassword?: (customerId: string) => void;
+  onToggleStatus?: (customer: Customer) => void;
 }
 
 export function CustomersTable({
@@ -52,16 +64,9 @@ export function CustomersTable({
   onDelete = () => {},
   onView = () => {},
   onEmail = () => {},
+  onResetPassword = () => {},
+  onToggleStatus = () => {},
 }: CustomersTableProps) {
-
-  const getStatusBadge = (status: boolean) => {
-    return status ? (
-      <Badge variant="default">Active</Badge>
-    ) : (
-      <Badge variant="secondary">Inactive</Badge>
-    );
-  };
-
   if (loading) {
     return (
       <div className="rounded-md border p-8 text-center">
@@ -107,7 +112,7 @@ export function CustomersTable({
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
                       <AvatarImage
-                        src={customer.avatar || "/placeholder.svg"}
+                        src={customer.avatar ?? "/placeholder.svg"}
                         alt={fullName}
                       />
                       <AvatarFallback>
@@ -120,7 +125,7 @@ export function CustomersTable({
                     <div>
                       <div className="font-medium">{fullName}</div>
                       <div className="text-sm text-muted-foreground">
-                        {customer.email || "—"}
+                        {customer.email ?? "—"}
                       </div>
                     </div>
                   </div>
@@ -131,16 +136,16 @@ export function CustomersTable({
                   </code>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {customer.phone || "—"}
+                  {customer.phone ?? "—"}
                 </TableCell>
                 <TableCell>
                   <Badge variant="outline">
-                    {customer.totalOrders || 0} orders
+                    {customer.totalOrders ?? 0} orders
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <div className="font-medium">
-                    ${(customer.totalSpent || 0).toFixed(2)}
+                    ${(customer.totalSpent ?? 0).toFixed(2)}
                   </div>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
@@ -148,7 +153,13 @@ export function CustomersTable({
                     ? new Date(customer.lastOrder).toLocaleDateString()
                     : "Never"}
                 </TableCell>
-                <TableCell>{getStatusBadge(customer.status)}</TableCell>
+                <TableCell>
+                  {customer.status ? (
+                    <Badge>Active</Badge>
+                  ) : (
+                    <Badge variant="secondary">Inactive</Badge>
+                  )}
+                </TableCell>
                 <TableCell className="text-muted-foreground">
                   {new Date(customer.created_at).toLocaleDateString()}
                 </TableCell>
@@ -172,6 +183,23 @@ export function CustomersTable({
                         <Edit className="mr-2 h-4 w-4" />
                         Edit
                       </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => onResetPassword(customer.id)}
+                      >
+                        <KeyRound className="mr-2 h-4 w-4" />
+                        Reset Password
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => onToggleStatus(customer)}
+                      >
+                        {customer.status ? (
+                          <UserX className="mr-2 h-4 w-4" />
+                        ) : (
+                          <UserCheck className="mr-2 h-4 w-4" />
+                        )}
+                        {customer.status ? "Deactivate" : "Activate"}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onDelete(customer.id)}
                         className="text-destructive"

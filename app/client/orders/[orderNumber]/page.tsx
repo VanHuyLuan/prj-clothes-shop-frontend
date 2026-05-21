@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Package, MapPin, Calendar, CreditCard, CheckCircle } from "lucide-react";
+import { ArrowLeft, Package, MapPin, Calendar, CreditCard, CheckCircle, Loader2 } from "lucide-react";
 import { Header } from "@/components/client/layout/header";
 import { Footer } from "@/components/client/layout/footer";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,18 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ApiService, Order } from "@/lib/api";
 import { toast } from "sonner";
+
+const paymentStatusColors = {
+  unpaid: "bg-yellow-500/10 text-yellow-700 border-yellow-500/20",
+  paid: "bg-green-500/10 text-green-700 border-green-500/20",
+  refunded: "bg-gray-500/10 text-gray-700 border-gray-500/20",
+};
+
+const paymentStatusLabels: Record<string, string> = {
+  unpaid: "Chưa thanh toán",
+  paid: "Đã thanh toán",
+  refunded: "Đã hoàn tiền",
+};
 
 const statusColors = {
   pending: "bg-yellow-500/10 text-yellow-700 border-yellow-500/20",
@@ -35,6 +47,7 @@ export default function OrderDetailPage() {
   const orderNumber = params.orderNumber as string;
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPayingMomo, setIsPayingMomo] = useState(false);
 
   useEffect(() => {
     loadOrder();
@@ -52,6 +65,29 @@ export default function OrderDetailPage() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleMomoPay = async () => {
+    if (!order) return;
+    try {
+      setIsPayingMomo(true);
+      const result = await ApiService.createMomoPayment({
+        orderId: order.order_number,
+        amount: Math.round(Number(order.total_amount)),
+        orderInfo: `Thanh toán đơn hàng ${order.order_number}`,
+      });
+      if (result.payUrl) {
+        window.location.href = result.payUrl;
+      } else {
+        toast.error("Không thể tạo thanh toán MoMo. Vui lòng thử lại.");
+      }
+    } catch (error: any) {
+      toast.error("Lỗi tạo thanh toán", {
+        description: error.message || "Vui lòng thử lại sau",
+      });
+    } finally {
+      setIsPayingMomo(false);
     }
   };
 
@@ -265,13 +301,50 @@ export default function OrderDetailPage() {
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <CreditCard className="h-4 w-4" />
-                      <span>Thanh toán khi nhận hàng</span>
+                      <span>
+                        {order.payment_method === "momo"
+                          ? "Thanh toán MoMo"
+                          : "Thanh toán khi nhận hàng"}
+                      </span>
                     </div>
+                    {order.payment_status && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Trạng thái TT</span>
+                        <Badge
+                          variant="outline"
+                          className={
+                            paymentStatusColors[
+                              order.payment_status as keyof typeof paymentStatusColors
+                            ] || paymentStatusColors.unpaid
+                          }
+                        >
+                          {paymentStatusLabels[order.payment_status] ?? order.payment_status}
+                        </Badge>
+                      </div>
+                    )}
                   </div>
 
                   <Separator />
 
                   <div className="space-y-2">
+                    {/* Show MoMo pay button if order is unpaid */}
+                    {order.payment_status === "unpaid" &&
+                      order.status !== "cancelled" && (
+                        <Button
+                          onClick={handleMomoPay}
+                          disabled={isPayingMomo}
+                          className="w-full bg-pink-600 hover:bg-pink-700 text-white"
+                        >
+                          {isPayingMomo ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Đang xử lý...
+                            </>
+                          ) : (
+                            "Thanh toán qua MoMo"
+                          )}
+                        </Button>
+                      )}
                     <Link href="/client/products">
                       <Button variant="outline" className="w-full">
                         Tiếp tục mua sắm

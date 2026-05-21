@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CustomersTable } from "@/components/admin/customers/customers-table";
 import { CustomersHeader } from "@/components/admin/customers/customers-header";
 import { useToast } from "@/hooks/use-toast";
@@ -25,7 +27,6 @@ export function CustomersClient() {
   const fetchCustomers = async () => {
     setLoading(true);
     try {
-      console.log("Fetching customers (non-admin users) from API...");
       const response = await ApiService.getCustomers({
         search: searchQuery || undefined,
         page,
@@ -33,9 +34,7 @@ export function CustomersClient() {
         sortBy: "created_at",
         sortOrder: "desc",
       });
-      console.log("Customers API response:", response);
-      
-      // Handle both paginated response and direct array response
+
       if (Array.isArray(response)) {
         setCustomers(response as CustomerWithStats[]);
         setTotalPages(1);
@@ -47,10 +46,9 @@ export function CustomersClient() {
       console.error("Failed to fetch customers:", error);
       toast({
         title: "Error",
-        description: "Failed to load customers. Check console for details.",
+        description: "Failed to load customers.",
         variant: "destructive",
       });
-      // Set empty array to show "No customers found" instead of keeping old data
       setCustomers([]);
     } finally {
       setLoading(false);
@@ -79,31 +77,62 @@ export function CustomersClient() {
   };
 
   const handleDelete = async (customerId: string) => {
+    if (!window.confirm("Are you sure you want to delete this customer?"))
+      return;
     try {
-      await ApiService.deleteUser(customerId);
-      toast({
-        title: "Success",
-        description: "Customer deleted successfully",
-      });
+      await ApiService.deleteUserByAdmin(customerId);
+      toast({ title: "Success", description: "Customer deleted successfully." });
       fetchCustomers();
     } catch (error) {
       console.error("Failed to delete customer:", error);
       toast({
         title: "Error",
-        description: "Failed to delete customer",
+        description: "Failed to delete customer.",
         variant: "destructive",
       });
     }
   };
 
   const handleEmail = (customer: CustomerWithStats) => {
-    // Open email client or modal
     if (customer.email) {
       window.location.href = `mailto:${customer.email}`;
     } else {
       toast({
         title: "No Email",
-        description: "This customer doesn't have an email address",
+        description: "This customer doesn't have an email address.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleResetPassword = async (customerId: string) => {
+    try {
+      await ApiService.resetPasswordByAdmin(customerId);
+      toast({
+        title: "Password Reset",
+        description: "A new password has been sent to the customer's email.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.message ?? "Failed to reset password.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleToggleStatus = async (customer: CustomerWithStats) => {
+    try {
+      await ApiService.setUserStatus(customer.id, !customer.status);
+      toast({
+        title: "Status Updated",
+        description: `Customer has been ${customer.status ? "deactivated" : "activated"}.`,
+      });
+      fetchCustomers();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.message ?? "Failed to update status.",
         variant: "destructive",
       });
     }
@@ -123,7 +152,34 @@ export function CustomersClient() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onEmail={handleEmail}
+        onResetPassword={handleResetPassword}
+        onToggleStatus={handleToggleStatus}
       />
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Previous
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Page {page} of {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

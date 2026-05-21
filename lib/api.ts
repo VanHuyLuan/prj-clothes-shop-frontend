@@ -1,5 +1,5 @@
 // API service layer for backend integration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.be-clothesshop.app';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.be-clothesshop.app';
 
 // Types matching the new backend schema
 export interface Role {
@@ -136,10 +136,41 @@ export interface Order {
   status: string;
   total_amount: string;
   shipping_address?: any;
+  payment_method?: string | null;
+  payment_status?: string | null;
   created_at: string;
   updated_at: string;
   user?: User;
   items?: OrderItem[];
+}
+
+export interface MomoPayment {
+  id: string;
+  order_id: string | null;
+  partner_code: string;
+  request_id: string;
+  amount: string;
+  order_info: string;
+  payment_method: string;
+  status: 'pending' | 'completed' | 'failed';
+  trans_id?: string | null;
+  pay_type?: string | null;
+  result_code?: number | null;
+  result_message?: string | null;
+  response_time?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateMomoPaymentResult {
+  success: boolean;
+  message: string;
+  payUrl: string;
+  qrCodeUrl?: string;
+  deeplink?: string;
+  orderId: string;
+  requestId: string;
+  resultCode: number;
 }
 
 export interface OrderItem {
@@ -449,8 +480,7 @@ export class ApiService {
 
   static async createOrder(data: {
     items: { product_variant_id: string; quantity: number }[];
-    shipping_address?: any;
-    user_id?: string;
+    shipping_address: any;
   }): Promise<Order> {
     return this.authenticatedRequest<Order>('/orders', {
       method: 'POST',
@@ -473,6 +503,27 @@ export class ApiService {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  }
+
+  // ============ PAYMENT API ============
+
+  static async createMomoPayment(data: {
+    orderId: string;
+    amount: number;
+    orderInfo: string;
+  }): Promise<CreateMomoPaymentResult> {
+    return this.request<CreateMomoPaymentResult>('/payment/momo/create', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  static async getPaymentByOrderId(orderId: string): Promise<MomoPayment | null> {
+    try {
+      return await this.request<MomoPayment>(`/payment/order/${orderId}`);
+    } catch {
+      return null;
+    }
   }
 
   // ============ CART API ============
@@ -868,13 +919,8 @@ export class ApiService {
     return this.authenticatedRequest<PaginatedResponse<User> | User[]>(endpoint) as Promise<any>;
   }
 
-  static async getCustomerById(customerId: string): Promise<User & {
-    totalOrders?: number;
-    totalSpent?: number;
-    lastOrderDate?: string;
-    addresses?: Address[];
-  }> {
-    return this.authenticatedRequest(`/users/${customerId}?includeStats=true`);
+  static async getCustomerById(customerId: string): Promise<User> {
+    return this.authenticatedRequest(`/identities/user/${customerId}`);
   }
 
   static async getCustomerOrders(customerId: string, params?: {
@@ -883,11 +929,12 @@ export class ApiService {
     status?: string;
   }): Promise<PaginatedResponse<any>> {
     const queryParams = new URLSearchParams();
+    queryParams.append('userId', customerId);
     if (params?.page) queryParams.append('page', params.page.toString());
     if (params?.limit) queryParams.append('limit', params.limit.toString());
     if (params?.status) queryParams.append('status', params.status);
 
-    return this.authenticatedRequest(`/users/${customerId}/orders?${queryParams.toString()}`);
+    return this.authenticatedRequest(`/orders?${queryParams.toString()}`);
   }
 
   static async getCustomerAddresses(customerId: string): Promise<Address[]> {

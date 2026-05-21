@@ -7,6 +7,7 @@ import {
   type ReactNode,
   useEffect,
 } from "react";
+import { API_BASE_URL as API_BASE } from "@/lib/api";
 
 export interface Role {
   id: string;
@@ -57,8 +58,6 @@ export interface CreateUserDto {
   phone: string;
   password: string;
 }
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.be-clothesshop.app';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

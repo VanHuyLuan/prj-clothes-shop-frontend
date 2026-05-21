@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/lib/hooks/use-toast"
+import { API_BASE_URL as API_BASE } from "@/lib/api"
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("")
@@ -21,8 +22,12 @@ export function ForgotPasswordForm() {
     e.preventDefault()
     setIsLoading(true)
     try {
-      // TODO: call actual forgot-password API endpoint
-      await new Promise((res) => setTimeout(res, 1200))
+      await fetch(`${API_BASE}/identities/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      // Luôn hiện màn "kiểm tra hộp thư" dù email có tồn tại hay không
       setSent(true)
     } catch {
       toast({
