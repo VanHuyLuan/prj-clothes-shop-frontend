@@ -27,21 +27,9 @@ import {
   Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import ApiService, { type User } from "@/lib/api";
+import ApiService, { type User, type Order } from "@/lib/api";
 
-interface CustomerProfile extends User {
-  gender?: string | null;
-  birthday?: string | null;
-  role?: { id: string; name: string; description?: string };
-  address?: Array<{
-    id: string;
-    street: string;
-    city: string;
-    state: string;
-    zip: string;
-    country: string;
-  }>;
-}
+type CustomerProfile = User;
 
 const ORDER_STATUS_LABELS: Record<string, string> = {
   pending: "Pending",
@@ -67,7 +55,7 @@ const ORDER_STATUS_VARIANTS: Record<
 export function CustomerDetails({ id }: { id: string }) {
   const { toast } = useToast();
   const [customer, setCustomer] = useState<CustomerProfile | null>(null);
-  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [orderStats, setOrderStats] = useState({ total: 0, totalSpent: 0 });
   const [loading, setLoading] = useState(true);
   const [isResetting, setIsResetting] = useState(false);
@@ -84,14 +72,14 @@ export function CustomerDetails({ id }: { id: string }) {
       const orders = ordersRes.data ?? [];
       setRecentOrders(orders.slice(0, 5));
       const totalSpent = orders.reduce(
-        (sum: number, o: any) => sum + Number(o.total_amount ?? 0),
+        (sum: number, o: Order) => sum + Number(o.total_amount ?? 0),
         0
       );
       setOrderStats({ total: ordersRes.total ?? 0, totalSpent });
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast({
         title: "Error",
-        description: e.message ?? "Failed to load customer",
+        description: (e as Error).message ?? "Failed to load customer",
         variant: "destructive",
       });
     } finally {
@@ -117,10 +105,10 @@ export function CustomerDetails({ id }: { id: string }) {
         title: "Password Reset",
         description: "A new password has been sent to the customer's email.",
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast({
         title: "Error",
-        description: e.message ?? "Failed to reset password",
+        description: (e as Error).message ?? "Failed to reset password",
         variant: "destructive",
       });
     } finally {
@@ -138,10 +126,10 @@ export function CustomerDetails({ id }: { id: string }) {
         title: "Status Updated",
         description: `Customer has been ${customer.status ? "deactivated" : "activated"}.`,
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast({
         title: "Error",
-        description: e.message ?? "Failed to update status",
+        description: (e as Error).message ?? "Failed to update status",
         variant: "destructive",
       });
     } finally {
@@ -294,11 +282,11 @@ export function CustomerDetails({ id }: { id: string }) {
                 {new Date(customer.created_at).toLocaleDateString("vi-VN")}
               </span>
             </div>
-            {customer.birthday && (
+            {customer.birthdate && (
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Birthday</span>
                 <span className="font-medium">
-                  {new Date(customer.birthday).toLocaleDateString("vi-VN")}
+                  {new Date(customer.birthdate).toLocaleDateString("vi-VN")}
                 </span>
               </div>
             )}
