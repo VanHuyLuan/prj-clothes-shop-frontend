@@ -1,110 +1,54 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { MotionDiv } from "@/components/providers/motion-provider";
-
 import Link from "next/link";
-import { ArrowUpRight, AlertTriangle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { AlertTriangle, CheckCircle } from "lucide-react";
+import { DashboardStats } from "@/lib/api";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+interface Props {
+  alerts: DashboardStats["inventoryAlerts"];
+}
 
-// Mock data for inventory alerts
-const inventoryAlerts = [
-  {
-    id: "prod-5",
-    name: "Leather Jacket",
-    sku: "LJ-001-BLK-M",
-    stock: 2,
-    threshold: 5,
-  },
-  {
-    id: "prod-12",
-    name: "Slim Fit Jeans",
-    sku: "SFJ-003-BLU-32",
-    stock: 3,
-    threshold: 10,
-  },
-  {
-    id: "prod-18",
-    name: "Summer Dress",
-    sku: "SD-007-WHT-S",
-    stock: 1,
-    threshold: 5,
-  },
-  {
-    id: "prod-24",
-    name: "Wool Sweater",
-    sku: "WS-002-GRY-L",
-    stock: 4,
-    threshold: 8,
-  },
-];
-
-export function InventoryAlerts() {
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
-
+export function InventoryAlerts({ alerts }: Props) {
   return (
-    <MotionDiv
-      initial={{ opacity: 0, y: 20 }}
-      animate={isLoaded ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: 0.4 }}
-    >
-      <Card className="border-muted/30 transition-all duration-200 hover:shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Inventory Alerts</CardTitle>
-            <CardDescription>Products with low stock levels</CardDescription>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-base font-semibold">Cảnh báo tồn kho</CardTitle>
+        <Link href="/admin/inventory" className="text-xs text-primary hover:underline">
+          Quản lý
+        </Link>
+      </CardHeader>
+      <CardContent>
+        {alerts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-40 text-muted-foreground gap-2">
+            <CheckCircle className="h-8 w-8 text-green-500 opacity-60" />
+            <p className="text-sm">Tồn kho ổn định</p>
           </div>
-          <Link
-            href="/admin/inventory"
-            className="flex items-center text-sm text-primary hover:underline"
-          >
-            View All
-            <ArrowUpRight className="ml-1 h-3 w-3" />
-          </Link>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {inventoryAlerts.map((item, index) => (
-              <MotionDiv
-                key={item.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={isLoaded ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.3, delay: 0.5 + index * 0.1 }}
-                className="flex items-center justify-between rounded-lg border p-3"
-              >
-                <div className="space-y-0.5">
-                  <div className="flex items-center">
-                    <AlertTriangle className="mr-2 h-4 w-4 text-amber-500" />
-                    <p className="font-medium">{item.name}</p>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    SKU: {item.sku}
-                  </p>
+        ) : (
+          <div className="space-y-3">
+            {alerts.map((alert) => (
+              <div key={alert.id} className="flex items-start gap-3 p-2 rounded-lg bg-orange-50 border border-orange-100">
+                <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{alert.productName}</p>
+                  <code className="text-xs text-muted-foreground">{alert.sku}</code>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-red-500">
-                    {item.stock} left
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Threshold: {item.threshold}
-                  </p>
-                </div>
-              </MotionDiv>
+                <Badge
+                  variant="outline"
+                  className={`flex-shrink-0 text-xs ${
+                    alert.stock_qty === 0
+                      ? "bg-red-100 text-red-800 border-red-200"
+                      : "bg-orange-100 text-orange-800 border-orange-200"
+                  }`}
+                >
+                  {alert.stock_qty === 0 ? "Hết hàng" : `Còn ${alert.stock_qty}`}
+                </Badge>
+              </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
-    </MotionDiv>
+        )}
+      </CardContent>
+    </Card>
   );
 }

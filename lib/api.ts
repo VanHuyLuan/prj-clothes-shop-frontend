@@ -77,6 +77,47 @@ export interface ProductVariant {
   product?: Product;
 }
 
+export interface DashboardStats {
+  metrics: {
+    thisMonthRevenue: number;
+    revenueGrowthPct: number | null;
+    thisMonthOrders: number;
+    ordersGrowthPct: number | null;
+    totalOrders: number;
+    totalCustomers: number;
+    thisMonthCustomers: number;
+    customersGrowthPct: number | null;
+    totalProducts: number;
+  };
+  salesChart: {
+    week: { labels: string[]; data: number[] };
+    month: { labels: string[]; data: number[] };
+    year: { labels: string[]; data: number[] };
+  };
+  topProducts: {
+    id: string;
+    name: string;
+    image?: string;
+    totalSales: number;
+    revenue: number;
+  }[];
+  recentOrders: {
+    id: string;
+    order_number: string;
+    customer: string;
+    created_at: string;
+    total_amount: number;
+    status: string;
+  }[];
+  inventoryAlerts: {
+    id: string;
+    productName: string;
+    sku: string;
+    stock_qty: number;
+    threshold: number;
+  }[];
+}
+
 export interface InventoryVariant {
   id: string;
   sku: string;
@@ -753,6 +794,11 @@ export class ApiService {
       sortOrder: 'desc'
     });
     return response.data;
+  }
+
+  // ============ DASHBOARD API ============
+  static async getDashboardStats(): Promise<DashboardStats> {
+    return this.authenticatedRequest<DashboardStats>('/dashboard');
   }
 
   // ============ INVENTORY API ============

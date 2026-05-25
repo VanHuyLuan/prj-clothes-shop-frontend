@@ -1,94 +1,81 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-import {
-  BarChart3,
-  ShoppingBag,
-  Users,
-  CreditCard,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
-import { MotionDiv } from "@/components/providers/motion-provider";
-
+import { TrendingUp, TrendingDown, ShoppingBag, Users, Package, DollarSign } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatVND } from "@/lib/utils";
+import { DashboardStats } from "@/lib/api";
 
-export function DashboardMetrics() {
-  const [isLoaded, setIsLoaded] = useState(false);
+interface Props {
+  metrics?: DashboardStats["metrics"];
+}
 
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
+function GrowthBadge({ pct }: { pct: number | null }) {
+  if (pct === null) return <span className="text-xs text-muted-foreground">Chưa có dữ liệu tháng trước</span>;
+  const positive = pct >= 0;
+  return (
+    <span className={`flex items-center gap-0.5 text-xs font-medium ${positive ? "text-green-600" : "text-red-500"}`}>
+      {positive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+      {positive ? "+" : ""}{pct.toFixed(1)}% so với tháng trước
+    </span>
+  );
+}
 
-  const statCards = [
+export function DashboardMetrics({ metrics }: Props) {
+  const cards = [
     {
-      title: "Total Revenue",
-      value: "$45,231.89",
-      change: "+20.1%",
-      trend: "up",
-      icon: CreditCard,
+      title: "Doanh thu tháng này",
+      value: formatVND(metrics?.thisMonthRevenue ?? 0),
+      growth: metrics?.revenueGrowthPct ?? null,
+      sub: null,
+      icon: DollarSign,
+      iconBg: "bg-blue-100 text-blue-600",
     },
     {
-      title: "Orders",
-      value: "+2350",
-      change: "+12.2%",
-      trend: "up",
+      title: "Đơn hàng tháng này",
+      value: (metrics?.thisMonthOrders ?? 0).toLocaleString("vi-VN"),
+      growth: metrics?.ordersGrowthPct ?? null,
+      sub: `Tổng cộng: ${(metrics?.totalOrders ?? 0).toLocaleString("vi-VN")} đơn`,
       icon: ShoppingBag,
+      iconBg: "bg-orange-100 text-orange-600",
     },
     {
-      title: "Customers",
-      value: "+573",
-      change: "+8.4%",
-      trend: "up",
+      title: "Khách hàng",
+      value: (metrics?.totalCustomers ?? 0).toLocaleString("vi-VN"),
+      growth: metrics?.customersGrowthPct ?? null,
+      sub: `+${(metrics?.thisMonthCustomers ?? 0)} tháng này`,
       icon: Users,
+      iconBg: "bg-purple-100 text-purple-600",
     },
     {
-      title: "Conversion Rate",
-      value: "3.2%",
-      change: "-1.1%",
-      trend: "down",
-      icon: BarChart3,
+      title: "Sản phẩm đang bán",
+      value: (metrics?.totalProducts ?? 0).toLocaleString("vi-VN"),
+      growth: null,
+      sub: "Sản phẩm active",
+      icon: Package,
+      iconBg: "bg-green-100 text-green-600",
     },
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {statCards.map((stat, index) => (
-        <MotionDiv
-          key={stat.title}
-          initial={{ opacity: 0, y: 20 }}
-          animate={isLoaded ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.3, delay: index * 0.1 }}
-        >
-          <Card className="overflow-hidden border-muted/30 transition-all duration-200 hover:shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.title}
-              </CardTitle>
-              <div className="rounded-full bg-muted/50 p-1.5">
-                <stat.icon className="h-4 w-4 text-muted-foreground" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">
-                <span
-                  className={`flex items-center ${
-                    stat.trend === "up" ? "text-green-500" : "text-red-500"
-                  }`}
-                >
-                  {stat.trend === "up" ? (
-                    <TrendingUp className="mr-1 h-3 w-3" />
-                  ) : (
-                    <TrendingDown className="mr-1 h-3 w-3" />
-                  )}
-                  {stat.change} from last month
-                </span>
-              </p>
-            </CardContent>
-          </Card>
-        </MotionDiv>
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      {cards.map((card) => (
+        <Card key={card.title}>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {card.title}
+            </CardTitle>
+            <div className={`p-2 rounded-lg ${card.iconBg}`}>
+              <card.icon className="h-4 w-4" />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-1">
+            <p className="text-2xl font-bold">{card.value}</p>
+            <GrowthBadge pct={card.growth} />
+            {card.sub && (
+              <p className="text-xs text-muted-foreground">{card.sub}</p>
+            )}
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

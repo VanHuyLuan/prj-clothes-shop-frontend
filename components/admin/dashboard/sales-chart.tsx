@@ -1,173 +1,73 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { MotionDiv } from "@/components/providers/motion-provider";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DashboardStats } from "@/lib/api";
+import { formatVND } from "@/lib/utils";
 
-import { Line } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-} from "chart.js";
+interface Props {
+  salesChart?: DashboardStats["salesChart"];
+}
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+type Period = "week" | "month" | "year";
 
-// Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
+export function SalesChart({ salesChart }: Props) {
+  const [period, setPeriod] = useState<Period>("week");
 
-export function SalesChart() {
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
-
-  // Mock data for the chart
-  const labels = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-
-  const yearData = {
-    labels,
-    datasets: [
-      {
-        label: "Revenue",
-        data: [
-          18000, 22000, 19500, 24000, 25500, 27000, 29500, 32000, 34500, 36000,
-          42000, 45000,
-        ],
-        borderColor: "hsl(var(--primary))",
-        backgroundColor: "rgba(var(--primary), 0.1)",
-        tension: 0.3,
-        fill: true,
-      },
-    ],
-  };
-
-  const monthData = {
-    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-    datasets: [
-      {
-        label: "Revenue",
-        data: [9500, 12000, 11500, 14000],
-        borderColor: "hsl(var(--primary))",
-        backgroundColor: "rgba(var(--primary), 0.1)",
-        tension: 0.3,
-        fill: true,
-      },
-    ],
-  };
-
-  const weekData = {
-    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-    datasets: [
-      {
-        label: "Revenue",
-        data: [1200, 1900, 1700, 2100, 2500, 3200, 2800],
-        borderColor: "hsl(var(--primary))",
-        backgroundColor: "rgba(var(--primary), 0.1)",
-        tension: 0.3,
-        fill: true,
-      },
-    ],
-  };
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        display: false,
-      },
-      tooltip: {
-        mode: "index" as const,
-        intersect: false,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        grid: {
-          color: "rgba(0, 0, 0, 0.05)",
-        },
-      },
-      x: {
-        grid: {
-          display: false,
-        },
-      },
-    },
-    interaction: {
-      mode: "nearest" as const,
-      axis: "x" as const,
-      intersect: false,
-    },
-  };
+  const current = salesChart?.[period];
+  const labels = current?.labels ?? [];
+  const data = current?.data ?? [];
+  const maxVal = Math.max(...data, 1);
 
   return (
-    <MotionDiv
-      initial={{ opacity: 0, y: 20 }}
-      animate={isLoaded ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5 }}
-    >
-      <Card className="border-muted/30 transition-all duration-200 hover:shadow-md">
-        <CardHeader>
-          <CardTitle>Sales Overview</CardTitle>
-          <CardDescription>
-            View your store&apos;s sales performance over time
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="year">
-            <TabsList className="mb-4">
-              <TabsTrigger value="week">Week</TabsTrigger>
-              <TabsTrigger value="month">Month</TabsTrigger>
-              <TabsTrigger value="year">Year</TabsTrigger>
-            </TabsList>
-            <TabsContent value="week" className="h-[300px]">
-              <Line data={weekData} options={options} />
-            </TabsContent>
-            <TabsContent value="month" className="h-[300px]">
-              <Line data={monthData} options={options} />
-            </TabsContent>
-            <TabsContent value="year" className="h-[300px]">
-              <Line data={yearData} options={options} />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </MotionDiv>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-base font-semibold">Doanh thu</CardTitle>
+        <Tabs value={period} onValueChange={(v) => setPeriod(v as Period)}>
+          <TabsList className="h-8">
+            <TabsTrigger value="week" className="text-xs px-3">7 ngày</TabsTrigger>
+            <TabsTrigger value="month" className="text-xs px-3">Tháng</TabsTrigger>
+            <TabsTrigger value="year" className="text-xs px-3">Năm</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </CardHeader>
+      <CardContent>
+        {data.every(v => v === 0) ? (
+          <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
+            Chưa có dữ liệu doanh thu
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {/* Bar chart */}
+            <div className="flex items-end gap-1 h-48">
+              {data.map((val, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1 group">
+                  <div className="relative w-full flex flex-col justify-end" style={{ height: "168px" }}>
+                    <div
+                      className="w-full bg-primary/80 hover:bg-primary rounded-t transition-all duration-300 cursor-default"
+                      style={{ height: `${(val / maxVal) * 100}%`, minHeight: val > 0 ? "4px" : "0" }}
+                    />
+                    {/* Tooltip */}
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                      {formatVND(val)}
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground truncate w-full text-center">
+                    {labels[i]}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Summary */}
+            <div className="flex justify-between text-sm border-t pt-3">
+              <span className="text-muted-foreground">Tổng kỳ này</span>
+              <span className="font-semibold">{formatVND(data.reduce((a, b) => a + b, 0))}</span>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

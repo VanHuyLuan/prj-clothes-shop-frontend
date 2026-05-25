@@ -1,127 +1,65 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { MotionDiv } from "@/components/providers/motion-provider";
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Package } from "lucide-react";
+import { formatVND } from "@/lib/utils";
+import { DashboardStats } from "@/lib/api";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+interface Props {
+  topProducts: DashboardStats["topProducts"];
+}
 
-// Mock data for top products
-const topProducts = [
-  {
-    id: "prod-1",
-    name: "Classic White Tee",
-    image: "/placeholder.svg?height=80&width=80",
-    sales: 245,
-    revenue: "$7,350",
-    progress: 100,
-  },
-  {
-    id: "prod-2",
-    name: "Slim Fit Jeans",
-    image: "/placeholder.svg?height=80&width=80",
-    sales: 189,
-    revenue: "$11,340",
-    progress: 77,
-  },
-  {
-    id: "prod-3",
-    name: "Leather Jacket",
-    image: "/placeholder.svg?height=80&width=80",
-    sales: 124,
-    revenue: "$24,800",
-    progress: 51,
-  },
-  {
-    id: "prod-4",
-    name: "Summer Dress",
-    image: "/placeholder.svg?height=80&width=80",
-    sales: 98,
-    revenue: "$4,900",
-    progress: 40,
-  },
-  {
-    id: "prod-5",
-    name: "Casual Blazer",
-    image: "/placeholder.svg?height=80&width=80",
-    sales: 76,
-    revenue: "$6,840",
-    progress: 31,
-  },
-];
-
-export function TopProducts() {
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
+export function TopProducts({ topProducts }: Props) {
+  const maxSales = Math.max(...topProducts.map(p => p.totalSales), 1);
 
   return (
-    <MotionDiv
-      initial={{ opacity: 0, y: 20 }}
-      animate={isLoaded ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: 0.1 }}
-    >
-      <Card className="border-muted/30 transition-all duration-200 hover:shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Top Products</CardTitle>
-            <CardDescription>
-              Your best-selling products this month
-            </CardDescription>
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base font-semibold">Top sản phẩm bán chạy</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {topProducts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-48 text-muted-foreground gap-2">
+            <Package className="h-8 w-8 opacity-30" />
+            <p className="text-sm">Chưa có dữ liệu bán hàng</p>
           </div>
-          <Link
-            href="/admin/products"
-            className="flex items-center text-sm text-primary hover:underline"
-          >
-            View All
-            <ArrowUpRight className="ml-1 h-3 w-3" />
-          </Link>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
+        ) : (
+          <div className="space-y-4">
             {topProducts.map((product, index) => (
-              <MotionDiv
-                key={product.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={isLoaded ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.3, delay: 0.2 + index * 0.1 }}
-                className="flex items-center gap-4"
-              >
-                <div className="relative h-12 w-12 overflow-hidden rounded-md">
-                  <Image
-                    src={product.image || "/placeholder.svg"}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                  />
+              <div key={product.id} className="flex items-center gap-3">
+                <span className="text-sm font-bold text-muted-foreground w-5">{index + 1}</span>
+                <div className="relative h-10 w-10 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+                  {product.image ? (
+                    <Image src={product.image} alt={product.name} fill className="object-cover" />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <Package className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  )}
                 </div>
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium">{product.name}</p>
-                    <p className="text-sm font-medium">{product.revenue}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{product.name}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <div className="flex-1 bg-muted rounded-full h-1.5">
+                      <div
+                        className="bg-primary h-1.5 rounded-full"
+                        style={{ width: `${(product.totalSales / maxSales) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      {product.totalSales} đã bán
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <p>{product.sales} sales</p>
-                    <p>{product.progress}%</p>
-                  </div>
-                  <Progress value={product.progress} className="h-1" />
                 </div>
-              </MotionDiv>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-sm font-semibold">{formatVND(product.revenue)}</p>
+                </div>
+              </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
-    </MotionDiv>
+        )}
+      </CardContent>
+    </Card>
   );
 }

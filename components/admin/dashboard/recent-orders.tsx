@@ -1,146 +1,79 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { MotionDiv, MotionTR } from "@/components/providers/motion-provider";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ShoppingBag } from "lucide-react";
+import { formatVND } from "@/lib/utils";
+import { DashboardStats } from "@/lib/api";
 
-// Mock data for recent orders
-const recentOrders = [
-  {
-    id: "ORD-001",
-    customer: "John Doe",
-    date: "2023-04-15",
-    amount: "$125.99",
-    status: "completed",
-  },
-  {
-    id: "ORD-002",
-    customer: "Jane Smith",
-    date: "2023-04-14",
-    amount: "$89.50",
-    status: "processing",
-  },
-  {
-    id: "ORD-003",
-    customer: "Robert Johnson",
-    date: "2023-04-14",
-    amount: "$254.00",
-    status: "completed",
-  },
-  {
-    id: "ORD-004",
-    customer: "Emily Davis",
-    date: "2023-04-13",
-    amount: "$45.25",
-    status: "shipped",
-  },
-  {
-    id: "ORD-005",
-    customer: "Michael Wilson",
-    date: "2023-04-12",
-    amount: "$189.75",
-    status: "cancelled",
-  },
-];
+interface Props {
+  recentOrders: DashboardStats["recentOrders"];
+}
 
-export function RecentOrders() {
-  const [isLoaded, setIsLoaded] = useState(false);
+const statusConfig: Record<string, { label: string; className: string }> = {
+  pending:    { label: "Chờ xử lý",   className: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+  confirmed:  { label: "Đã xác nhận", className: "bg-blue-100 text-blue-800 border-blue-200" },
+  processing: { label: "Đang xử lý",  className: "bg-blue-100 text-blue-800 border-blue-200" },
+  shipped:    { label: "Đang giao",   className: "bg-purple-100 text-purple-800 border-purple-200" },
+  delivered:  { label: "Đã giao",     className: "bg-green-100 text-green-800 border-green-200" },
+  cancelled:  { label: "Đã huỷ",      className: "bg-red-100 text-red-800 border-red-200" },
+};
 
-  useEffect(() => {
-    setIsLoaded(true);
-  }, []);
-
+export function RecentOrders({ recentOrders }: Props) {
   return (
-    <MotionDiv
-      initial={{ opacity: 0, y: 20 }}
-      animate={isLoaded ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: 0.3 }}
-    >
-      <Card className="border-muted/30 transition-all duration-200 hover:shadow-md">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Recent Orders</CardTitle>
-            <CardDescription>Latest customer orders</CardDescription>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-base font-semibold">Đơn hàng gần đây</CardTitle>
+        <Link href="/admin/orders" className="text-xs text-primary hover:underline">
+          Xem tất cả
+        </Link>
+      </CardHeader>
+      <CardContent>
+        {recentOrders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-40 text-muted-foreground gap-2">
+            <ShoppingBag className="h-8 w-8 opacity-30" />
+            <p className="text-sm">Chưa có đơn hàng nào</p>
           </div>
-          <Link
-            href="/admin/orders"
-            className="flex items-center text-sm text-primary hover:underline"
-          >
-            View All
-            <ArrowUpRight className="ml-1 h-3 w-3" />
-          </Link>
-        </CardHeader>
-        <CardContent>
+        ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>Mã đơn</TableHead>
+                <TableHead>Khách hàng</TableHead>
+                <TableHead>Ngày</TableHead>
+                <TableHead>Tổng tiền</TableHead>
+                <TableHead>Trạng thái</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recentOrders.map((order, index) => (
-                <MotionTR
-                  key={order.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={isLoaded ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
-                  className="hover:bg-muted/50"
-                >
-                  <TableCell className="font-medium">
-                    <Link
-                      href={`/admin/orders/${order.id}`}
-                      className="hover:underline"
-                    >
-                      {order.id}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{order.customer}</TableCell>
-                  <TableCell>{order.date}</TableCell>
-                  <TableCell>{order.amount}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        order.status === "completed"
-                          ? "default"
-                          : order.status === "processing"
-                          ? "secondary"
-                          : order.status === "shipped"
-                          ? "outline"
-                          : "destructive"
-                      }
-                      className="capitalize"
-                    >
-                      {order.status}
-                    </Badge>
-                  </TableCell>
-                </MotionTR>
-              ))}
+              {recentOrders.map((order) => {
+                const s = statusConfig[order.status] ?? { label: order.status, className: "bg-muted text-muted-foreground" };
+                return (
+                  <TableRow key={order.id}>
+                    <TableCell>
+                      <Link href={`/admin/orders/${order.id}`} className="font-mono text-xs hover:text-primary">
+                        {order.order_number}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="text-sm">{order.customer}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {new Date(order.created_at).toLocaleDateString("vi-VN")}
+                    </TableCell>
+                    <TableCell className="text-sm font-medium">{formatVND(order.total_amount)}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={`text-xs ${s.className}`}>
+                        {s.label}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
-    </MotionDiv>
+        )}
+      </CardContent>
+    </Card>
   );
 }
