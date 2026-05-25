@@ -3,14 +3,10 @@ import {
   LayoutDashboard,
   ShoppingBag,
   Users,
-  BarChart3,
   Package,
   Tags,
-  Percent,
-  Star,
   UserCog,
   Boxes,
-  Activity,
   Settings,
 } from "lucide-react";
 
@@ -19,11 +15,6 @@ const sidebarItems = [
     title: "Dashboard",
     href: "/admin/dashboard",
     icon: LayoutDashboard,
-  },
-  {
-    title: "Real-Time",
-    href: "/admin/real-time",
-    icon: Activity,
   },
   {
     title: "Products",
@@ -49,21 +40,6 @@ const sidebarItems = [
     title: "Customers",
     href: "/admin/customers",
     icon: Users,
-  },
-  {
-    title: "Coupons",
-    href: "/admin/coupons",
-    icon: Percent,
-  },
-  {
-    title: "Reviews",
-    href: "/admin/reviews",
-    icon: Star,
-  },
-  {
-    title: "Analytics",
-    href: "/admin/analytics",
-    icon: BarChart3,
   },
   {
     title: "Users",

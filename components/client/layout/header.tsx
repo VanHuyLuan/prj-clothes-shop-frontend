@@ -36,7 +36,6 @@ export function Header() {
     { name: "Men", href: "/client/men" },
     { name: "Kids", href: "/client/kids" },
     { name: "Accessories", href: "/client/accessories" },
-    { name: "Sale", href: "/client/sale" },
     { name: "✨ Virtual Try-On", href: "/client/virtual-tryon" },
   ];
 
@@ -97,11 +96,8 @@ export function Header() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "text-sm font-medium relative group transition-colors",
-                  isActive && "font-semibold",
-                  isHomePage && !scrolled
-                    ? " hover:text-white/80"
-                    : "text-foreground hover:text-primary"
+                  "text-sm font-medium relative group transition-colors text-foreground hover:text-primary",
+                  isActive && "font-semibold"
                 )}
               >
                 {item.name}
