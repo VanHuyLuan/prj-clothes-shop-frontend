@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   Table,
   TableBody,
@@ -11,282 +12,305 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Edit, Plus, Minus, AlertTriangle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, Minus, AlertTriangle, ChevronLeft, ChevronRight, Package } from "lucide-react";
 import { formatVND } from "@/lib/utils";
+import { InventoryVariant } from "@/lib/api";
 
-interface InventoryItem {
-  id: string;
-  productName: string;
-  sku: string;
-  image: string;
-  category: string;
-  currentStock: number;
-  minStock: number;
-  maxStock: number;
-  price: number;
-  lastUpdated: string;
-  status: "in-stock" | "low-stock" | "out-of-stock";
-}
+const LOW_STOCK_THRESHOLD = 10;
 
 interface InventoryTableProps {
-  items?: InventoryItem[];
-  onEdit?: (item: InventoryItem) => void;
-  onUpdateStock?: (itemId: string, newStock: number) => void;
+  items: InventoryVariant[];
+  loading: boolean;
+  total: number;
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  onUpdateStock: (variantId: string, stock_qty: number) => Promise<void>;
 }
 
 export function InventoryTable({
-  items = [],
-  onEdit = () => {},
-  onUpdateStock = () => {},
+  items,
+  loading,
+  total,
+  page,
+  totalPages,
+  onPageChange,
+  onUpdateStock,
 }: InventoryTableProps) {
-  const [stockUpdates, setStockUpdates] = useState<{ [key: string]: number }>(
-    {}
-  );
+  const [pendingStock, setPendingStock] = useState<Record<string, number>>({});
+  const [saving, setSaving] = useState<Record<string, boolean>>({});
 
-  const mockItems: InventoryItem[] = [
-    {
-      id: "1",
-      productName: "Classic White T-Shirt",
-      sku: "CWT-001",
-      image: "/placeholder.svg?height=40&width=40",
-      category: "T-Shirts",
-      currentStock: 45,
-      minStock: 10,
-      maxStock: 100,
-      price: 29.99,
-      lastUpdated: "2024-01-20",
-      status: "in-stock",
-    },
-    {
-      id: "2",
-      productName: "Denim Jacket",
-      sku: "DJ-002",
-      image: "/placeholder.svg?height=40&width=40",
-      category: "Jackets",
-      currentStock: 8,
-      minStock: 10,
-      maxStock: 50,
-      price: 89.99,
-      lastUpdated: "2024-01-19",
-      status: "low-stock",
-    },
-    {
-      id: "3",
-      productName: "Summer Dress",
-      sku: "SD-003",
-      image: "/placeholder.svg?height=40&width=40",
-      category: "Dresses",
-      currentStock: 0,
-      minStock: 5,
-      maxStock: 30,
-      price: 59.99,
-      lastUpdated: "2024-01-18",
-      status: "out-of-stock",
-    },
-    {
-      id: "4",
-      productName: "Running Shoes",
-      sku: "RS-004",
-      image: "/placeholder.svg?height=40&width=40",
-      category: "Shoes",
-      currentStock: 25,
-      minStock: 15,
-      maxStock: 75,
-      price: 129.99,
-      lastUpdated: "2024-01-20",
-      status: "in-stock",
-    },
-  ];
+  const getStatusBadge = (qty: number) => {
+    if (qty === 0) return <Badge variant="destructive">Hết hàng</Badge>;
+    if (qty <= LOW_STOCK_THRESHOLD)
+      return <Badge className="bg-orange-500 hover:bg-orange-600">Sắp hết</Badge>;
+    return <Badge className="bg-green-600 hover:bg-green-700">Còn hàng</Badge>;
+  };
 
-  const displayItems = items.length > 0 ? items : mockItems;
+  const getStockBarColor = (qty: number) => {
+    if (qty === 0) return "bg-red-500";
+    if (qty <= LOW_STOCK_THRESHOLD) return "bg-orange-500";
+    return "bg-green-500";
+  };
 
-  const getStatusBadge = (
-    status: string,
-    currentStock: number,
-    minStock: number
-  ) => {
-    if (currentStock === 0) {
-      return <Badge variant="destructive">Out of Stock</Badge>;
-    } else if (currentStock <= minStock) {
-      return <Badge variant="destructive">Low Stock</Badge>;
-    } else {
-      return <Badge variant="default">In Stock</Badge>;
+  const handleChange = (id: string, value: number) => {
+    setPendingStock((prev) => ({ ...prev, [id]: Math.max(0, value) }));
+  };
+
+  const handleAdjust = (id: string, currentQty: number, delta: number) => {
+    const base = pendingStock[id] ?? currentQty;
+    setPendingStock((prev) => ({ ...prev, [id]: Math.max(0, base + delta) }));
+  };
+
+  const handleSave = async (id: string, currentQty: number) => {
+    const newQty = pendingStock[id];
+    if (newQty === undefined || newQty === currentQty) return;
+    setSaving((prev) => ({ ...prev, [id]: true }));
+    try {
+      await onUpdateStock(id, newQty);
+      setPendingStock((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    } finally {
+      setSaving((prev) => ({ ...prev, [id]: false }));
     }
   };
 
-  const getStockLevel = (current: number, min: number, max: number) => {
-    const percentage = (current / max) * 100;
-    let color = "bg-green-500";
-    if (current <= min) color = "bg-red-500";
-    else if (current <= min * 2) color = "bg-yellow-500";
-
+  if (loading) {
     return (
-      <div className="w-full bg-gray-200 rounded-full h-2">
-        <div
-          className={`h-2 rounded-full ${color}`}
-          style={{ width: `${Math.min(percentage, 100)}%` }}
-        />
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Sản phẩm</TableHead>
+              <TableHead>SKU</TableHead>
+              <TableHead>Danh mục</TableHead>
+              <TableHead>Kích cỡ / Màu</TableHead>
+              <TableHead>Tồn kho</TableHead>
+              <TableHead>Mức tồn</TableHead>
+              <TableHead>Giá</TableHead>
+              <TableHead>Trạng thái</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <TableRow key={i}>
+                {Array.from({ length: 8 }).map((_, j) => (
+                  <TableCell key={j}>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     );
-  };
+  }
 
-  const handleStockUpdate = (itemId: string, change: number) => {
-    const item = displayItems.find((i) => i.id === itemId);
-    if (!item) return;
-
-    const currentValue = stockUpdates[itemId] ?? item.currentStock;
-    const newValue = Math.max(0, currentValue + change);
-    setStockUpdates({ ...stockUpdates, [itemId]: newValue });
-  };
-
-  const handleStockSave = (itemId: string) => {
-    const newStock = stockUpdates[itemId];
-    if (newStock !== undefined) {
-      onUpdateStock(itemId, newStock);
-      const { [itemId]: removed, ...rest } = stockUpdates;
-      setStockUpdates(rest);
-    }
-  };
+  if (!loading && items.length === 0) {
+    return (
+      <div className="rounded-md border">
+        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
+          <Package className="h-12 w-12 opacity-30" />
+          <p className="text-lg font-medium">Không có sản phẩm nào</p>
+          <p className="text-sm">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Product</TableHead>
-            <TableHead>SKU</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Current Stock</TableHead>
-            <TableHead>Stock Level</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="w-[70px]">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {displayItems.map((item) => {
-            const currentStock = stockUpdates[item.id] ?? item.currentStock;
-            const hasChanges = stockUpdates[item.id] !== undefined;
+    <div className="space-y-4">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Sản phẩm</TableHead>
+              <TableHead>SKU</TableHead>
+              <TableHead>Danh mục</TableHead>
+              <TableHead>Kích cỡ / Màu</TableHead>
+              <TableHead>Tồn kho</TableHead>
+              <TableHead>Mức tồn</TableHead>
+              <TableHead>Giá</TableHead>
+              <TableHead>Trạng thái</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((item) => {
+              const displayQty = pendingStock[item.id] ?? item.stock_qty;
+              const hasChange =
+                pendingStock[item.id] !== undefined &&
+                pendingStock[item.id] !== item.stock_qty;
+              const barPct = Math.min((displayQty / 100) * 100, 100);
+              const category = item.product.categories?.[0]?.name;
+              const image = item.product.images?.[0]?.url;
 
-            return (
-              <TableRow key={item.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage
-                        src={item.image || "/placeholder.svg"}
-                        alt={item.productName}
-                      />
-                      <AvatarFallback>
-                        {item.productName.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium">{item.productName}</div>
-                      <div className="text-sm text-muted-foreground">
-                        Updated{" "}
-                        {new Date(item.lastUpdated).toLocaleDateString()}
+              return (
+                <TableRow key={item.id}>
+                  {/* Product */}
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="relative h-10 w-10 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+                        {image ? (
+                          <Image
+                            src={image}
+                            alt={item.product.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <Package className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm">{item.product.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(item.updated_at).toLocaleDateString("vi-VN")}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <code className="text-sm bg-gray-100 px-2 py-1 rounded">
-                    {item.sku}
-                  </code>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">{item.category}</Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleStockUpdate(item.id, -1)}
-                      disabled={currentStock <= 0}
-                    >
-                      <Minus className="h-3 w-3" />
-                    </Button>
-                    <Input
-                      type="number"
-                      value={currentStock}
-                      onChange={(e) =>
-                        setStockUpdates({
-                          ...stockUpdates,
-                          [item.id]: Number.parseInt(e.target.value) || 0,
-                        })
-                      }
-                      className="w-20 text-center"
-                      min="0"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleStockUpdate(item.id, 1)}
-                    >
-                      <Plus className="h-3 w-3" />
-                    </Button>
-                    {hasChanges && (
-                      <Button
-                        size="sm"
-                        onClick={() => handleStockSave(item.id)}
-                      >
-                        Save
-                      </Button>
+                  </TableCell>
+
+                  {/* SKU */}
+                  <TableCell>
+                    <code className="text-xs bg-muted px-2 py-1 rounded">
+                      {item.sku}
+                    </code>
+                  </TableCell>
+
+                  {/* Category */}
+                  <TableCell>
+                    {category ? (
+                      <Badge variant="outline">{category}</Badge>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">—</span>
                     )}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Min: {item.minStock} | Max: {item.maxStock}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="space-y-1">
-                    {getStockLevel(currentStock, item.minStock, item.maxStock)}
-                    <div className="text-xs text-muted-foreground">
-                      {currentStock} / {item.maxStock}
+                  </TableCell>
+
+                  {/* Size / Color */}
+                  <TableCell>
+                    <div className="text-sm">
+                      {[item.size, item.color].filter(Boolean).join(" / ") || "—"}
                     </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="font-medium">{formatVND(item.price)}</div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    {getStatusBadge(item.status, currentStock, item.minStock)}
-                    {currentStock <= item.minStock && (
-                      <AlertTriangle className="h-4 w-4 text-orange-500" />
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
+                  </TableCell>
+
+                  {/* Stock control */}
+                  <TableCell>
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => handleAdjust(item.id, item.stock_qty, -1)}
+                        disabled={displayQty <= 0}
+                      >
+                        <Minus className="h-3 w-3" />
                       </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit(item)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Product
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+                      <Input
+                        type="number"
+                        value={displayQty}
+                        onChange={(e) =>
+                          handleChange(item.id, parseInt(e.target.value) || 0)
+                        }
+                        className="w-16 h-7 text-center text-sm px-1"
+                        min="0"
+                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => handleAdjust(item.id, item.stock_qty, 1)}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                      {hasChange && (
+                        <Button
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => handleSave(item.id, item.stock_qty)}
+                          disabled={saving[item.id]}
+                        >
+                          {saving[item.id] ? "..." : "Lưu"}
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+
+                  {/* Stock bar */}
+                  <TableCell>
+                    <div className="space-y-1 w-24">
+                      <div className="w-full bg-muted rounded-full h-1.5">
+                        <div
+                          className={`h-1.5 rounded-full transition-all ${getStockBarColor(displayQty)}`}
+                          style={{ width: `${barPct}%` }}
+                        />
+                      </div>
+                      <div className="text-xs text-muted-foreground">{displayQty} / 100</div>
+                    </div>
+                  </TableCell>
+
+                  {/* Price */}
+                  <TableCell>
+                    <div className="text-sm font-medium">{formatVND(item.sale_price ?? item.price)}</div>
+                    {item.sale_price && (
+                      <div className="text-xs text-muted-foreground line-through">
+                        {formatVND(item.price)}
+                      </div>
+                    )}
+                  </TableCell>
+
+                  {/* Status */}
+                  <TableCell>
+                    <div className="flex items-center gap-1.5">
+                      {getStatusBadge(displayQty)}
+                      {displayQty > 0 && displayQty <= LOW_STOCK_THRESHOLD && (
+                        <AlertTriangle className="h-4 w-4 text-orange-500" />
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-2">
+          <p className="text-sm text-muted-foreground">
+            Hiển thị {items.length} / {total} biến thể
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(page - 1)}
+              disabled={page <= 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm font-medium">
+              {page} / {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(page + 1)}
+              disabled={page >= totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

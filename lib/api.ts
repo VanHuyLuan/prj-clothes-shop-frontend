@@ -77,6 +77,33 @@ export interface ProductVariant {
   product?: Product;
 }
 
+export interface InventoryVariant {
+  id: string;
+  sku: string;
+  price: number;
+  sale_price?: number | null;
+  stock_qty: number;
+  size?: string | null;
+  color?: string | null;
+  updated_at: string;
+  product: {
+    id: string;
+    name: string;
+    images?: { url: string; alt_text?: string | null }[];
+    categories?: { id: string; name: string }[];
+  };
+}
+
+export interface InventoryResponse {
+  data: InventoryVariant[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+}
+
 // Request DTOs
 export interface CreateProductDto {
   name: string;
@@ -726,6 +753,33 @@ export class ApiService {
       sortOrder: 'desc'
     });
     return response.data;
+  }
+
+  // ============ INVENTORY API ============
+  static async getInventory(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: string;
+  }): Promise<InventoryResponse> {
+    const queryParams = new URLSearchParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          queryParams.append(key, value.toString());
+        }
+      });
+    }
+    return this.authenticatedRequest<InventoryResponse>(
+      `/inventory?${queryParams.toString()}`
+    );
+  }
+
+  static async updateInventoryStock(variantId: string, stock_qty: number): Promise<InventoryVariant> {
+    return this.authenticatedRequest<InventoryVariant>(`/inventory/${variantId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ stock_qty }),
+    });
   }
 
   // ============ INVENTORY MANAGEMENT ============

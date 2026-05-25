@@ -1,36 +1,82 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { InventoryTable } from "@/components/admin/inventory/inventory-table";
 import { InventoryHeader } from "@/components/admin/inventory/inventory-header";
-import { useToast } from "@/hooks/use-toast";
+import { ApiService, InventoryVariant, InventoryResponse } from "@/lib/api";
+import { toast } from "sonner";
+
+const PAGE_SIZE = 20;
 
 export function InventoryClient() {
-  const { toast } = useToast();
+  const [data, setData] = useState<InventoryResponse | null>(null);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [searchDebounce, setSearchDebounce] = useState("");
 
-  const handleAddStock = () => {
-    toast({
-      title: "Add Stock",
-      description: "Functionality to add new stock.",
-    });
-    // Hoặc chuyển hướng đến trang thêm stock nếu có:
-    // router.push("/admin/inventory/new");
-  };
+  // Debounce search input
+  useEffect(() => {
+    const t = setTimeout(() => setSearchDebounce(searchQuery), 400);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-    // Thêm logic lọc cho InventoryTable tại đây nếu cần
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [searchDebounce, statusFilter]);
+
+  const fetchInventory = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await ApiService.getInventory({
+        page,
+        limit: PAGE_SIZE,
+        search: searchDebounce || undefined,
+        status: statusFilter !== "all" ? statusFilter : undefined,
+      });
+      setData(res);
+    } catch {
+      toast.error("Không thể tải dữ liệu tồn kho");
+    } finally {
+      setLoading(false);
+    }
+  }, [page, searchDebounce, statusFilter]);
+
+  useEffect(() => {
+    fetchInventory();
+  }, [fetchInventory]);
+
+  const handleUpdateStock = async (variantId: string, stock_qty: number) => {
+    try {
+      await ApiService.updateInventoryStock(variantId, stock_qty);
+      toast.success("Đã cập nhật tồn kho");
+      fetchInventory();
+    } catch {
+      toast.error("Cập nhật tồn kho thất bại");
+    }
   };
 
   return (
     <div className="space-y-6">
       <InventoryHeader
-        onAddStock={handleAddStock}
         searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
+        onSearchChange={setSearchQuery}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+        lowStockCount={data?.lowStockCount ?? 0}
+        outOfStockCount={data?.outOfStockCount ?? 0}
       />
-      <InventoryTable />
+      <InventoryTable
+        items={data?.data ?? []}
+        loading={loading}
+        total={data?.total ?? 0}
+        page={page}
+        totalPages={data?.totalPages ?? 1}
+        onPageChange={setPage}
+        onUpdateStock={handleUpdateStock}
+      />
     </div>
   );
 }
