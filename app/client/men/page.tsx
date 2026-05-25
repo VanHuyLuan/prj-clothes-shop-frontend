@@ -8,6 +8,7 @@ import { Header } from "@/components/client/layout/header";
 import { Footer } from "@/components/client/layout/footer";
 import { getCategoryHeroImage } from "@/lib/product-images";
 import { ApiService, Product } from "@/lib/api";
+import { formatVND } from "@/lib/utils";
 
 interface PriceRange {
   id: string;
@@ -39,13 +40,13 @@ const convertToDisplayProduct = (product: Product): DisplayProduct => {
   return {
     id: product.id,
     name: product.name,
-    price: `$${lowestPrice.toFixed(2)}`,
+    price: formatVND(lowestPrice),
     image: primaryImage
   };
 };
 
 const parsePrice = (priceString: string): number => {
-  return parseFloat(priceString.replace(/[$,]/g, ""));
+  return parseFloat(priceString.replace(/[₫\s]/g, '').replace(/\./g, '').replace(',', '.')) || 0;
 };
 
 const isPriceInRange = (priceString: string, range: PriceRange): boolean => {

@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/pagination";
 import { Product } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { formatVND } from "@/lib/utils";
 import { ProductViewDialog } from "./product-view-dialog";
 import { ProductDeleteDialog } from "./product-delete-dialog";
 
@@ -246,8 +247,8 @@ export function ProductsTable({
 
                   <TableCell>
                     {minPrice === maxPrice
-                      ? `$${minPrice.toFixed(2)}`
-                      : `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`}
+                      ? formatVND(minPrice)
+                      : `${formatVND(minPrice)} - ${formatVND(maxPrice)}`}
                   </TableCell>
 
                   <TableCell>

@@ -7,6 +7,7 @@ import { MotionDiv } from "@/components/providers/motion-provider";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/ui/product-card";
 import { ApiService, Product } from "@/lib/api";
+import { formatVND } from "@/lib/utils";
 
 export function FeaturedProductsSection() {
   const [products, setProducts] = useState<Array<{ id: string; name: string; price: string; image: string }>>([]);
@@ -56,7 +57,7 @@ export function FeaturedProductsSection() {
           return {
             id: (product as ProductType).id,
             name: product.name,
-            price: `$${lowestPrice.toFixed(2)}`,
+            price: formatVND(lowestPrice),
             image: product.images?.[0]?.url || '/placeholder.jpg'
           };
         });

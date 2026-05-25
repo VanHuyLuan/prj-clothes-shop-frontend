@@ -6,6 +6,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function formatVND(amount: number | string | null | undefined): string {
+  const n = Math.round(Number(amount) || 0);
+  return n.toLocaleString('vi-VN') + '₫';
+}
+
 export const toast = {
   success: (message: string) => sonnerToast.success(message),
   error: (message: string) => sonnerToast.error(message),

@@ -6,7 +6,7 @@ import { ShoppingCart, Plus, Minus, Check, Star, Package } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, formatVND } from "@/lib/utils";
 import { useCart } from "@/contexts/cart-context";
 import { useRouter } from "next/navigation";
 
@@ -211,7 +211,7 @@ export function ProductQuickView({ open, onOpenChange, product }: ProductQuickVi
               {/* Price */}
               <div className="flex items-center gap-3 py-2">
                 <span className="text-4xl font-bold text-red-600">
-                  ${Math.floor(getCurrentPrice())}<sup className="text-xl">.{((getCurrentPrice() % 1) * 100).toFixed(0).padStart(2, '0')}</sup>
+                  {formatVND(getCurrentPrice())}
                 </span>
                 {(() => {
                   const originalPrice = getOriginalPrice();
@@ -220,7 +220,7 @@ export function ProductQuickView({ open, onOpenChange, product }: ProductQuickVi
                     return (
                       <>
                         <span className="text-lg text-muted-foreground line-through">
-                          ${originalPrice.toFixed(2)}
+                          {formatVND(originalPrice)}
                         </span>
                         <Badge variant="destructive" className="text-xs px-2">
                           -{Math.round((1 - currentPrice / originalPrice) * 100)}%

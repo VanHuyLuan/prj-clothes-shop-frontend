@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Plus, Minus, AlertTriangle } from "lucide-react";
+import { formatVND } from "@/lib/utils";
 
 interface InventoryItem {
   id: string;
@@ -256,7 +257,7 @@ export function InventoryTable({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="font-medium">${item.price}</div>
+                  <div className="font-medium">{formatVND(item.price)}</div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">

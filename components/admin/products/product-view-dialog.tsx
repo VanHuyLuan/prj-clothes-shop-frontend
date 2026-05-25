@@ -1,6 +1,7 @@
 "use client";
 
 import { Product } from "@/lib/api";
+import { formatVND } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -160,8 +161,8 @@ export function ProductViewDialog({
                     </label>
                     <p className="mt-1 text-lg font-semibold">
                       {minPrice === maxPrice
-                        ? `$${minPrice.toFixed(2)}`
-                        : `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`}
+                        ? formatVND(minPrice)
+                        : `${formatVND(minPrice)} - ${formatVND(maxPrice)}`}
                     </p>
                   </div>
                   <div>
@@ -193,7 +194,7 @@ export function ProductViewDialog({
                         </div>
                         <div className="text-right">
                           <div className="font-semibold">
-                            ${(typeof variant.price === 'number' ? variant.price : parseFloat(variant.price)).toFixed(2)}
+                            {formatVND(typeof variant.price === 'number' ? variant.price : parseFloat(variant.price))}
                           </div>
                           <Badge
                             variant={

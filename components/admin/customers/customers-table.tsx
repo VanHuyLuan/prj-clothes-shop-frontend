@@ -28,6 +28,7 @@ import {
   UserCheck,
   UserX,
 } from "lucide-react";
+import { formatVND } from "@/lib/utils";
 
 interface Customer {
   id: string;
@@ -145,7 +146,7 @@ export function CustomersTable({
                 </TableCell>
                 <TableCell>
                   <div className="font-medium">
-                    ${(customer.totalSpent ?? 0).toFixed(2)}
+                    {formatVND(customer.totalSpent ?? 0)}
                   </div>
                 </TableCell>
                 <TableCell className="text-muted-foreground">

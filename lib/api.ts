@@ -1,4 +1,4 @@
-// API service layer for backend integration
+﻿// API service layer for backend integration
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.be-clothesshop.app';
 
 // Types matching the new backend schema
@@ -481,6 +481,7 @@ export class ApiService {
   static async createOrder(data: {
     items: { product_variant_id: string; quantity: number }[];
     shipping_address: any;
+    payment_method?: string;
   }): Promise<Order> {
     return this.authenticatedRequest<Order>('/orders', {
       method: 'POST',

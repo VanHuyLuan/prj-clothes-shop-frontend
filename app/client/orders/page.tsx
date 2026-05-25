@@ -21,6 +21,7 @@ import {
 import { ApiService, Order } from "@/lib/api";
 import { useAuth } from "@/components/auth/auth-provider";
 import { toast } from "sonner";
+import { formatVND } from "@/lib/utils";
 
 const statusColors = {
   pending: "bg-yellow-500/10 text-yellow-700 border-yellow-500/20",
@@ -259,7 +260,7 @@ export default function MyOrdersPage() {
                             <div>
                               <p className="text-muted-foreground font-medium">Tổng tiền</p>
                               <p className="font-bold text-xl text-primary">
-                                ${Number(order.total_amount || 0).toFixed(2)}
+                                {formatVND(order.total_amount || 0)}
                               </p>
                             </div>
                             <div>

@@ -36,6 +36,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Order, OrderItem } from "@/lib/api";
+import { formatVND } from "@/lib/utils";
 
 interface OrdersTableProps {
   orders?: Order[];
@@ -348,7 +349,7 @@ export function OrdersTable({
                     </TableCell>
                     <TableCell>
                       <div className="font-medium">
-                        ${parseFloat(order.total_amount).toFixed(2)}
+                        {formatVND(order.total_amount)}
                       </div>
                     </TableCell>
                     <TableCell>{getStatusBadge(order.status)}</TableCell>

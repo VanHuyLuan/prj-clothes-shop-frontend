@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useCart } from "@/contexts/cart-context";
 import { useAuth } from "@/components/auth/auth-provider";
+import { formatVND } from "@/lib/utils";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, isLoading } = useCart();
@@ -245,10 +246,10 @@ export default function CartPage() {
 
                         <div className="text-right">
                           <p className="text-lg font-bold text-foreground">
-                            ${(Number(item.price) * item.quantity).toFixed(2)}
+                            {formatVND(Number(item.price) * item.quantity)}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            ${Number(item.price).toFixed(2)} x {item.quantity}
+                            {formatVND(item.price)} x {item.quantity}
                           </p>
                         </div>
                       </div>
@@ -283,7 +284,7 @@ export default function CartPage() {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Tạm tính</span>
                     <span className="font-medium">
-                      ${(user ? selectedTotal : items.reduce((s, i) => s + Number(i.price) * i.quantity, 0)).toFixed(2)}
+                      {formatVND(user ? selectedTotal : items.reduce((s, i) => s + Number(i.price) * i.quantity, 0))}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
@@ -293,7 +294,7 @@ export default function CartPage() {
                   <div className="border-t pt-3 flex justify-between">
                     <span className="font-semibold">Tổng cộng</span>
                     <span className="text-2xl font-bold text-primary">
-                      ${(user ? selectedTotal : items.reduce((s, i) => s + Number(i.price) * i.quantity, 0)).toFixed(2)}
+                      {formatVND(user ? selectedTotal : items.reduce((s, i) => s + Number(i.price) * i.quantity, 0))}
                     </span>
                   </div>
                 </div>

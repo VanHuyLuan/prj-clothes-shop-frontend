@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ApiService, Order } from "@/lib/api";
 import { toast } from "sonner";
+import { formatVND } from "@/lib/utils";
 
 const paymentStatusColors = {
   unpaid: "bg-yellow-500/10 text-yellow-700 border-yellow-500/20",
@@ -216,7 +217,7 @@ export default function OrderDetailPage() {
                           <div className="flex items-center justify-between mt-2">
                             <span className="text-sm">Số lượng: {item.quantity}</span>
                             <span className="font-medium">
-                              ${Number(item.unit_price || item.unitPrice || 0).toFixed(2)}
+                              {formatVND(item.unit_price || item.unitPrice || 0)}
                             </span>
                           </div>
                         </div>
@@ -274,7 +275,7 @@ export default function OrderDetailPage() {
                     <Separator />
                     <div className="flex justify-between text-sm">
                       <span>Tạm tính</span>
-                      <span>${Number(order.total_amount || 0).toFixed(2)}</span>
+                      <span>{formatVND(order.total_amount || 0)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Phí vận chuyển</span>
@@ -284,7 +285,7 @@ export default function OrderDetailPage() {
                     <div className="flex justify-between font-bold text-lg">
                       <span>Tổng cộng</span>
                       <span className="text-primary">
-                        ${Number(order.total_amount || 0).toFixed(2)}
+                        {formatVND(order.total_amount || 0)}
                       </span>
                     </div>
                   </div>

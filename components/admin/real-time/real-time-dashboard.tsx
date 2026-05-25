@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { formatVND } from "@/lib/utils";
 import { useRealTimeData } from "@/hooks/use-real-time-data";
 import { RealtimeSalesChart } from "@/components/admin/real-time/realtime-sales-chart";
 import { RealtimeInventoryAlerts } from "@/components/admin/real-time/realtime-inventory-alerts";
@@ -183,7 +184,7 @@ export function RealTimeDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${metrics.revenueToday.toLocaleString()}
+              {formatVND(metrics.revenueToday)}
             </div>
             <p className="text-xs text-muted-foreground">
               <span

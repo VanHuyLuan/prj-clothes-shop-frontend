@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { formatVND } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -594,9 +595,9 @@ export function ProductForm({ id }: ProductFormProps) {
                               {variant.sku}
                             </code>
                           </TableCell>
-                          <TableCell>${variant.price}</TableCell>
+                          <TableCell>{formatVND(variant.price)}</TableCell>
                           <TableCell>
-                            {variant.sale_price ? `$${variant.sale_price}` : "—"}
+                            {variant.sale_price ? formatVND(variant.sale_price) : "—"}
                           </TableCell>
                           <TableCell>
                             <Badge

@@ -15,6 +15,7 @@ import {
 } from "chart.js";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { formatVND } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -253,11 +254,10 @@ export function RealtimeSalesChart({
                 Avg. Order Value
               </div>
               <div className="text-xl font-bold">
-                $
-                {(
+                {formatVND(
                   data.reduce((sum, item) => sum + item.revenue, 0) /
                   data.reduce((sum, item) => sum + item.orders, 0)
-                ).toFixed(2)}
+                )}
               </div>
             </CardContent>
           </Card>

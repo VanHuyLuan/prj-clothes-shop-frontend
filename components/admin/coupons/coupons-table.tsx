@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Edit, Trash2, Copy, Eye } from "lucide-react";
+import { formatVND } from "@/lib/utils";
 import { format } from "date-fns";
 
 interface Coupon {
@@ -142,10 +143,10 @@ export function CouponsTable({
                 <div className="font-medium">
                   {coupon.type === "percentage"
                     ? `${coupon.value}%`
-                    : `$${coupon.value}`}
+                    : formatVND(coupon.value)}
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  Min: ${coupon.minOrderValue}
+                  Min: {formatVND(coupon.minOrderValue)}
                 </div>
               </TableCell>
               <TableCell>

@@ -34,6 +34,7 @@ import { useCart } from "@/contexts/cart-context";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ApiService } from "@/lib/api";
 import { toast } from "sonner";
+import { formatVND } from "@/lib/utils";
 
 const addressSchema = z.object({
   street: z.string().min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
@@ -227,6 +228,7 @@ export default function CheckoutPage() {
             quantity: i.quantity,
           })),
           shipping_address: shippingAddress,
+          payment_method: paymentMethod,
         });
         await Promise.all(
           checkoutItems.map((i) => ApiService.removeCartItem(i.id).catch(() => {}))
@@ -247,8 +249,7 @@ export default function CheckoutPage() {
       }
 
       if (paymentMethod === "momo") {
-        // Prices stored in USD → convert to VND (1 USD ≈ 25,000 VND)
-        const amountVnd = Math.round(Number(order.total_amount) * 25000);
+        const amountVnd = Math.round(Number(order.total_amount));
         const momoResult = await ApiService.createMomoPayment({
           orderId: order.order_number,
           amount: amountVnd,
@@ -469,7 +470,7 @@ export default function CheckoutPage() {
                             {item.size} / {item.color}
                           </p>
                           <p className="text-sm">
-                            {item.quantity} x ${Number(item.price).toFixed(2)}
+                            {item.quantity} x {formatVND(item.price)}
                           </p>
                         </div>
                       </div>
@@ -479,7 +480,7 @@ export default function CheckoutPage() {
                   <div className="border-t pt-4 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Tạm tính</span>
-                      <span>${checkoutTotal.toFixed(2)}</span>
+                      <span>{formatVND(checkoutTotal)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Phí vận chuyển</span>
@@ -487,7 +488,7 @@ export default function CheckoutPage() {
                     </div>
                     <div className="border-t pt-2 flex justify-between font-bold text-lg">
                       <span>Tổng cộng</span>
-                      <span className="text-primary">${checkoutTotal.toFixed(2)}</span>
+                      <span className="text-primary">{formatVND(checkoutTotal)}</span>
                     </div>
                   </div>
 

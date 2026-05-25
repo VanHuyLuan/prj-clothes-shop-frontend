@@ -17,6 +17,7 @@ import {
   Mail,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { formatVND } from "@/lib/utils";
 
 interface OrderItem {
   id: string;
@@ -254,12 +255,12 @@ export function OrderDetails({ id }: OrderDetailsProps) {
                     <div className="flex-1">
                       <h4 className="font-medium">{item.productName}</h4>
                       <p className="text-sm text-muted-foreground">
-                        Quantity: {item.quantity} × ${item.price}
+                        Quantity: {item.quantity} × {formatVND(item.price)}
                       </p>
                     </div>
                     <div className="text-right">
                       <div className="font-medium">
-                        ${item.total.toFixed(2)}
+                        {formatVND(item.total)}
                       </div>
                     </div>
                   </div>
@@ -271,20 +272,20 @@ export function OrderDetails({ id }: OrderDetailsProps) {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>${order.subtotal.toFixed(2)}</span>
+                  <span>{formatVND(order.subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tax</span>
-                  <span>${order.tax.toFixed(2)}</span>
+                  <span>{formatVND(order.tax)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>${order.shipping.toFixed(2)}</span>
+                  <span>{formatVND(order.shipping)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-medium text-lg">
                   <span>Total</span>
-                  <span>${order.total.toFixed(2)}</span>
+                  <span>{formatVND(order.total)}</span>
                 </div>
               </div>
             </CardContent>

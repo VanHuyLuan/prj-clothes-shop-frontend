@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { ApiService, type Product } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import { cn, formatVND } from "@/lib/utils";
 
 interface SearchDialogProps {
   open: boolean;
@@ -252,18 +252,18 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                               {salePrice ? (
                                 <>
                                   <span className="font-bold text-lg text-primary">
-                                    ${salePrice.toFixed(2)}
+                                    {formatVND(salePrice)}
                                   </span>
                                   <span className="text-sm text-muted-foreground line-through">
-                                    ${price.toFixed(2)}
+                                    {formatVND(price)}
                                   </span>
                                   <Badge variant="secondary" className="ml-auto text-xs">
-                                    Save ${(price - salePrice).toFixed(2)}
+                                    -{Math.round((1 - salePrice / price) * 100)}%
                                   </Badge>
                                 </>
                               ) : (
                                 <span className="font-bold text-lg">
-                                  ${price.toFixed(2)}
+                                  {formatVND(price)}
                                 </span>
                               )}
                             </div>
