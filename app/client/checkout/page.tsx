@@ -64,6 +64,7 @@ export default function CheckoutPage() {
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "momo">("cod");
   const [selectedItemIds, setSelectedItemIds] = useState<Set<string> | null>(null);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   // MoMo QR dialog state
   const [momoDialogOpen, setMomoDialogOpen] = useState(false);
@@ -111,8 +112,8 @@ export default function CheckoutPage() {
   }, [user]);
 
   useEffect(() => {
-    if (items.length === 0) router.push("/client/cart");
-  }, [items, router]);
+    if (items.length === 0 && !isPlacingOrder) router.push("/client/cart");
+  }, [items, router, isPlacingOrder]);
 
   // Cleanup intervals on unmount
   useEffect(() => {
@@ -166,6 +167,7 @@ export default function CheckoutPage() {
             setPaymentStatus("success");
             setTimeout(() => {
               setMomoDialogOpen(false);
+              refreshCart();
               toast.success("Payment successful! Your order has been confirmed.");
               router.push(`/client/orders/${orderNumber}`);
             }, 2000);
@@ -178,12 +180,13 @@ export default function CheckoutPage() {
         }
       }, 3000);
     },
-    [router, stopPolling]
+    [router, stopPolling, refreshCart]
   );
 
   const handleCancelMomo = () => {
     stopPolling();
     setMomoDialogOpen(false);
+    refreshCart();
     toast.info("Payment cancelled. You can retry payment from the order page.");
     router.push(`/client/orders/${pendingOrderNumber}`);
   };
@@ -199,6 +202,7 @@ export default function CheckoutPage() {
   const onSubmit = async (data: AddressFormData) => {
     try {
       setIsLoading(true);
+      setIsPlacingOrder(true);
 
       let shippingAddress: AddressFormData;
 
@@ -233,7 +237,8 @@ export default function CheckoutPage() {
         await Promise.all(
           checkoutItems.map((i) => ApiService.removeCartItem(i.id).catch(() => {}))
         );
-        refreshCart();
+        // refreshCart() is deferred — calling it here empties `items` and triggers
+        // the items.length === 0 useEffect redirect before MoMo dialog can show.
       } else {
         const guestCartId = localStorage.getItem("guestCartId");
         if (!guestCartId) {
@@ -264,13 +269,17 @@ export default function CheckoutPage() {
           setPaymentStatus("waiting");
           setMomoDialogOpen(true);
           startMomoPolling(order.order_number);
+          // refreshCart() will be called when dialog closes (success/cancel/expire)
         } else {
           toast.error("Could not create MoMo payment. Please try again.");
+          refreshCart();
           router.push(`/client/orders/${order.order_number}`);
         }
         return;
       }
 
+      // COD: refresh cart then redirect
+      refreshCart();
       toast.success("Order placed successfully!");
       router.push(`/client/orders/${order.order_number}`);
     } catch (error: any) {
@@ -665,6 +674,7 @@ export default function CheckoutPage() {
                   className="w-full"
                   onClick={() => {
                     setMomoDialogOpen(false);
+                    refreshCart();
                     router.push(`/client/orders/${pendingOrderNumber}`);
                   }}
                 >
