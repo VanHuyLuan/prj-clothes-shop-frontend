@@ -16,13 +16,13 @@ export function TopProducts({ topProducts }: Props) {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-base font-semibold">Top sản phẩm bán chạy</CardTitle>
+        <CardTitle className="text-base font-semibold">Top Selling Products</CardTitle>
       </CardHeader>
       <CardContent>
         {topProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 text-muted-foreground gap-2">
             <Package className="h-8 w-8 opacity-30" />
-            <p className="text-sm">Chưa có dữ liệu bán hàng</p>
+            <p className="text-sm">No sales data yet</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -48,7 +48,7 @@ export function TopProducts({ topProducts }: Props) {
                       />
                     </div>
                     <span className="text-xs text-muted-foreground whitespace-nowrap">
-                      {product.totalSales} đã bán
+                      {product.totalSales} sold
                     </span>
                   </div>
                 </div>

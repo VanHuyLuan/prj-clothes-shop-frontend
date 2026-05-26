@@ -44,18 +44,18 @@ function PaymentResultContent() {
 
         <div className="space-y-2">
           <h1 className="text-2xl font-bold">
-            {isSuccess ? "Thanh toán thành công!" : "Thanh toán thất bại"}
+            {isSuccess ? "Payment successful!" : "Payment failed"}
           </h1>
           <p className="text-muted-foreground text-sm">
             {isSuccess
-              ? "Đơn hàng của bạn đã được xác nhận và đang được xử lý."
-              : message || "Giao dịch không thành công. Vui lòng thử lại."}
+              ? "Your order has been confirmed and is being processed."
+              : message || "Transaction unsuccessful. Please try again."}
           </p>
         </div>
 
         {orderId && (
           <div className="bg-muted rounded-lg py-3 px-4 text-sm">
-            <span className="text-muted-foreground">Mã đơn hàng: </span>
+            <span className="text-muted-foreground">Order ID: </span>
             <span className="font-mono font-semibold">{orderId}</span>
           </div>
         )}
@@ -64,21 +64,21 @@ function PaymentResultContent() {
           {orderId && (
             <Link href={`/client/orders/${orderId}`}>
               <Button className="w-full" size="lg">
-                Xem đơn hàng
+                View order
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           )}
           <Link href="/client/products">
             <Button variant="outline" className="w-full">
-              Tiếp tục mua sắm
+              Continue shopping
             </Button>
           </Link>
         </div>
 
         {orderId && (
           <p className="text-xs text-muted-foreground">
-            Tự động chuyển đến đơn hàng sau{" "}
+            Redirecting to your order in{" "}
             <span className="font-semibold text-foreground">{countdown}s</span>
           </p>
         )}

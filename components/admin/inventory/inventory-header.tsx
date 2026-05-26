@@ -33,9 +33,9 @@ export function InventoryHeader({
     <div className="space-y-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Tồn kho</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Inventory</h1>
           <p className="text-muted-foreground">
-            Quản lý và theo dõi số lượng tồn kho sản phẩm
+            Manage and track product stock levels
           </p>
         </div>
 
@@ -43,7 +43,7 @@ export function InventoryHeader({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Tìm theo tên hoặc SKU..."
+              placeholder="Search by name or SKU..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-10 w-full sm:w-[280px]"
@@ -52,13 +52,13 @@ export function InventoryHeader({
 
           <Select value={statusFilter} onValueChange={onStatusChange}>
             <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Trạng thái" />
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tất cả</SelectItem>
-              <SelectItem value="in_stock">Còn hàng</SelectItem>
-              <SelectItem value="low_stock">Sắp hết</SelectItem>
-              <SelectItem value="out_of_stock">Hết hàng</SelectItem>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="in_stock">In stock</SelectItem>
+              <SelectItem value="low_stock">Low stock</SelectItem>
+              <SelectItem value="out_of_stock">Out of stock</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -76,7 +76,7 @@ export function InventoryHeader({
                 <Badge variant="destructive" className="mr-1">
                   {lowStockCount}
                 </Badge>
-                biến thể sắp hết hàng
+                variants low on stock
               </span>
             </button>
           )}
@@ -90,7 +90,7 @@ export function InventoryHeader({
                 <Badge variant="destructive" className="mr-1">
                   {outOfStockCount}
                 </Badge>
-                biến thể hết hàng
+                variants out of stock
               </span>
             </button>
           )}

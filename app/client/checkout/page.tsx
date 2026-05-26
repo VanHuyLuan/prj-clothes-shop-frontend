@@ -37,11 +37,11 @@ import { toast } from "sonner";
 import { formatVND } from "@/lib/utils";
 
 const addressSchema = z.object({
-  street: z.string().min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
-  city: z.string().min(2, "Thành phố không được để trống"),
-  state: z.string().min(2, "Quận/Huyện không được để trống"),
-  zip: z.string().min(5, "Mã bưu điện phải có ít nhất 5 ký tự"),
-  country: z.string().min(2, "Quốc gia không được để trống"),
+  street: z.string().min(5, "Address must be at least 5 characters"),
+  city: z.string().min(2, "City is required"),
+  state: z.string().min(2, "District is required"),
+  zip: z.string().min(5, "ZIP code must be at least 5 characters"),
+  country: z.string().min(2, "Country is required"),
 });
 
 type AddressFormData = z.infer<typeof addressSchema>;
@@ -52,7 +52,7 @@ interface SavedAddress extends AddressFormData {
 
 type PaymentStatus = "waiting" | "success" | "failed";
 
-const MOMO_QR_TTL = 10 * 60; // 10 phút (giây)
+const MOMO_QR_TTL = 10 * 60; // 10 minutes (seconds)
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -166,7 +166,7 @@ export default function CheckoutPage() {
             setPaymentStatus("success");
             setTimeout(() => {
               setMomoDialogOpen(false);
-              toast.success("Thanh toán thành công! Đơn hàng đã được xác nhận.");
+              toast.success("Payment successful! Your order has been confirmed.");
               router.push(`/client/orders/${orderNumber}`);
             }, 2000);
           } else if (payment?.status === "failed") {
@@ -184,7 +184,7 @@ export default function CheckoutPage() {
   const handleCancelMomo = () => {
     stopPolling();
     setMomoDialogOpen(false);
-    toast.info("Thanh toán bị huỷ. Bạn có thể thanh toán lại từ trang đơn hàng.");
+    toast.info("Payment cancelled. You can retry payment from the order page.");
     router.push(`/client/orders/${pendingOrderNumber}`);
   };
 
@@ -205,7 +205,7 @@ export default function CheckoutPage() {
       if (user && selectedAddressId !== "new") {
         const selectedAddr = savedAddresses.find((addr) => addr.id === selectedAddressId);
         if (!selectedAddr) {
-          toast.error("Vui lòng chọn địa chỉ giao hàng");
+          toast.error("Please select a shipping address");
           return;
         }
         shippingAddress = {
@@ -237,7 +237,7 @@ export default function CheckoutPage() {
       } else {
         const guestCartId = localStorage.getItem("guestCartId");
         if (!guestCartId) {
-          toast.error("Không tìm thấy giỏ hàng");
+          toast.error("Cart not found");
           router.push("/client/cart");
           return;
         }
@@ -253,7 +253,7 @@ export default function CheckoutPage() {
         const momoResult = await ApiService.createMomoPayment({
           orderId: order.order_number,
           amount: amountVnd,
-          orderInfo: `Thanh toán đơn hàng ${order.order_number}`,
+          orderInfo: `Payment for order ${order.order_number}`,
         });
 
         if (momoResult.qrCodeUrl || momoResult.payUrl) {
@@ -265,26 +265,26 @@ export default function CheckoutPage() {
           setMomoDialogOpen(true);
           startMomoPolling(order.order_number);
         } else {
-          toast.error("Không thể tạo thanh toán MoMo. Vui lòng thử lại.");
+          toast.error("Could not create MoMo payment. Please try again.");
           router.push(`/client/orders/${order.order_number}`);
         }
         return;
       }
 
-      toast.success("Đặt hàng thành công!");
+      toast.success("Order placed successfully!");
       router.push(`/client/orders/${order.order_number}`);
     } catch (error: any) {
       console.error("Checkout error:", error);
       if (error.message?.includes("409") || error.message?.includes("stock")) {
-        toast.error("Một số sản phẩm đã hết hàng", {
-          description: "Vui lòng kiểm tra lại giỏ hàng",
-          action: { label: "Xem giỏ hàng", onClick: () => router.push("/client/cart") },
+        toast.error("Some items are out of stock", {
+          description: "Please review your cart",
+          action: { label: "View cart", onClick: () => router.push("/client/cart") },
         });
       } else if (error.message?.includes("401")) {
-        toast.error("Phiên đăng nhập đã hết hạn", { description: "Vui lòng đăng nhập lại" });
+        toast.error("Session expired", { description: "Please sign in again" });
         router.push("/login");
       } else {
-        toast.error("Không thể đặt hàng", { description: error.message || "Vui lòng thử lại sau" });
+        toast.error("Could not place order", { description: error.message || "Please try again later" });
       }
     } finally {
       setIsLoading(false);
@@ -309,10 +309,10 @@ export default function CheckoutPage() {
             className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Quay lại giỏ hàng
+            Back to cart
           </Link>
 
-          <h1 className="text-3xl font-bold mb-8">Thanh toán</h1>
+          <h1 className="text-3xl font-bold mb-8">Checkout</h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left: Shipping Address */}
@@ -321,13 +321,13 @@ export default function CheckoutPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
-                    Địa chỉ giao hàng
+                    Shipping address
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {user && savedAddresses.length > 0 && (
                     <div className="space-y-4">
-                      <Label>Chọn địa chỉ giao hàng</Label>
+                      <Label>Select shipping address</Label>
                       <RadioGroup
                         value={selectedAddressId}
                         onValueChange={setSelectedAddressId}
@@ -351,7 +351,7 @@ export default function CheckoutPage() {
                         <div className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-muted/50 cursor-pointer">
                           <RadioGroupItem value="new" id="new" />
                           <Label htmlFor="new" className="cursor-pointer">
-                            Sử dụng địa chỉ mới
+                            Use a new address
                           </Label>
                         </div>
                       </RadioGroup>
@@ -366,9 +366,9 @@ export default function CheckoutPage() {
                           name="street"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Địa chỉ</FormLabel>
+                              <FormLabel>Street address</FormLabel>
                               <FormControl>
-                                <Input placeholder="Số nhà, tên đường" {...field} />
+                                <Input placeholder="House number, street name" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -380,9 +380,9 @@ export default function CheckoutPage() {
                             name="city"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Thành phố</FormLabel>
+                                <FormLabel>City</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Hồ Chí Minh" {...field} />
+                                  <Input placeholder="Ho Chi Minh City" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -393,9 +393,9 @@ export default function CheckoutPage() {
                             name="state"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Quận/Huyện</FormLabel>
+                                <FormLabel>District</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Quận 1" {...field} />
+                                  <Input placeholder="District 1" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -408,7 +408,7 @@ export default function CheckoutPage() {
                             name="zip"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Mã bưu điện</FormLabel>
+                                <FormLabel>ZIP code</FormLabel>
                                 <FormControl>
                                   <Input placeholder="700000" {...field} />
                                 </FormControl>
@@ -421,7 +421,7 @@ export default function CheckoutPage() {
                             name="country"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Quốc gia</FormLabel>
+                                <FormLabel>Country</FormLabel>
                                 <FormControl>
                                   <Input placeholder="Vietnam" {...field} />
                                 </FormControl>
@@ -443,7 +443,7 @@ export default function CheckoutPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ShoppingBag className="h-5 w-5" />
-                    Đơn hàng ({checkoutCount} sản phẩm)
+                    Order ({checkoutCount} item{checkoutCount !== 1 ? "s" : ""})
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -479,21 +479,21 @@ export default function CheckoutPage() {
 
                   <div className="border-t pt-4 space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Tạm tính</span>
+                      <span>Subtotal</span>
                       <span>{formatVND(checkoutTotal)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Phí vận chuyển</span>
-                      <span>Miễn phí</span>
+                      <span>Shipping</span>
+                      <span>Free</span>
                     </div>
                     <div className="border-t pt-2 flex justify-between font-bold text-lg">
-                      <span>Tổng cộng</span>
+                      <span>Total</span>
                       <span className="text-primary">{formatVND(checkoutTotal)}</span>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">Phương thức thanh toán</p>
+                    <p className="text-sm font-medium">Payment method</p>
                     <RadioGroup
                       value={paymentMethod}
                       onValueChange={(v) => setPaymentMethod(v as "cod" | "momo")}
@@ -505,7 +505,7 @@ export default function CheckoutPage() {
                         <RadioGroupItem value="cod" id="pm-cod" />
                         <Label htmlFor="pm-cod" className="flex items-center gap-2 cursor-pointer flex-1">
                           <Banknote className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">Thanh toán khi nhận hàng (COD)</span>
+                          <span className="text-sm">Cash on delivery (COD)</span>
                         </Label>
                       </div>
                       <div
@@ -516,7 +516,7 @@ export default function CheckoutPage() {
                           <div className="w-4 h-4 rounded bg-gradient-to-br from-pink-600 to-pink-800 flex items-center justify-center flex-shrink-0">
                             <CreditCard className="h-2.5 w-2.5 text-white" />
                           </div>
-                          <span className="text-sm">Thanh toán qua MoMo</span>
+                          <span className="text-sm">Pay with MoMo</span>
                         </Label>
                       </div>
                     </RadioGroup>
@@ -532,21 +532,20 @@ export default function CheckoutPage() {
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        Đang xử lý...
+                        Processing...
                       </>
                     ) : paymentMethod === "momo" ? (
-                      "Thanh toán qua MoMo"
+                      "Pay with MoMo"
                     ) : (
-                      "Đặt hàng"
+                      "Place order"
                     )}
                   </Button>
 
                   <p className="text-xs text-center text-muted-foreground">
-                    Bằng cách đặt hàng, bạn đồng ý với{" "}
+                    By placing an order, you agree to our{" "}
                     <Link href="/terms" className="underline">
-                      Điều khoản dịch vụ
-                    </Link>{" "}
-                    của chúng tôi
+                      Terms of Service
+                    </Link>
                   </p>
                 </CardContent>
               </Card>
@@ -572,7 +571,7 @@ export default function CheckoutPage() {
               <div className="w-6 h-6 rounded bg-gradient-to-br from-pink-600 to-pink-800 flex items-center justify-center">
                 <CreditCard className="h-3.5 w-3.5 text-white" />
               </div>
-              Thanh toán MoMo
+              MoMo Payment
             </DialogTitle>
           </DialogHeader>
 
@@ -580,7 +579,7 @@ export default function CheckoutPage() {
             {paymentStatus === "waiting" && (
               <>
                 <p className="text-sm text-muted-foreground text-center">
-                  Mở ứng dụng MoMo và quét mã QR bên dưới để thanh toán
+                  Open the MoMo app and scan the QR code below to pay
                 </p>
 
                 {/* QR Code */}
@@ -600,19 +599,19 @@ export default function CheckoutPage() {
 
                 {/* Amount */}
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground">Số tiền thanh toán</p>
+                  <p className="text-xs text-muted-foreground">Amount</p>
                   <p className="text-2xl font-bold text-pink-600">
-                    {pendingAmount.toLocaleString("vi-VN")}₫
+                    {pendingAmount.toLocaleString("en-US")}₫
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Đơn hàng: {pendingOrderNumber}
+                    Order: {pendingOrderNumber}
                   </p>
                 </div>
 
                 {/* Countdown */}
                 <div className="flex items-center gap-2 text-sm">
                   <RefreshCw className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
-                  <span className="text-muted-foreground">Đang chờ thanh toán...</span>
+                  <span className="text-muted-foreground">Waiting for payment...</span>
                   <span
                     className={`font-mono font-semibold ${countdown < 60 ? "text-red-500" : "text-foreground"}`}
                   >
@@ -629,7 +628,7 @@ export default function CheckoutPage() {
                     rel="noopener noreferrer"
                   >
                     <Button className="w-full bg-pink-600 hover:bg-pink-700 text-white">
-                      Mở ứng dụng MoMo
+                      Open MoMo app
                     </Button>
                   </a>
                 )}
@@ -639,7 +638,7 @@ export default function CheckoutPage() {
                   className="w-full text-muted-foreground"
                   onClick={handleCancelMomo}
                 >
-                  Huỷ thanh toán
+                  Cancel payment
                 </Button>
               </>
             )}
@@ -647,9 +646,9 @@ export default function CheckoutPage() {
             {paymentStatus === "success" && (
               <div className="flex flex-col items-center gap-4 py-4">
                 <CheckCircle2 className="h-16 w-16 text-green-500" />
-                <p className="text-lg font-semibold text-green-600">Thanh toán thành công!</p>
+                <p className="text-lg font-semibold text-green-600">Payment successful!</p>
                 <p className="text-sm text-muted-foreground text-center">
-                  Đơn hàng của bạn đã được xác nhận. Đang chuyển hướng...
+                  Your order has been confirmed. Redirecting...
                 </p>
               </div>
             )}
@@ -657,9 +656,9 @@ export default function CheckoutPage() {
             {paymentStatus === "failed" && (
               <div className="flex flex-col items-center gap-4 py-4">
                 <XCircle className="h-16 w-16 text-red-500" />
-                <p className="text-lg font-semibold text-red-600">Thanh toán thất bại</p>
+                <p className="text-lg font-semibold text-red-600">Payment failed</p>
                 <p className="text-sm text-muted-foreground text-center">
-                  Mã QR đã hết hạn hoặc thanh toán không thành công.
+                  The QR code has expired or the payment was unsuccessful.
                 </p>
                 <Button
                   variant="outline"
@@ -669,7 +668,7 @@ export default function CheckoutPage() {
                     router.push(`/client/orders/${pendingOrderNumber}`);
                   }}
                 >
-                  Xem đơn hàng
+                  View order
                 </Button>
               </div>
             )}

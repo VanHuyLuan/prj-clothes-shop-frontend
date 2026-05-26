@@ -66,7 +66,7 @@ export default function AccountPage() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!user) {
-      toast.error("Vui lòng đăng nhập để xem tài khoản");
+      toast.error("Please sign in to view your account");
       router.push("/login");
     }
   }, [user, router]);
@@ -93,8 +93,8 @@ export default function AccountPage() {
       setAddresses(data);
     } catch (error: any) {
       console.error("Error loading addresses:", error);
-      toast.error("Không thể tải danh sách địa chỉ", {
-        description: error.message || "Vui lòng thử lại sau",
+      toast.error("Could not load addresses", {
+        description: error.message || "Please try again later",
       });
     } finally {
       setIsLoading(false);
@@ -104,12 +104,12 @@ export default function AccountPage() {
   const handleAddAddress = async () => {
     try {
       if (!formData.street || !formData.city || !formData.state || !formData.zip) {
-        toast.error("Vui lòng điền đầy đủ thông tin");
+        toast.error("Please fill in all required fields");
         return;
       }
 
       await ApiService.createAddress(formData);
-      toast.success("Thêm địa chỉ thành công");
+      toast.success("Address added successfully");
       setIsAddDialogOpen(false);
       setFormData({
         street: "",
@@ -121,8 +121,8 @@ export default function AccountPage() {
       loadAddresses();
     } catch (error: any) {
       console.error("Error adding address:", error);
-      toast.error("Không thể thêm địa chỉ", {
-        description: error.message || "Vui lòng thử lại sau",
+      toast.error("Could not add address", {
+        description: error.message || "Please try again later",
       });
     }
   };
@@ -130,12 +130,12 @@ export default function AccountPage() {
   const handleUpdateAddress = async (id: string) => {
     try {
       if (!formData.street || !formData.city || !formData.state || !formData.zip) {
-        toast.error("Vui lòng điền đầy đủ thông tin");
+        toast.error("Please fill in all required fields");
         return;
       }
 
       await ApiService.updateAddress(id, formData);
-      toast.success("Cập nhật địa chỉ thành công");
+      toast.success("Address updated successfully");
       setEditingAddressId(null);
       setFormData({
         street: "",
@@ -147,25 +147,25 @@ export default function AccountPage() {
       loadAddresses();
     } catch (error: any) {
       console.error("Error updating address:", error);
-      toast.error("Không thể cập nhật địa chỉ", {
-        description: error.message || "Vui lòng thử lại sau",
+      toast.error("Could not update address", {
+        description: error.message || "Please try again later",
       });
     }
   };
 
   const handleDeleteAddress = async (id: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa địa chỉ này?")) {
+    if (!confirm("Are you sure you want to delete this address?")) {
       return;
     }
 
     try {
       await ApiService.deleteAddress(id);
-      toast.success("Xóa địa chỉ thành công");
+      toast.success("Address deleted");
       loadAddresses();
     } catch (error: any) {
       console.error("Error deleting address:", error);
-      toast.error("Không thể xóa địa chỉ", {
-        description: error.message || "Vui lòng thử lại sau",
+      toast.error("Could not delete address", {
+        description: error.message || "Please try again later",
       });
     }
   };
@@ -217,13 +217,13 @@ export default function AccountPage() {
   const handleUpdateProfile = async () => {
     try {
       if (!profileData.firstName || !profileData.lastName) {
-        toast.error("Vui lòng điền đầy đủ họ tên");
+        toast.error("Please enter your full name");
         return;
       }
 
       // Validate phone number format if provided
       if (profileData.phone && !/^[0-9+\s()-]+$/.test(profileData.phone)) {
-        toast.error("Số điện thoại không hợp lệ");
+        toast.error("Invalid phone number");
         return;
       }
 
@@ -245,7 +245,7 @@ export default function AccountPage() {
       console.log(" Update API response:", response);
       console.log(" Birthday in response:", response.birthdate);
       console.log(" Gender in response:", response.gender);
-      toast.success("Cập nhật thông tin thành công");
+      toast.success("Profile updated successfully");
       setIsEditingProfile(false);
       
       // Refresh user data
@@ -258,8 +258,8 @@ export default function AccountPage() {
       }
     } catch (error: any) {
       console.error("Error updating profile:", error);
-      toast.error("Không thể cập nhật thông tin", {
-        description: error.message || "Vui lòng thử lại sau",
+      toast.error("Could not update profile", {
+        description: error.message || "Please try again later",
       });
     }
   };
@@ -267,23 +267,23 @@ export default function AccountPage() {
   const handleChangePassword = async () => {
     try {
       if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-        toast.error("Vui lòng điền đầy đủ thông tin");
+        toast.error("Please fill in all fields");
         return;
       }
 
       if (passwordData.newPassword !== passwordData.confirmPassword) {
-        toast.error("Mật khẩu mới không khớp");
+        toast.error("New passwords don't match");
         return;
       }
 
       if (passwordData.newPassword.length < 6) {
-        toast.error("Mật khẩu mới phải có ít nhất 6 ký tự");
+        toast.error("New password must be at least 6 characters");
         return;
       }
 
       // Check if new password is different from current
       if (passwordData.newPassword === passwordData.currentPassword) {
-        toast.error("Mật khẩu mới phải khác mật khẩu hiện tại");
+        toast.error("New password must differ from current password");
         return;
       }
 
@@ -295,7 +295,7 @@ export default function AccountPage() {
         new_password: passwordData.newPassword,
       });
       
-      toast.success("Đổi mật khẩu thành công");
+      toast.success("Password changed successfully");
       setPasswordData({
         currentPassword: "",
         newPassword: "",
@@ -303,8 +303,8 @@ export default function AccountPage() {
       });
     } catch (error: any) {
       console.error("Error changing password:", error);
-      toast.error("Không thể đổi mật khẩu", {
-        description: error.message || "Mật khẩu hiện tại không đúng",
+      toast.error("Could not change password", {
+        description: error.message || "Current password is incorrect",
       });
     }
   };
@@ -316,16 +316,16 @@ export default function AccountPage() {
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Định dạng file không hợp lệ", {
-        description: "Vui lòng chọn file ảnh (JPEG, PNG, GIF hoặc WebP)",
+      toast.error("Invalid file format", {
+        description: "Please choose an image file (JPEG, PNG, GIF or WebP)",
       });
       return;
     }
 
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("File quá lớn", {
-        description: "Kích thước ảnh phải nhỏ hơn 5MB",
+      toast.error("File too large", {
+        description: "Image size must be under 5MB",
       });
       return;
     }
@@ -343,7 +343,7 @@ export default function AccountPage() {
   const handleChangeAvatar = async () => {
     try {
       if (!avatarFile) {
-        toast.error("Vui lòng chọn ảnh đại diện");
+        toast.error("Please select an avatar image");
         return;
       }
 
@@ -355,7 +355,7 @@ export default function AccountPage() {
       // Then save URL to database
       await ApiService.setAvatar(uploadResult.url);
       
-      toast.success("Cập nhật ảnh đại diện thành công");
+      toast.success("Avatar updated successfully");
       setIsAvatarDialogOpen(false);
       setAvatarFile(null);
       setAvatarPreview("");
@@ -366,8 +366,8 @@ export default function AccountPage() {
       }
     } catch (error: any) {
       console.error("Error changing avatar:", error);
-      toast.error("Không thể cập nhật ảnh đại diện", {
-        description: error.message || "Vui lòng thử lại sau",
+      toast.error("Could not update avatar", {
+        description: error.message || "Please try again later",
       });
     } finally {
       setIsUploadingAvatar(false);
@@ -399,14 +399,14 @@ export default function AccountPage() {
                 <DialogTrigger asChild>
                   <Button variant="ghost" size="sm" className="h-auto p-0 text-muted-foreground hover:text-primary">
                     <Edit2 className="mr-2 h-3 w-3" />
-                    Chỉnh sửa ảnh đại diện
+                    Edit avatar
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Thay đổi ảnh đại diện</DialogTitle>
+                    <DialogTitle>Change avatar</DialogTitle>
                     <DialogDescription>
-                      Chọn ảnh đại diện mới của bạn
+                      Choose a new profile picture
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
@@ -419,7 +419,7 @@ export default function AccountPage() {
                       </Avatar>
                     </div>
                     <div>
-                      <Label htmlFor="avatarFile">Chọn ảnh</Label>
+                      <Label htmlFor="avatarFile">Choose image</Label>
                       <Input
                         id="avatarFile"
                         type="file"
@@ -429,7 +429,7 @@ export default function AccountPage() {
                         disabled={isUploadingAvatar}
                       />
                       <p className="text-xs text-muted-foreground mt-2">
-                        JPEG, PNG, GIF hoặc WebP. Tối đa 5MB
+                        JPEG, PNG, GIF or WebP. Max 5MB
                       </p>
                     </div>
                     <Button 
@@ -440,10 +440,10 @@ export default function AccountPage() {
                       {isUploadingAvatar ? (
                         <>
                           <span className="animate-spin mr-2">⏳</span>
-                          Đang tải lên...
+                          Uploading...
                         </>
                       ) : (
-                        "Cập nhật ảnh đại diện"
+                        "Update avatar"
                       )}
                     </Button>
                   </div>
@@ -457,15 +457,15 @@ export default function AccountPage() {
             <TabsList className="grid w-full grid-cols-3 mb-8">
               <TabsTrigger value="profile" className="text-base">
                 <User className="mr-2 h-4 w-4" />
-                Thông tin của bạn
+                Profile
               </TabsTrigger>
               <TabsTrigger value="security" className="text-base">
                 <Lock className="mr-2 h-4 w-4" />
-                Bảo mật
+                Security
               </TabsTrigger>
               <TabsTrigger value="addresses" className="text-base">
                 <MapPin className="mr-2 h-4 w-4" />
-                Địa chỉ
+                Addresses
               </TabsTrigger>
             </TabsList>
 
@@ -476,9 +476,9 @@ export default function AccountPage() {
                   <div className="flex flex-col lg:flex-row gap-12">
                     {/* Left Sidebar */}
                     <div className="lg:w-64 flex-shrink-0">
-                      <h2 className="text-xl font-bold mb-2">Thông tin cá nhân</h2>
+                      <h2 className="text-xl font-bold mb-2">Personal info</h2>
                       <p className="text-sm text-muted-foreground">
-                        Chi tiết thông tin cá nhân của bạn
+                        Your personal details
                       </p>
                     </div>
 
@@ -489,11 +489,11 @@ export default function AccountPage() {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                           <div className="space-y-2">
                             <Label htmlFor="fullName" className="text-base font-semibold">
-                              Họ và tên đệm
+                              First name
                             </Label>
                             <Input
                               id="firstName"
-                              placeholder="hệ"
+                              placeholder="First name"
                               value={profileData.firstName}
                               onChange={(e) => {
                                 setProfileData({
@@ -506,11 +506,11 @@ export default function AccountPage() {
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="class" className="text-base font-semibold">
-                              Tên
+                              Last name
                             </Label>
                            <Input
                               id="lastName"
-                              placeholder="hệ"
+                              placeholder=""
                               value={profileData.lastName}
                               onChange={(e) => {
                                 setProfileData({
@@ -540,7 +540,7 @@ export default function AccountPage() {
                         {/* Phone */}
                         <div className="space-y-2">
                           <Label htmlFor="phone" className="text-base font-semibold">
-                            Số điện thoại
+                            Phone number
                           </Label>
                           <Input
                             id="phone"
@@ -557,7 +557,7 @@ export default function AccountPage() {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                           <div className="space-y-2">
                             <Label htmlFor="birthday" className="text-base font-semibold">
-                              Ngày sinh
+                              Date of birth
                             </Label>
                             <Input
                               id="birthday"
@@ -571,11 +571,11 @@ export default function AccountPage() {
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="gender" className="text-base font-semibold">
-                              Giới tính
+                              Gender
                             </Label>
                             <Input
                               id="gender"
-                              placeholder="Nam/Nữ/Khác"
+                              placeholder="Male/Female/Other"
                               value={profileData.gender}
                               onChange={(e) =>
                                 setProfileData({ ...profileData, gender: e.target.value })
@@ -589,7 +589,7 @@ export default function AccountPage() {
                         {addresses.length > 0 && (
                           <div className="space-y-2">
                             <Label htmlFor="address" className="text-base font-semibold">
-                              Địa chỉ
+                              Address
                             </Label>
                             <Input
                               id="address"
@@ -598,7 +598,7 @@ export default function AccountPage() {
                               className="h-11 bg-muted/50"
                             />
                             <p className="text-xs text-muted-foreground">
-                              Để thay đổi địa chỉ, vui lòng chuyển sang tab "Địa chỉ"
+                              To change your address, go to the &quot;Addresses&quot; tab
                             </p>
                           </div>
                         )}
@@ -610,7 +610,7 @@ export default function AccountPage() {
                             size="lg"
                             className="px-8"
                           >
-                            Lưu thông tin
+                            Save
                           </Button>
                         </div>
                       </div>
@@ -627,9 +627,9 @@ export default function AccountPage() {
                   <div className="flex flex-col lg:flex-row gap-12">
                     {/* Left Sidebar */}
                     <div className="lg:w-64 flex-shrink-0">
-                      <h2 className="text-xl font-bold mb-2">Bảo mật</h2>
+                      <h2 className="text-xl font-bold mb-2">Security</h2>
                       <p className="text-sm text-muted-foreground">
-                        Thay đổi mật khẩu để bảo vệ tài khoản của bạn
+                        Change your password to keep your account secure
                       </p>
                     </div>
 
@@ -638,13 +638,13 @@ export default function AccountPage() {
                       <div className="space-y-6">
                         <div className="space-y-2">
                           <Label htmlFor="currentPassword" className="text-base font-semibold">
-                            Mật khẩu hiện tại *
+                            Current password *
                           </Label>
                           <div className="relative">
                             <Input
                               id="currentPassword"
                               type={showPasswords.current ? "text" : "password"}
-                              placeholder="Nhập mật khẩu hiện tại"
+                              placeholder="Enter current password"
                               value={passwordData.currentPassword}
                               onChange={(e) =>
                                 setPasswordData({ ...passwordData, currentPassword: e.target.value })
@@ -671,13 +671,13 @@ export default function AccountPage() {
 
                         <div className="space-y-2">
                           <Label htmlFor="newPassword" className="text-base font-semibold">
-                            Mật khẩu mới *
+                            New password *
                           </Label>
                           <div className="relative">
                             <Input
                               id="newPassword"
                               type={showPasswords.new ? "text" : "password"}
-                              placeholder="Nhập mật khẩu mới"
+                              placeholder="Enter new password"
                               value={passwordData.newPassword}
                               onChange={(e) =>
                                 setPasswordData({ ...passwordData, newPassword: e.target.value })
@@ -704,13 +704,13 @@ export default function AccountPage() {
 
                         <div className="space-y-2">
                           <Label htmlFor="confirmPassword" className="text-base font-semibold">
-                            Xác nhận mật khẩu *
+                            Confirm new password *
                           </Label>
                           <div className="relative">
                             <Input
                               id="confirmPassword"
                               type={showPasswords.confirm ? "text" : "password"}
-                              placeholder="Nhập lại mật khẩu mới"
+                              placeholder="Confirm new password"
                               value={passwordData.confirmPassword}
                               onChange={(e) =>
                                 setPasswordData({ ...passwordData, confirmPassword: e.target.value })
@@ -741,7 +741,7 @@ export default function AccountPage() {
                             size="lg"
                             className="px-8"
                           >
-                            Lưu thông tin
+                            Save
                           </Button>
                         </div>
                       </div>
@@ -758,28 +758,28 @@ export default function AccountPage() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2 text-xl">
                       <MapPin className="h-6 w-6" />
-                      Địa chỉ giao hàng
+                      Shipping addresses
                     </CardTitle>
                     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                       <DialogTrigger asChild>
                         <Button>
                           <Plus className="mr-2 h-4 w-4" />
-                          Thêm địa chỉ
+                          Add address
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="max-w-md">
                         <DialogHeader>
-                          <DialogTitle>Thêm địa chỉ mới</DialogTitle>
+                          <DialogTitle>Add new address</DialogTitle>
                           <DialogDescription>
-                            Nhập thông tin địa chỉ giao hàng của bạn
+                            Enter your shipping address details
                           </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                           <div>
-                            <Label htmlFor="street">Địa chỉ *</Label>
+                            <Label htmlFor="street">Street *</Label>
                             <Input
                               id="street"
-                              placeholder="Số nhà, tên đường..."
+                              placeholder="House number, street name..."
                               value={formData.street}
                               onChange={(e) =>
                                 setFormData({ ...formData, street: e.target.value })
@@ -788,10 +788,10 @@ export default function AccountPage() {
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="city">Thành phố *</Label>
+                              <Label htmlFor="city">City *</Label>
                               <Input
                                 id="city"
-                                placeholder="Hồ Chí Minh"
+                                placeholder="Ho Chi Minh"
                                 value={formData.city}
                                 onChange={(e) =>
                                   setFormData({ ...formData, city: e.target.value })
@@ -799,10 +799,10 @@ export default function AccountPage() {
                               />
                             </div>
                             <div>
-                              <Label htmlFor="state">Quận/Huyện *</Label>
+                              <Label htmlFor="state">District *</Label>
                               <Input
                                 id="state"
-                                placeholder="Quận 1"
+                                placeholder="District 1"
                                 value={formData.state}
                                 onChange={(e) =>
                                   setFormData({ ...formData, state: e.target.value })
@@ -812,7 +812,7 @@ export default function AccountPage() {
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="zip">Mã bưu điện *</Label>
+                              <Label htmlFor="zip">ZIP code *</Label>
                               <Input
                                 id="zip"
                                 placeholder="700000"
@@ -823,7 +823,7 @@ export default function AccountPage() {
                               />
                             </div>
                             <div>
-                              <Label htmlFor="country">Quốc gia *</Label>
+                              <Label htmlFor="country">Country *</Label>
                               <Input
                                 id="country"
                                 value={formData.country}
@@ -834,7 +834,7 @@ export default function AccountPage() {
                             </div>
                           </div>
                           <Button onClick={handleAddAddress} className="w-full">
-                            Thêm địa chỉ
+                            Add address
                           </Button>
                         </div>
                       </DialogContent>
@@ -845,20 +845,20 @@ export default function AccountPage() {
                   {isLoading ? (
                     <div className="text-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
-                      <p className="text-sm text-muted-foreground">Đang tải...</p>
+                      <p className="text-sm text-muted-foreground">Loading...</p>
                     </div>
                   ) : addresses.length === 0 ? (
                     <div className="text-center py-12">
                       <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
                       <p className="text-muted-foreground mb-4">
-                        Bạn chưa có địa chỉ giao hàng nào
+                        You have no saved addresses yet
                       </p>
                       <Button
                         variant="outline"
                         onClick={() => setIsAddDialogOpen(true)}
                       >
                         <Plus className="mr-2 h-4 w-4" />
-                        Thêm địa chỉ đầu tiên
+                        Add your first address
                       </Button>
                     </div>
                   ) : (
@@ -869,7 +869,7 @@ export default function AccountPage() {
                             {editingAddressId === address.id ? (
                               <div className="space-y-3">
                                 <Input
-                                  placeholder="Địa chỉ"
+                                  placeholder="Street"
                                   value={formData.street}
                                   onChange={(e) =>
                                     setFormData({ ...formData, street: e.target.value })
@@ -877,14 +877,14 @@ export default function AccountPage() {
                                 />
                                 <div className="grid grid-cols-2 gap-3">
                                   <Input
-                                    placeholder="Thành phố"
+                                    placeholder="City"
                                     value={formData.city}
                                     onChange={(e) =>
                                       setFormData({ ...formData, city: e.target.value })
                                     }
                                   />
                                   <Input
-                                    placeholder="Quận/Huyện"
+                                    placeholder="District"
                                     value={formData.state}
                                     onChange={(e) =>
                                       setFormData({ ...formData, state: e.target.value })
@@ -893,14 +893,14 @@ export default function AccountPage() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                   <Input
-                                    placeholder="Mã bưu điện"
+                                    placeholder="ZIP code"
                                     value={formData.zip}
                                     onChange={(e) =>
                                       setFormData({ ...formData, zip: e.target.value })
                                     }
                                   />
                                   <Input
-                                    placeholder="Quốc gia"
+                                    placeholder="Country"
                                     value={formData.country}
                                     onChange={(e) =>
                                       setFormData({ ...formData, country: e.target.value })
@@ -914,7 +914,7 @@ export default function AccountPage() {
                                     className="flex-1"
                                   >
                                     <Save className="mr-2 h-4 w-4" />
-                                    Lưu
+                                    Save
                                   </Button>
                                   <Button
                                     size="sm"
@@ -923,7 +923,7 @@ export default function AccountPage() {
                                     className="flex-1"
                                   >
                                     <X className="mr-2 h-4 w-4" />
-                                    Hủy
+                                    Cancel
                                   </Button>
                                 </div>
                               </div>
@@ -953,7 +953,7 @@ export default function AccountPage() {
                                     className="flex-1"
                                   >
                                     <Edit2 className="mr-1 h-3 w-3" />
-                                    Sửa
+                                    Edit
                                   </Button>
                                   <Button
                                     size="sm"

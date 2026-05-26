@@ -17,7 +17,7 @@ export default function VirtualTryOnPage() {
   const searchParams = useSearchParams();
   const [personImage, setPersonImage] = useState<File | null>(null);
   const [garmentImage, setGarmentImage] = useState<File | null>(null);
-  const [garmentImageUrl, setGarmentImageUrl] = useState<string>(""); // Lưu URL từ product
+  const [garmentImageUrl, setGarmentImageUrl] = useState<string>(""); // URL from product page
   const [personPreview, setPersonPreview] = useState<string>("");
   const [garmentPreview, setGarmentPreview] = useState<string>("");
   const [resultImage, setResultImage] = useState<string>("");
@@ -35,13 +35,13 @@ export default function VirtualTryOnPage() {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      toast.error("Vui lòng chọn file ảnh hợp lệ");
+      toast.error("Please select a valid image file");
       return;
     }
 
     // Validate file size (10MB)
     if (file.size > 10 * 1024 * 1024) {
-      toast.error("Kích thước ảnh phải nhỏ hơn 10MB");
+      toast.error("Image size must be less than 10MB");
       return;
     }
 
@@ -58,17 +58,17 @@ export default function VirtualTryOnPage() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error("Vui lòng chọn file ảnh hợp lệ");
+      toast.error("Please select a valid image file");
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      toast.error("Kích thước ảnh phải nhỏ hơn 10MB");
+      toast.error("Image size must be less than 10MB");
       return;
     }
 
     setGarmentImage(file);
-    setGarmentImageUrl(""); // Clear URL khi upload file mới
+    setGarmentImageUrl(""); // Clear URL when uploading a new file
     const reader = new FileReader();
     reader.onloadend = () => {
       setGarmentPreview(reader.result as string);
@@ -89,17 +89,17 @@ export default function VirtualTryOnPage() {
           const decodedUrl = decodeURIComponent(garmentUrl);
           console.log('✅ Decoded URL:', decodedUrl);
           setGarmentPreview(decodedUrl);
-          setGarmentImageUrl(decodedUrl); // Lưu URL để gửi đến backend
-          setGarmentImage(null); // Clear file cũ nếu có
+          setGarmentImageUrl(decodedUrl); // Store URL to send to backend
+          setGarmentImage(null); // Clear any existing file
           if (garmentName) {
             setGarmentDescription(decodeURIComponent(garmentName));
           }
-          
-          // Không cần convert thành File nữa, giữ URL để gửi trực tiếp
-          toast.success("Đã tải quần áo từ trang sản phẩm!");
+
+          // No need to convert to File; send URL directly
+          toast.success("Garment loaded from product page!");
         } catch (error) {
           console.error("Failed to load garment from URL:", error);
-          toast.error("Không thể tải ảnh quần áo");
+          toast.error("Could not load garment image");
         }
       };
       
@@ -116,12 +116,12 @@ export default function VirtualTryOnPage() {
     });
 
     if (!personImage) {
-      toast.error("Vui lòng upload ảnh người");
+      toast.error("Please upload a photo of yourself");
       return;
     }
 
     if (!garmentImage && (!garmentImageUrl || garmentImageUrl.trim() === '')) {
-      toast.error("Vui lòng chọn quần áo từ trang sản phẩm hoặc upload ảnh");
+      toast.error("Please select a garment from the product page or upload an image");
       return;
     }
 
@@ -132,7 +132,7 @@ export default function VirtualTryOnPage() {
       const formData = new FormData();
       formData.append('person_image', personImage);
       
-      // Ưu tiên gửi URL nếu có (từ product page)
+      // Prefer sending URL if available (from product page)
       if (garmentImageUrl) {
         formData.append('garment_image_url', garmentImageUrl);
       } else if (garmentImage) {
@@ -150,7 +150,7 @@ export default function VirtualTryOnPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Có lỗi xảy ra khi xử lý');
+        throw new Error(error.error || 'An error occurred during processing');
       }
 
       const result = await response.json();
@@ -158,19 +158,19 @@ export default function VirtualTryOnPage() {
       if (result.success && result.outputImage) {
         // New backend response format
         setResultImage(result.outputImage);
-        toast.success(result.message || "Thử đồ ảo thành công!");
+        toast.success(result.message || "Virtual try-on successful!");
       } else if (result.success && result.data && result.data[0]) {
         // Legacy format fallback
         setResultImage(result.data[0]);
-        toast.success("Thử đồ ảo thành công!");
+        toast.success("Virtual try-on successful!");
       } else {
-        throw new Error('Không nhận được kết quả từ API');
+        throw new Error('No result received from API');
       }
 
     } catch (error: any) {
       console.error('Virtual try-on error:', error);
-      toast.error("Có lỗi xảy ra", {
-        description: error.message || "Vui lòng thử lại sau"
+      toast.error("An error occurred", {
+        description: error.message || "Please try again later"
       });
     } finally {
       setIsProcessing(false);
@@ -214,10 +214,10 @@ export default function VirtualTryOnPage() {
               <Sparkles className="h-8 w-8 text-primary" />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Trợ lý Thử Đồ Ảo
+              Virtual Try-On Assistant
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Trải nghiệm công nghệ AI thử đồ ảo. Upload ảnh của bạn và ảnh quần áo để xem kết quả ngay lập tức!
+              Experience AI-powered virtual try-on technology. Upload your photo and a garment image to see the result instantly!
             </p>
           </div>
 
@@ -230,10 +230,10 @@ export default function VirtualTryOnPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <ImageIcon className="h-5 w-5" />
-                      Ảnh của bạn
+                      Your photo
                     </CardTitle>
                     <CardDescription>
-                      Upload ảnh toàn thân, đứng thẳng, nền đơn giản
+                      Upload a full-body photo, standing straight, with a plain background
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -244,7 +244,7 @@ export default function VirtualTryOnPage() {
                       >
                         <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                         <p className="text-sm text-muted-foreground mb-2">
-                          Click để chọn ảnh
+                          Click to select an image
                         </p>
                         <p className="text-xs text-muted-foreground">
                           JPEG, PNG (Max 10MB)
@@ -282,10 +282,10 @@ export default function VirtualTryOnPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <ImageIcon className="h-5 w-5" />
-                      Ảnh quần áo
+                      Garment image
                     </CardTitle>
                     <CardDescription>
-                      Chọn quần áo từ <a href="/client/women" className="text-primary hover:underline">trang sản phẩm</a> để thử đồ (Upload file chưa được hỗ trợ)
+                      Select a garment from the <a href="/client/women" className="text-primary hover:underline">product page</a> to try on (file upload not yet supported)
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -296,7 +296,7 @@ export default function VirtualTryOnPage() {
                       >
                         <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                         <p className="text-sm text-muted-foreground mb-2">
-                          Click để chọn ảnh
+                          Click to select an image
                         </p>
                         <p className="text-xs text-muted-foreground">
                           JPEG, PNG (Max 10MB)
@@ -333,17 +333,17 @@ export default function VirtualTryOnPage() {
               {/* Settings Card */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Cài đặt nâng cao</CardTitle>
+                  <CardTitle>Advanced settings</CardTitle>
                   <CardDescription>
-                    Tùy chỉnh chất lượng và kết quả xử lý
+                    Customize quality and processing output
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <Label htmlFor="description">Mô tả quần áo (tùy chọn)</Label>
+                    <Label htmlFor="description">Garment description (optional)</Label>
                     <Input
                       id="description"
-                      placeholder="Ví dụ: Áo sơ mi trắng, Váy hoa..."
+                      placeholder="e.g. White shirt, floral dress..."
                       value={garmentDescription}
                       onChange={(e) => setGarmentDescription(e.target.value)}
                       className="mt-2"
@@ -354,7 +354,7 @@ export default function VirtualTryOnPage() {
                     <Label>
                       Denoise Steps: {denoiseSteps}
                       <span className="text-xs text-muted-foreground ml-2">
-                        (Ít = nhanh, Nhiều = chất lượng cao)
+                        (Less = faster, More = higher quality)
                       </span>
                     </Label>
                     <Slider
@@ -388,12 +388,12 @@ export default function VirtualTryOnPage() {
                       {isProcessing ? (
                         <>
                           <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                          Đang xử lý...
+                          Processing...
                         </>
                       ) : (
                         <>
                           <Sparkles className="mr-2 h-5 w-5" />
-                          Thử đồ ngay
+                          Try it on
                         </>
                       )}
                     </Button>
@@ -402,7 +402,7 @@ export default function VirtualTryOnPage() {
                       variant="outline"
                       disabled={isProcessing}
                     >
-                      Làm mới
+                      Reset
                     </Button>
                   </div>
                 </CardContent>
@@ -413,9 +413,9 @@ export default function VirtualTryOnPage() {
             <div>
               <Card className="sticky top-4">
                 <CardHeader>
-                  <CardTitle>Kết quả</CardTitle>
+                  <CardTitle>Result</CardTitle>
                   <CardDescription>
-                    {resultImage ? "Ảnh thử đồ của bạn" : "Kết quả sẽ hiển thị ở đây"}
+                    {resultImage ? "Your try-on photo" : "Result will appear here"}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -424,7 +424,7 @@ export default function VirtualTryOnPage() {
                       <div className="text-center">
                         <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
                         <p className="text-sm text-muted-foreground">
-                          Đang xử lý... (20-40 giây)
+                          Processing... (20-40 seconds)
                         </p>
                       </div>
                     </div>
@@ -445,7 +445,7 @@ export default function VirtualTryOnPage() {
                         variant="outline"
                         className="w-full"
                       >
-                        Tải xuống ảnh
+                        Download image
                       </Button>
                     </div>
                   ) : (
@@ -453,7 +453,7 @@ export default function VirtualTryOnPage() {
                       <div className="text-center">
                         <ImageIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                         <p className="text-sm text-muted-foreground">
-                          Chưa có kết quả
+                          No result yet
                         </p>
                       </div>
                     </div>
@@ -466,26 +466,26 @@ export default function VirtualTryOnPage() {
           {/* Guide Section */}
           <Card className="mt-12">
             <CardHeader>
-              <CardTitle>💡 Hướng dẫn sử dụng</CardTitle>
+              <CardTitle>💡 How to use</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <h3 className="font-semibold mb-2">1. Upload ảnh người</h3>
+                  <h3 className="font-semibold mb-2">1. Upload your photo</h3>
                   <p className="text-sm text-muted-foreground">
-                    Chọn ảnh toàn thân, đứng thẳng, nền đơn giản. Ảnh rõ nét sẽ cho kết quả tốt hơn.
+                    Choose a full-body photo, standing straight, with a plain background. A clear photo gives better results.
                   </p>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-2">2. Upload ảnh quần áo</h3>
+                  <h3 className="font-semibold mb-2">2. Upload garment image</h3>
                   <p className="text-sm text-muted-foreground">
-                    Chọn ảnh quần áo nền trắng hoặc trong suốt. Tránh ảnh người mặc sẵn.
+                    Choose a garment image with a white or transparent background. Avoid photos of people wearing it.
                   </p>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-2">3. Nhận kết quả</h3>
+                  <h3 className="font-semibold mb-2">3. Get the result</h3>
                   <p className="text-sm text-muted-foreground">
-                    Click "Thử đồ ngay" và đợi 20-40 giây. Bạn có thể tải xuống kết quả.
+                    Click &quot;Try it on&quot; and wait 20-40 seconds. You can download the result.
                   </p>
                 </div>
               </div>

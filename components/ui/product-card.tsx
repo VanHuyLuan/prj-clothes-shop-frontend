@@ -105,7 +105,7 @@ export function ProductCard({
                 }}
               >
                 <Sparkles className="mr-2 h-4 w-4" />
-                Thử đồ ảo
+                Virtual try-on
               </Button>
               <Button
                 className="w-full bg-white/90 text-black backdrop-blur-sm hover:bg-white"

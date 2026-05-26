@@ -146,11 +146,11 @@ export default function CategoryPage({
 
   // Define price ranges (same as in CategoryFilters)
   const priceRanges: PriceRange[] = [
-    { id: "price1", label: "Under $25", min: 0, max: 25 },
-    { id: "price2", label: "$25 - $50", min: 25, max: 50 },
-    { id: "price3", label: "$50 - $100", min: 50, max: 100 },
-    { id: "price4", label: "$100 - $200", min: 100, max: 200 },
-    { id: "price5", label: "$200+", min: 200, max: null },
+    { id: "price1", label: "Under 100,000₫",          min: 0,       max: 100000 },
+    { id: "price2", label: "100,000 – 300,000₫",      min: 100000,  max: 300000 },
+    { id: "price3", label: "300,000 – 500,000₫",      min: 300000,  max: 500000 },
+    { id: "price4", label: "500,000 – 1,000,000₫",    min: 500000,  max: 1000000 },
+    { id: "price5", label: "Over 1,000,000₫",         min: 1000000, max: null },
   ];
 
   // Calculate product count for each price range

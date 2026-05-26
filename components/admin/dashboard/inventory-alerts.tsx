@@ -14,16 +14,16 @@ export function InventoryAlerts({ alerts }: Props) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base font-semibold">Cảnh báo tồn kho</CardTitle>
+        <CardTitle className="text-base font-semibold">Inventory Alerts</CardTitle>
         <Link href="/admin/inventory" className="text-xs text-primary hover:underline">
-          Quản lý
+          Manage
         </Link>
       </CardHeader>
       <CardContent>
         {alerts.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 text-muted-foreground gap-2">
             <CheckCircle className="h-8 w-8 text-green-500 opacity-60" />
-            <p className="text-sm">Tồn kho ổn định</p>
+            <p className="text-sm">Stock levels are healthy</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -42,7 +42,7 @@ export function InventoryAlerts({ alerts }: Props) {
                       : "bg-orange-100 text-orange-800 border-orange-200"
                   }`}
                 >
-                  {alert.stock_qty === 0 ? "Hết hàng" : `Còn ${alert.stock_qty}`}
+                  {alert.stock_qty === 0 ? "Out of stock" : `${alert.stock_qty} left`}
                 </Badge>
               </div>
             ))}

@@ -10,12 +10,12 @@ interface Props {
 }
 
 function GrowthBadge({ pct }: { pct: number | null }) {
-  if (pct === null) return <span className="text-xs text-muted-foreground">Chưa có dữ liệu tháng trước</span>;
+  if (pct === null) return <span className="text-xs text-muted-foreground">No previous month data</span>;
   const positive = pct >= 0;
   return (
     <span className={`flex items-center gap-0.5 text-xs font-medium ${positive ? "text-green-600" : "text-red-500"}`}>
       {positive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-      {positive ? "+" : ""}{pct.toFixed(1)}% so với tháng trước
+      {positive ? "+" : ""}{pct.toFixed(1)}% vs last month
     </span>
   );
 }
@@ -23,7 +23,7 @@ function GrowthBadge({ pct }: { pct: number | null }) {
 export function DashboardMetrics({ metrics }: Props) {
   const cards = [
     {
-      title: "Doanh thu tháng này",
+      title: "Revenue this month",
       value: formatVND(metrics?.thisMonthRevenue ?? 0),
       growth: metrics?.revenueGrowthPct ?? null,
       sub: null,
@@ -31,26 +31,26 @@ export function DashboardMetrics({ metrics }: Props) {
       iconBg: "bg-blue-100 text-blue-600",
     },
     {
-      title: "Đơn hàng tháng này",
-      value: (metrics?.thisMonthOrders ?? 0).toLocaleString("vi-VN"),
+      title: "Orders this month",
+      value: (metrics?.thisMonthOrders ?? 0).toLocaleString("en-US"),
       growth: metrics?.ordersGrowthPct ?? null,
-      sub: `Tổng cộng: ${(metrics?.totalOrders ?? 0).toLocaleString("vi-VN")} đơn`,
+      sub: `Total: ${(metrics?.totalOrders ?? 0).toLocaleString("en-US")} orders`,
       icon: ShoppingBag,
       iconBg: "bg-orange-100 text-orange-600",
     },
     {
-      title: "Khách hàng",
-      value: (metrics?.totalCustomers ?? 0).toLocaleString("vi-VN"),
+      title: "Customers",
+      value: (metrics?.totalCustomers ?? 0).toLocaleString("en-US"),
       growth: metrics?.customersGrowthPct ?? null,
-      sub: `+${(metrics?.thisMonthCustomers ?? 0)} tháng này`,
+      sub: `+${(metrics?.thisMonthCustomers ?? 0)} this month`,
       icon: Users,
       iconBg: "bg-purple-100 text-purple-600",
     },
     {
-      title: "Sản phẩm đang bán",
-      value: (metrics?.totalProducts ?? 0).toLocaleString("vi-VN"),
+      title: "Active products",
+      value: (metrics?.totalProducts ?? 0).toLocaleString("en-US"),
       growth: null,
-      sub: "Sản phẩm active",
+      sub: "Active products",
       icon: Package,
       iconBg: "bg-green-100 text-green-600",
     },

@@ -32,11 +32,11 @@ const statusColors = {
 };
 
 const statusLabels = {
-  pending: "Chờ xử lý",
-  processing: "Đang xử lý",
-  shipped: "Đang giao hàng",
-  delivered: "Đã giao hàng",
-  cancelled: "Đã hủy",
+  pending: "Pending",
+  processing: "Processing",
+  shipped: "Shipped",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
 };
 
 export default function MyOrdersPage() {
@@ -52,7 +52,7 @@ export default function MyOrdersPage() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!user) {
-      toast.error("Vui lòng đăng nhập để xem đơn hàng");
+      toast.error("Please sign in to view your orders");
       router.push("/login");
     }
   }, [user, router]);
@@ -81,8 +81,8 @@ export default function MyOrdersPage() {
       setTotalPages(response.totalPages);
     } catch (error: any) {
       console.error("Error loading orders:", error);
-      toast.error("Không thể tải danh sách đơn hàng", {
-        description: error.message || "Vui lòng thử lại sau",
+      toast.error("Could not load orders", {
+        description: error.message || "Please try again later",
       });
     } finally {
       setIsLoading(false);
@@ -105,9 +105,9 @@ export default function MyOrdersPage() {
         <div className="mx-auto max-w-7xl px-4 md:px-6">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Đơn hàng của tôi</h1>
+            <h1 className="text-3xl font-bold mb-2">My Orders</h1>
             <p className="text-muted-foreground">
-              Quản lý và theo dõi đơn hàng của bạn
+              Manage and track your orders
             </p>
           </div>
 
@@ -118,7 +118,7 @@ export default function MyOrdersPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Tìm kiếm theo mã đơn hàng..."
+                placeholder="Search by order number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -129,15 +129,15 @@ export default function MyOrdersPage() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-[200px]">
                 <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Trạng thái" />
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tất cả</SelectItem>
-                <SelectItem value="pending">Chờ xử lý</SelectItem>
-                <SelectItem value="processing">Đang xử lý</SelectItem>
-                <SelectItem value="shipped">Đang giao hàng</SelectItem>
-                <SelectItem value="delivered">Đã giao hàng</SelectItem>
-                <SelectItem value="cancelled">Đã hủy</SelectItem>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="processing">Processing</SelectItem>
+                <SelectItem value="shipped">Shipped</SelectItem>
+                <SelectItem value="delivered">Delivered</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -146,7 +146,7 @@ export default function MyOrdersPage() {
           {isLoading ? (
             <div className="text-center py-20">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Đang tải đơn hàng...</p>
+              <p className="text-muted-foreground">Loading orders...</p>
             </div>
           ) : filteredOrders.length === 0 ? (
             /* Empty state */
@@ -156,16 +156,16 @@ export default function MyOrdersPage() {
                   <Package className="w-16 h-16 text-muted-foreground mx-auto" />
                   <h2 className="text-2xl font-bold">
                     {searchQuery
-                      ? "Không tìm thấy đơn hàng"
-                      : "Chưa có đơn hàng nào"}
+                      ? "No orders found"
+                      : "No orders yet"}
                   </h2>
                   <p className="text-muted-foreground">
                     {searchQuery
-                      ? "Thử tìm kiếm với từ khóa khác"
-                      : "Hãy bắt đầu mua sắm để tạo đơn hàng đầu tiên"}
+                      ? "Try searching with a different keyword"
+                      : "Start shopping to place your first order"}
                   </p>
                   <Link href="/client/products">
-                    <Button>Khám phá sản phẩm</Button>
+                    <Button>Explore products</Button>
                   </Link>
                 </div>
               </CardContent>
@@ -222,7 +222,7 @@ export default function MyOrdersPage() {
                           <div className="flex flex-wrap items-center justify-between gap-4">
                             <div>
                               <p className="text-base font-medium text-muted-foreground">
-                                Mã đơn hàng
+                                Order number
                               </p>
                               <Link
                                 href={`/client/orders/${order.order_number}`}
@@ -245,10 +245,10 @@ export default function MyOrdersPage() {
                           {/* Date & Total */}
                           <div className="flex flex-wrap gap-6 text-base">
                             <div>
-                              <p className="text-muted-foreground font-medium">Ngày đặt</p>
+                              <p className="text-muted-foreground font-medium">Order date</p>
                               <p className="font-semibold">
                                 {new Date(order.created_at).toLocaleDateString(
-                                  "vi-VN",
+                                  "en-US",
                                   {
                                     year: "numeric",
                                     month: "2-digit",
@@ -258,14 +258,14 @@ export default function MyOrdersPage() {
                               </p>
                             </div>
                             <div>
-                              <p className="text-muted-foreground font-medium">Tổng tiền</p>
+                              <p className="text-muted-foreground font-medium">Total</p>
                               <p className="font-bold text-xl text-primary">
                                 {formatVND(order.total_amount || 0)}
                               </p>
                             </div>
                             <div>
-                              <p className="text-muted-foreground font-medium">Số lượng</p>
-                              <p className="font-semibold">{totalItems} sản phẩm</p>
+                              <p className="text-muted-foreground font-medium">Items</p>
+                              <p className="font-semibold">{totalItems} item{totalItems !== 1 ? "s" : ""}</p>
                             </div>
                           </div>
 
@@ -274,7 +274,7 @@ export default function MyOrdersPage() {
                             <Link href={`/client/orders/${order.order_number}`}>
                               <Button variant="outline" className="w-full sm:w-auto text-base font-semibold">
                                 <Eye className="mr-2 h-5 w-5" />
-                                Xem chi tiết
+                                View details
                               </Button>
                             </Link>
                           </div>
@@ -296,10 +296,10 @@ export default function MyOrdersPage() {
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
               >
-                Trước
+                Previous
               </Button>
               <span className="text-sm text-muted-foreground px-4">
-                Trang {currentPage} / {totalPages}
+                Page {currentPage} / {totalPages}
               </span>
               <Button
                 variant="outline"
@@ -309,7 +309,7 @@ export default function MyOrdersPage() {
                 }
                 disabled={currentPage === totalPages}
               >
-                Sau
+                Next
               </Button>
             </div>
           )}

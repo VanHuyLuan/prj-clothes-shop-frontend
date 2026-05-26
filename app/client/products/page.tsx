@@ -71,11 +71,11 @@ export default function AllProductsPage() {
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
 
   const priceRanges: PriceRange[] = [
-    { id: "price1", label: "Under $10", min: 0, max: 10 },
-    { id: "price2", label: "$10 - $25", min: 10, max: 25 },
-    { id: "price3", label: "$25 - $50", min: 25, max: 50 },
-    { id: "price4", label: "$50 - $100", min: 50, max: 100 },
-    { id: "price5", label: "$100+", min: 100, max: null },
+    { id: "price1", label: "Under 100,000₫",          min: 0,       max: 100000 },
+    { id: "price2", label: "100,000 – 300,000₫",      min: 100000,  max: 300000 },
+    { id: "price3", label: "300,000 – 500,000₫",      min: 300000,  max: 500000 },
+    { id: "price4", label: "500,000 – 1,000,000₫",    min: 500000,  max: 1000000 },
+    { id: "price5", label: "Over 1,000,000₫",         min: 1000000, max: null },
   ];
 
   // Fetch all products from API

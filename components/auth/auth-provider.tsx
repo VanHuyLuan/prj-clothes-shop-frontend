@@ -61,6 +61,24 @@ export interface CreateUserDto {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const getErrorMessage = async (
+  response: Response,
+  fallback: string
+): Promise<string> => {
+  const data = await response.json().catch(() => null);
+  const message = data?.message;
+
+  if (Array.isArray(message)) {
+    return message.join("\n");
+  }
+
+  if (typeof message === "string" && message.trim()) {
+    return message;
+  }
+
+  return fallback;
+};
+
 // ============================================
 // GLOBAL REFRESH LOCK (prevent refresh spam)
 // ============================================
@@ -181,7 +199,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify({ email, password }),
     });
 
-    if (!res.ok) throw new Error("Invalid email or password");
+    if (!res.ok) {
+      throw new Error(await getErrorMessage(res, "Invalid email or password"));
+    }
 
     const data = await res.json();
 
@@ -234,7 +254,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify(dto),
     });
 
-    if (!res.ok) throw new Error("Signup failed");
+    if (!res.ok) {
+      throw new Error(await getErrorMessage(res, "Signup failed"));
+    }
   };
 
   // ============================

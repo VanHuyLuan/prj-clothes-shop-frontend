@@ -139,13 +139,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const formattedItems = formatCartData(cartData);
       setItems(formattedItems);
       
-      toast.success("Đã thêm vào giỏ hàng", {
+      toast.success("Added to cart", {
         description: `${item.productName} - ${item.size} / ${item.color}`,
       });
     } catch (error: any) {
       console.error("Error adding to cart:", error);
-      toast.error("Không thể thêm vào giỏ hàng", {
-        description: error.message || "Vui lòng thử lại",
+      toast.error("Could not add to cart", {
+        description: error.message || "Please try again",
       });
     } finally {
       setIsLoading(false);
@@ -167,11 +167,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const formattedItems = formatCartData(cartData);
       setItems(formattedItems);
       
-      toast.success("Đã xóa khỏi giỏ hàng");
+      toast.success("Removed from cart");
     } catch (error: any) {
       console.error("Error removing from cart:", error);
-      toast.error("Không thể xóa sản phẩm", {
-        description: error.message || "Vui lòng thử lại",
+      toast.error("Could not remove item", {
+        description: error.message || "Please try again",
       });
     } finally {
       setIsLoading(false);
@@ -199,8 +199,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setItems(formattedItems);
     } catch (error: any) {
       console.error("Error updating cart:", error);
-      toast.error("Không thể cập nhật số lượng", {
-        description: error.message || "Vui lòng thử lại",
+      toast.error("Could not update quantity", {
+        description: error.message || "Please try again",
       });
     } finally {
       setIsLoading(false);
@@ -222,11 +222,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       
       setItems([]);
-      toast.success("Đã xóa tất cả sản phẩm khỏi giỏ hàng");
+      toast.success("Cart cleared");
     } catch (error: any) {
       console.error("Error clearing cart:", error);
-      toast.error("Không thể xóa giỏ hàng", {
-        description: error.message || "Vui lòng thử lại",
+      toast.error("Could not clear cart", {
+        description: error.message || "Please try again",
       });
     } finally {
       setIsLoading(false);

@@ -22,9 +22,9 @@ const paymentStatusColors = {
 };
 
 const paymentStatusLabels: Record<string, string> = {
-  unpaid: "Chưa thanh toán",
-  paid: "Đã thanh toán",
-  refunded: "Đã hoàn tiền",
+  unpaid: "Unpaid",
+  paid: "Paid",
+  refunded: "Refunded",
 };
 
 const statusColors = {
@@ -36,11 +36,11 @@ const statusColors = {
 };
 
 const statusLabels = {
-  pending: "Chờ xử lý",
-  processing: "Đang xử lý",
-  shipped: "Đang giao hàng",
-  delivered: "Đã giao hàng",
-  cancelled: "Đã hủy",
+  pending: "Pending",
+  processing: "Processing",
+  shipped: "Shipped",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
 };
 
 export default function OrderDetailPage() {
@@ -61,8 +61,8 @@ export default function OrderDetailPage() {
       setOrder(data);
     } catch (error: any) {
       console.error("Error loading order:", error);
-      toast.error("Không thể tải thông tin đơn hàng", {
-        description: error.message || "Vui lòng thử lại sau",
+      toast.error("Could not load order", {
+        description: error.message || "Please try again later",
       });
     } finally {
       setIsLoading(false);
@@ -76,16 +76,16 @@ export default function OrderDetailPage() {
       const result = await ApiService.createMomoPayment({
         orderId: order.order_number,
         amount: Math.round(Number(order.total_amount)),
-        orderInfo: `Thanh toán đơn hàng ${order.order_number}`,
+        orderInfo: `Payment for order ${order.order_number}`,
       });
       if (result.payUrl) {
         window.location.href = result.payUrl;
       } else {
-        toast.error("Không thể tạo thanh toán MoMo. Vui lòng thử lại.");
+        toast.error("Could not create MoMo payment. Please try again.");
       }
     } catch (error: any) {
-      toast.error("Lỗi tạo thanh toán", {
-        description: error.message || "Vui lòng thử lại sau",
+      toast.error("Payment error", {
+        description: error.message || "Please try again later",
       });
     } finally {
       setIsPayingMomo(false);
@@ -99,7 +99,7 @@ export default function OrderDetailPage() {
         <main className="flex-1 flex items-center justify-center py-20">
           <div className="text-center space-y-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="text-muted-foreground">Đang tải đơn hàng...</p>
+            <p className="text-muted-foreground">Loading order...</p>
           </div>
         </main>
         <Footer />
@@ -114,12 +114,12 @@ export default function OrderDetailPage() {
         <main className="flex-1 flex items-center justify-center py-20">
           <div className="text-center space-y-4">
             <Package className="w-16 h-16 text-muted-foreground mx-auto" />
-            <h2 className="text-2xl font-bold">Không tìm thấy đơn hàng</h2>
+            <h2 className="text-2xl font-bold">Order not found</h2>
             <p className="text-muted-foreground">
-              Đơn hàng #{orderNumber} không tồn tại hoặc đã bị xóa
+              Order #{orderNumber} does not exist or has been removed
             </p>
             <Link href="/client/products">
-              <Button>Tiếp tục mua sắm</Button>
+              <Button>Continue shopping</Button>
             </Link>
           </div>
         </main>
@@ -142,15 +142,15 @@ export default function OrderDetailPage() {
               <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400 flex-shrink-0 mt-1" />
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-green-900 dark:text-green-100 mb-2">
-                  Đặt hàng thành công!
+                  Order placed!
                 </h2>
                 <p className="text-green-700 dark:text-green-300 mb-4">
-                  Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn đang được xử lý.
+                  Thank you for your order. It is being processed.
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <div>
                     <p className="text-sm text-green-600 dark:text-green-400">
-                      Mã đơn hàng
+                      Order number
                     </p>
                     <p className="font-mono font-bold text-green-900 dark:text-green-100">
                       {order.order_number}
@@ -158,10 +158,10 @@ export default function OrderDetailPage() {
                   </div>
                   <div>
                     <p className="text-sm text-green-600 dark:text-green-400">
-                      Ngày đặt hàng
+                      Order date
                     </p>
                     <p className="font-medium text-green-900 dark:text-green-100">
-                      {new Date(order.created_at).toLocaleDateString("vi-VN", {
+                      {new Date(order.created_at).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
@@ -181,7 +181,7 @@ export default function OrderDetailPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Package className="h-5 w-5" />
-                    Sản phẩm đã đặt
+                    Order items
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -215,7 +215,7 @@ export default function OrderDetailPage() {
                             SKU: {variant?.sku}
                           </p>
                           <div className="flex items-center justify-between mt-2">
-                            <span className="text-sm">Số lượng: {item.quantity}</span>
+                            <span className="text-sm">Qty: {item.quantity}</span>
                             <span className="font-medium">
                               {formatVND(item.unit_price || item.unitPrice || 0)}
                             </span>
@@ -232,7 +232,7 @@ export default function OrderDetailPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MapPin className="h-5 w-5" />
-                    Địa chỉ giao hàng
+                    Shipping address
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -248,7 +248,7 @@ export default function OrderDetailPage() {
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      Chưa có địa chỉ giao hàng
+                      No shipping address provided
                     </p>
                   )}
                 </CardContent>
@@ -259,12 +259,12 @@ export default function OrderDetailPage() {
             <div className="md:col-span-1">
               <Card className="sticky top-6">
                 <CardHeader>
-                  <CardTitle>Tổng quan đơn hàng</CardTitle>
+                  <CardTitle>Order summary</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Trạng thái</span>
+                      <span>Status</span>
                       <Badge
                         variant="outline"
                         className={statusColors[status] || statusColors.pending}
@@ -274,16 +274,16 @@ export default function OrderDetailPage() {
                     </div>
                     <Separator />
                     <div className="flex justify-between text-sm">
-                      <span>Tạm tính</span>
+                      <span>Subtotal</span>
                       <span>{formatVND(order.total_amount || 0)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span>Phí vận chuyển</span>
-                      <span>Miễn phí</span>
+                      <span>Shipping</span>
+                      <span>Free</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between font-bold text-lg">
-                      <span>Tổng cộng</span>
+                      <span>Total</span>
                       <span className="text-primary">
                         {formatVND(order.total_amount || 0)}
                       </span>
@@ -296,21 +296,21 @@ export default function OrderDetailPage() {
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Calendar className="h-4 w-4" />
                       <span>
-                        Đặt ngày{" "}
-                        {new Date(order.created_at).toLocaleDateString("vi-VN")}
+                        Placed on{" "}
+                        {new Date(order.created_at).toLocaleDateString("en-US")}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <CreditCard className="h-4 w-4" />
                       <span>
                         {order.payment_method === "momo"
-                          ? "Thanh toán MoMo"
-                          : "Thanh toán khi nhận hàng"}
+                          ? "MoMo payment"
+                          : "Cash on delivery"}
                       </span>
                     </div>
                     {order.payment_status && (
                       <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Trạng thái TT</span>
+                        <span className="text-muted-foreground">Payment status</span>
                         <Badge
                           variant="outline"
                           className={
@@ -339,22 +339,22 @@ export default function OrderDetailPage() {
                           {isPayingMomo ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Đang xử lý...
+                              Processing...
                             </>
                           ) : (
-                            "Thanh toán qua MoMo"
+                            "Pay with MoMo"
                           )}
                         </Button>
                       )}
                     <Link href="/client/products">
                       <Button variant="outline" className="w-full">
-                        Tiếp tục mua sắm
+                        Continue shopping
                       </Button>
                     </Link>
                     <Link href="/">
                       <Button variant="ghost" className="w-full">
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Về trang chủ
+                        Back to home
                       </Button>
                     </Link>
                   </div>

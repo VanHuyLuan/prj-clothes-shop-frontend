@@ -38,7 +38,7 @@ export function InventoryClient() {
       });
       setData(res);
     } catch {
-      toast.error("Không thể tải dữ liệu tồn kho");
+      toast.error("Could not load inventory data");
     } finally {
       setLoading(false);
     }
@@ -51,10 +51,10 @@ export function InventoryClient() {
   const handleUpdateStock = async (variantId: string, stock_qty: number) => {
     try {
       await ApiService.updateInventoryStock(variantId, stock_qty);
-      toast.success("Đã cập nhật tồn kho");
+      toast.success("Inventory updated");
       fetchInventory();
     } catch {
-      toast.error("Cập nhật tồn kho thất bại");
+      toast.error("Failed to update inventory");
     }
   };
 

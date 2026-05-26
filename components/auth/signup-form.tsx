@@ -49,9 +49,10 @@ export function SignupForm() {
       router.push("/login")
     } catch (error) {
       console.error("Signup error:", error)
+      const message = error instanceof Error ? error.message : "There was a problem creating your account."
       toast({
         title: "Signup failed",
-        description: "There was a problem creating your account.",
+        description: message,
         variant: "destructive",
       })
     } finally {

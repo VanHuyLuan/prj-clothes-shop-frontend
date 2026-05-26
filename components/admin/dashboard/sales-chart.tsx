@@ -23,19 +23,19 @@ export function SalesChart({ salesChart }: Props) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base font-semibold">Doanh thu</CardTitle>
+        <CardTitle className="text-base font-semibold">Revenue</CardTitle>
         <Tabs value={period} onValueChange={(v) => setPeriod(v as Period)}>
           <TabsList className="h-8">
-            <TabsTrigger value="week" className="text-xs px-3">7 ngày</TabsTrigger>
-            <TabsTrigger value="month" className="text-xs px-3">Tháng</TabsTrigger>
-            <TabsTrigger value="year" className="text-xs px-3">Năm</TabsTrigger>
+            <TabsTrigger value="week" className="text-xs px-3">7 days</TabsTrigger>
+            <TabsTrigger value="month" className="text-xs px-3">Month</TabsTrigger>
+            <TabsTrigger value="year" className="text-xs px-3">Year</TabsTrigger>
           </TabsList>
         </Tabs>
       </CardHeader>
       <CardContent>
         {data.every(v => v === 0) ? (
           <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
-            Chưa có dữ liệu doanh thu
+            No revenue data yet
           </div>
         ) : (
           <div className="space-y-3">
@@ -62,7 +62,7 @@ export function SalesChart({ salesChart }: Props) {
 
             {/* Summary */}
             <div className="flex justify-between text-sm border-t pt-3">
-              <span className="text-muted-foreground">Tổng kỳ này</span>
+              <span className="text-muted-foreground">Total this period</span>
               <span className="font-semibold">{formatVND(data.reduce((a, b) => a + b, 0))}</span>
             </div>
           </div>

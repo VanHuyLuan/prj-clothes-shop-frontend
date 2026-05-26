@@ -54,9 +54,10 @@ export function LoginForm() {
       }
     } catch (error) {
       console.error("Login error:", error)
+      const message = error instanceof Error ? error.message : "Please check your credentials and try again."
       toast({
         title: "Sign in failed",
-        description: "Please check your credentials and try again.",
+        description: message,
         variant: "destructive",
       })
     } finally {
@@ -111,7 +112,7 @@ export function LoginForm() {
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+              placeholder="••••••••"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}

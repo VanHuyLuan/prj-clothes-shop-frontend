@@ -84,7 +84,7 @@ export default function CartPage() {
         <main className="flex-1 flex items-center justify-center py-20">
           <div className="text-center space-y-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
-            <p className="text-muted-foreground">Đang tải giỏ hàng...</p>
+            <p className="text-muted-foreground">Loading cart...</p>
           </div>
         </main>
         <Footer />
@@ -104,15 +104,15 @@ export default function CartPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-bold">Giỏ hàng trống</h2>
+              <h2 className="text-2xl font-bold">Your cart is empty</h2>
               <p className="text-muted-foreground">
-                Bạn chưa có sản phẩm nào trong giỏ hàng
+                You have no items in your cart yet
               </p>
             </div>
             <Link href="/client/products">
               <Button size="lg" className="mt-4">
                 <ShoppingBag className="mr-2 h-5 w-5" />
-                Tiếp tục mua sắm
+                Continue shopping
               </Button>
             </Link>
           </div>
@@ -134,11 +134,11 @@ export default function CartPage() {
               className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Tiếp tục mua sắm
+              Continue shopping
             </Link>
-            <h1 className="text-3xl font-bold">Giỏ hàng của bạn</h1>
+            <h1 className="text-3xl font-bold">Your cart</h1>
             <p className="text-muted-foreground mt-2">
-              {items.length} sản phẩm
+              {items.length} item{items.length !== 1 ? "s" : ""}
             </p>
           </div>
 
@@ -160,7 +160,7 @@ export default function CartPage() {
                     htmlFor="select-all"
                     className="text-sm font-medium cursor-pointer select-none"
                   >
-                    {allSelected ? "Bỏ chọn tất cả" : "Chọn tất cả"}
+                    {allSelected ? "Deselect all" : "Select all"}
                     {selectedIds.size > 0 && (
                       <span className="ml-1 text-muted-foreground">
                         ({selectedIds.size}/{items.length})
@@ -270,29 +270,29 @@ export default function CartPage() {
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="bg-card rounded-lg border shadow-sm p-6 sticky top-4">
-                <h2 className="text-xl font-bold mb-6">Tóm tắt đơn hàng</h2>
+                <h2 className="text-xl font-bold mb-6">Order summary</h2>
 
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
-                      Sản phẩm đã chọn
+                      Selected items
                     </span>
                     <span className="font-medium">
                       {user ? selectedIds.size : items.length} / {items.length}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tạm tính</span>
+                    <span className="text-muted-foreground">Subtotal</span>
                     <span className="font-medium">
                       {formatVND(user ? selectedTotal : items.reduce((s, i) => s + Number(i.price) * i.quantity, 0))}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Phí vận chuyển</span>
-                    <span className="font-medium">Miễn phí</span>
+                    <span className="text-muted-foreground">Shipping</span>
+                    <span className="font-medium">Free</span>
                   </div>
                   <div className="border-t pt-3 flex justify-between">
-                    <span className="font-semibold">Tổng cộng</span>
+                    <span className="font-semibold">Total</span>
                     <span className="text-2xl font-bold text-primary">
                       {formatVND(user ? selectedTotal : items.reduce((s, i) => s + Number(i.price) * i.quantity, 0))}
                     </span>
@@ -306,32 +306,32 @@ export default function CartPage() {
                   onClick={handleCheckout}
                 >
                   <ShoppingBag className="mr-2 h-5 w-5" />
-                  Thanh toán
+                  Checkout
                   {user && selectedIds.size > 0 && (
                     <span className="ml-1 text-sm font-normal opacity-80">
-                      ({selectedCount} sp)
+                      ({selectedCount})
                     </span>
                   )}
                 </Button>
 
                 {user && selectedIds.size === 0 && (
                   <p className="text-xs text-center text-muted-foreground mt-2">
-                    Chọn ít nhất 1 sản phẩm để thanh toán
+                    Select at least 1 item to checkout
                   </p>
                 )}
 
                 <div className="mt-4 space-y-2 text-xs text-muted-foreground">
                   <p className="flex items-center gap-2">
                     <span className="text-green-600">✓</span>
-                    Miễn phí vận chuyển toàn quốc
+                    Free nationwide shipping
                   </p>
                   <p className="flex items-center gap-2">
                     <span className="text-green-600">✓</span>
-                    Đổi trả trong 30 ngày
+                    30-day returns
                   </p>
                   <p className="flex items-center gap-2">
                     <span className="text-green-600">✓</span>
-                    Thanh toán an toàn & bảo mật
+                    Secure & safe payment
                   </p>
                 </div>
               </div>

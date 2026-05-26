@@ -204,7 +204,7 @@ export function ProductQuickView({ open, onOpenChange, product }: ProductQuickVi
                   ))}
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  35 đánh giá
+                  35 reviews
                 </span>
               </div>
 
@@ -235,7 +235,7 @@ export function ProductQuickView({ open, onOpenChange, product }: ProductQuickVi
               {/* SKU */}
               {selectedVariant && (
                 <p className="text-sm text-muted-foreground">
-                  Mã SP: <span className="font-medium text-foreground">{selectedVariant.sku}</span>
+                  SKU: <span className="font-medium text-foreground">{selectedVariant.sku}</span>
                 </p>
               )}
             </div>
@@ -250,7 +250,7 @@ export function ProductQuickView({ open, onOpenChange, product }: ProductQuickVi
             {availableSizes.length > 0 && (
               <div className="space-y-3 py-4 border-t">
                 <label className="text-sm font-semibold block">
-                  Chọn size của bạn
+                  Select your size
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {availableSizes.map((size) => {
@@ -273,7 +273,7 @@ export function ProductQuickView({ open, onOpenChange, product }: ProductQuickVi
                 </div>
                 {!selectedSize && (
                   <p className="text-xs text-muted-foreground italic">
-                    Bạn không nhớ size của mình? Mời bạn xem hướng dẫn chọn size.
+                    Not sure about your size? Check our size guide.
                   </p>
                 )}
               </div>
@@ -283,7 +283,7 @@ export function ProductQuickView({ open, onOpenChange, product }: ProductQuickVi
             {availableColors.length > 0 && (
               <div className="space-y-3 py-4 border-t">
                 <label className="text-sm font-semibold block">
-                  Chọn màu yêu thích
+                  Select a color
                 </label>
                 <div className="flex flex-wrap gap-3">
                   {availableColors.map((color) => {
@@ -322,7 +322,7 @@ export function ProductQuickView({ open, onOpenChange, product }: ProductQuickVi
 
             {/* Quantity */}
             <div className="space-y-3 py-4 border-t">
-              <label className="text-sm font-semibold block">Số lượng:</label>
+              <label className="text-sm font-semibold block">Quantity:</label>
               <div className="flex items-center gap-4">
                 <div className="flex items-center border-2 rounded-lg overflow-hidden">
                   <button
@@ -349,7 +349,7 @@ export function ProductQuickView({ open, onOpenChange, product }: ProductQuickVi
                 {selectedVariant && (
                   <span className="text-sm text-muted-foreground flex items-center gap-1">
                     <Package className="w-4 h-4" />
-                    {selectedVariant.stock_qty} sản phẩm có sẵn
+                    {selectedVariant.stock_qty} in stock
                   </span>
                 )}
               </div>
@@ -363,7 +363,7 @@ export function ProductQuickView({ open, onOpenChange, product }: ProductQuickVi
                 disabled={!selectedVariant || selectedVariant.stock_qty === 0}
               >
                 <ShoppingCart className="mr-2 h-5 w-5" />
-                THÊM VÀO GIỎ HÀNG
+                ADD TO CART
               </Button>
 
               <Button
@@ -371,7 +371,7 @@ export function ProductQuickView({ open, onOpenChange, product }: ProductQuickVi
                 onClick={handleBuyNow}
                 disabled={!selectedVariant || selectedVariant.stock_qty === 0}
               >
-                MUA NGAY
+                BUY NOW
               </Button>
 
               {/* Stock & Selection Status */}
@@ -380,14 +380,14 @@ export function ProductQuickView({ open, onOpenChange, product }: ProductQuickVi
                   selectedVariant.stock_qty > 0 ? (
                     <div className="flex items-center gap-2 text-green-600 justify-center">
                       <Check className="h-4 w-4" />
-                      <span className="font-medium">Còn hàng - Sẵn sàng giao</span>
+                      <span className="font-medium">In stock - Ready to ship</span>
                     </div>
                   ) : (
-                    <div className="text-red-600 font-medium text-center">Hết hàng</div>
+                    <div className="text-red-600 font-medium text-center">Out of stock</div>
                   )
                 ) : (
                   <p className="text-center text-muted-foreground">
-                    Vui lòng chọn size và màu sắc
+                    Please select a size and color
                   </p>
                 )}
               </div>

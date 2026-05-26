@@ -43,10 +43,10 @@ export function InventoryTable({
   const [saving, setSaving] = useState<Record<string, boolean>>({});
 
   const getStatusBadge = (qty: number) => {
-    if (qty === 0) return <Badge variant="destructive">Hết hàng</Badge>;
+    if (qty === 0) return <Badge variant="destructive">Out of stock</Badge>;
     if (qty <= LOW_STOCK_THRESHOLD)
-      return <Badge className="bg-orange-500 hover:bg-orange-600">Sắp hết</Badge>;
-    return <Badge className="bg-green-600 hover:bg-green-700">Còn hàng</Badge>;
+      return <Badge className="bg-orange-500 hover:bg-orange-600">Low stock</Badge>;
+    return <Badge className="bg-green-600 hover:bg-green-700">In stock</Badge>;
   };
 
   const getStockBarColor = (qty: number) => {
@@ -86,14 +86,14 @@ export function InventoryTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Sản phẩm</TableHead>
+              <TableHead>Product</TableHead>
               <TableHead>SKU</TableHead>
-              <TableHead>Danh mục</TableHead>
-              <TableHead>Kích cỡ / Màu</TableHead>
-              <TableHead>Tồn kho</TableHead>
-              <TableHead>Mức tồn</TableHead>
-              <TableHead>Giá</TableHead>
-              <TableHead>Trạng thái</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Size / Color</TableHead>
+              <TableHead>Stock</TableHead>
+              <TableHead>Level</TableHead>
+              <TableHead>Price</TableHead>
+              <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -117,8 +117,8 @@ export function InventoryTable({
       <div className="rounded-md border">
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
           <Package className="h-12 w-12 opacity-30" />
-          <p className="text-lg font-medium">Không có sản phẩm nào</p>
-          <p className="text-sm">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+          <p className="text-lg font-medium">No products found</p>
+          <p className="text-sm">Try adjusting your filters or search term</p>
         </div>
       </div>
     );
@@ -130,14 +130,14 @@ export function InventoryTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Sản phẩm</TableHead>
+              <TableHead>Product</TableHead>
               <TableHead>SKU</TableHead>
-              <TableHead>Danh mục</TableHead>
-              <TableHead>Kích cỡ / Màu</TableHead>
-              <TableHead>Tồn kho</TableHead>
-              <TableHead>Mức tồn</TableHead>
-              <TableHead>Giá</TableHead>
-              <TableHead>Trạng thái</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Size / Color</TableHead>
+              <TableHead>Stock</TableHead>
+              <TableHead>Level</TableHead>
+              <TableHead>Price</TableHead>
+              <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -172,7 +172,7 @@ export function InventoryTable({
                       <div>
                         <div className="font-medium text-sm">{item.product.name}</div>
                         <div className="text-xs text-muted-foreground">
-                          {new Date(item.updated_at).toLocaleDateString("vi-VN")}
+                          {new Date(item.updated_at).toLocaleDateString("en-US")}
                         </div>
                       </div>
                     </div>
@@ -237,7 +237,7 @@ export function InventoryTable({
                           onClick={() => handleSave(item.id, item.stock_qty)}
                           disabled={saving[item.id]}
                         >
-                          {saving[item.id] ? "..." : "Lưu"}
+                          {saving[item.id] ? "..." : "Save"}
                         </Button>
                       )}
                     </div>
@@ -286,7 +286,7 @@ export function InventoryTable({
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-2">
           <p className="text-sm text-muted-foreground">
-            Hiển thị {items.length} / {total} biến thể
+            Showing {items.length} of {total} variants
           </p>
           <div className="flex items-center gap-2">
             <Button

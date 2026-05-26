@@ -26,8 +26,8 @@ function ResetPasswordContent() {
   useEffect(() => {
     if (!token) {
       toast({
-        title: "Link không hợp lệ",
-        description: "Vui lòng yêu cầu đặt lại mật khẩu lại.",
+        title: "Invalid link",
+        description: "Please request a new password reset link.",
         variant: "destructive",
       });
     }
@@ -37,11 +37,11 @@ function ResetPasswordContent() {
     e.preventDefault();
 
     if (newPassword.length < 8) {
-      toast({ title: "Mật khẩu quá ngắn", description: "Mật khẩu phải có ít nhất 8 ký tự.", variant: "destructive" });
+      toast({ title: "Password too short", description: "Password must be at least 8 characters.", variant: "destructive" });
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast({ title: "Mật khẩu không khớp", description: "Vui lòng kiểm tra lại.", variant: "destructive" });
+      toast({ title: "Passwords don't match", description: "Please check and try again.", variant: "destructive" });
       return;
     }
 
@@ -55,12 +55,12 @@ function ResetPasswordContent() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data?.message || "Token không hợp lệ hoặc đã hết hạn.");
+        throw new Error(data?.message || "Invalid or expired token.");
       }
 
       setDone(true);
     } catch (err: any) {
-      toast({ title: "Đặt lại mật khẩu thất bại", description: err.message, variant: "destructive" });
+      toast({ title: "Password reset failed", description: err.message, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -70,10 +70,10 @@ function ResetPasswordContent() {
     return (
       <div className="w-full space-y-6 text-center">
         <Lock className="w-12 h-12 text-destructive mx-auto" />
-        <h1 className="text-2xl font-bold">Link không hợp lệ</h1>
-        <p className="text-sm text-muted-foreground">Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.</p>
+        <h1 className="text-2xl font-bold">Invalid link</h1>
+        <p className="text-sm text-muted-foreground">This password reset link is invalid or has expired.</p>
         <Link href="/forgot-password">
-          <Button className="w-full">Yêu cầu link mới</Button>
+          <Button className="w-full">Request a new link</Button>
         </Link>
       </div>
     );
@@ -86,11 +86,11 @@ function ResetPasswordContent() {
           <CheckCircle className="w-7 h-7 text-white dark:text-black" />
         </div>
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Đặt lại thành công!</h1>
-          <p className="text-sm text-muted-foreground">Mật khẩu của bạn đã được cập nhật. Hãy đăng nhập lại.</p>
+          <h1 className="text-2xl font-bold tracking-tight">Password reset!</h1>
+          <p className="text-sm text-muted-foreground">Your password has been updated. Please sign in again.</p>
         </div>
         <Link href="/login">
-          <Button className="w-full">Đăng nhập</Button>
+          <Button className="w-full">Sign in</Button>
         </Link>
       </div>
     );
@@ -100,23 +100,23 @@ function ResetPasswordContent() {
     <div className="w-full space-y-7">
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-          Đặt lại mật khẩu
+          Reset password
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Nhập mật khẩu mới cho tài khoản của bạn
+          Enter a new password for your account
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-1.5">
           <Label htmlFor="new-password" className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-            Mật khẩu mới
+            New password
           </Label>
           <div className="relative">
             <Input
               id="new-password"
               type={showPassword ? "text" : "password"}
-              placeholder="Ít nhất 8 ký tự"
+              placeholder="At least 8 characters"
               required
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -134,12 +134,12 @@ function ResetPasswordContent() {
 
         <div className="space-y-1.5">
           <Label htmlFor="confirm-password" className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-            Xác nhận mật khẩu
+            Confirm password
           </Label>
           <Input
             id="confirm-password"
             type="password"
-            placeholder="Nhập lại mật khẩu mới"
+            placeholder="Re-enter new password"
             required
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -155,10 +155,10 @@ function ResetPasswordContent() {
           {isLoading ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Đang xử lý...
+              Processing...
             </>
           ) : (
-            "Đặt lại mật khẩu"
+            "Reset password"
           )}
         </Button>
       </form>
@@ -168,7 +168,7 @@ function ResetPasswordContent() {
         className="flex items-center justify-center gap-1.5 text-sm text-gray-500 hover:text-black dark:hover:text-white transition-colors"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
-        Quay lại đăng nhập
+        Back to sign in
       </Link>
 
       <p className="text-center text-xs text-gray-400 flex items-center justify-center gap-1">
